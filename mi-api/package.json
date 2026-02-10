@@ -1,0 +1,19 @@
+{
+  "name": "mi-api",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch --env-file=.env src/index.js",
+    "start": "node --env-file=.env src/index.js"
+  },
+  "engines": {
+    "node": ">=20.11.0"
+  },
+  "dependencies": {
+    "express": "^5.0.1",
+    "zod": "^3.22.4",
+    "helmet": "^7.1.0",
+    "cors": "^2.8.5"
+  }
+}
+

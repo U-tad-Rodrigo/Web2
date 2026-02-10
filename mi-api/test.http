@@ -1,0 +1,137 @@
+### Variables
+@baseUrl = http://localhost:3000
+@apiUrl = {{baseUrl}}/api
+
+### Health Check
+GET {{baseUrl}}/health
+
+### API Info
+GET {{apiUrl}}
+
+###############################################
+# CURSOS DE PROGRAMACIÓN
+###############################################
+
+### Obtener todos los cursos de programación
+GET {{apiUrl}}/cursos/programacion
+
+### Obtener cursos filtrados por nivel
+GET {{apiUrl}}/cursos/programacion?nivel=basico
+
+### Obtener cursos filtrados por lenguaje
+GET {{apiUrl}}/cursos/programacion?lenguaje=javascript
+
+### Obtener cursos ordenados por vistas
+GET {{apiUrl}}/cursos/programacion?orden=vistas
+
+### Obtener cursos ordenados por título
+GET {{apiUrl}}/cursos/programacion?orden=titulo
+
+### Obtener un curso específico
+GET {{apiUrl}}/cursos/programacion/1
+
+### Crear un nuevo curso de programación
+POST {{apiUrl}}/cursos/programacion
+Content-Type: application/json
+
+{
+  "titulo": "TypeScript desde Cero",
+  "lenguaje": "javascript",
+  "nivel": "intermedio",
+  "descripcion": "Aprende TypeScript de forma práctica"
+}
+
+### Actualizar completamente un curso (PUT)
+PUT {{apiUrl}}/cursos/programacion/1
+Content-Type: application/json
+
+{
+  "titulo": "JavaScript Moderno y ES2024",
+  "lenguaje": "javascript",
+  "nivel": "basico",
+  "descripcion": "Curso actualizado con las últimas características"
+}
+
+### Actualizar parcialmente un curso (PATCH)
+PATCH {{apiUrl}}/cursos/programacion/1
+Content-Type: application/json
+
+{
+  "titulo": "JavaScript Moderno - Actualizado 2026"
+}
+
+### Eliminar un curso
+DELETE {{apiUrl}}/cursos/programacion/4
+
+###############################################
+# CURSOS DE MATEMÁTICAS
+###############################################
+
+### Obtener todos los cursos de matemáticas
+GET {{apiUrl}}/cursos/matematicas
+
+### Obtener cursos filtrados por nivel
+GET {{apiUrl}}/cursos/matematicas?nivel=basico
+
+### Obtener cursos filtrados por tema
+GET {{apiUrl}}/cursos/matematicas?tema=calculo
+
+### Obtener cursos ordenados por vistas
+GET {{apiUrl}}/cursos/matematicas?orden=vistas
+
+### Obtener un curso específico de matemáticas
+GET {{apiUrl}}/cursos/matematicas/1
+
+### Crear un nuevo curso de matemáticas
+POST {{apiUrl}}/cursos/matematicas
+Content-Type: application/json
+
+{
+  "titulo": "Geometría Analítica",
+  "tema": "geometria",
+  "nivel": "intermedio",
+  "descripcion": "Introducción a la geometría analítica"
+}
+
+### Actualizar completamente un curso de matemáticas (PUT)
+PUT {{apiUrl}}/cursos/matematicas/1
+Content-Type: application/json
+
+{
+  "titulo": "Cálculo Diferencial Avanzado",
+  "tema": "calculo",
+  "nivel": "avanzado",
+  "descripcion": "Profundización en cálculo diferencial"
+}
+
+### Actualizar parcialmente un curso de matemáticas (PATCH)
+PATCH {{apiUrl}}/cursos/matematicas/2
+Content-Type: application/json
+
+{
+  "nivel": "avanzado"
+}
+
+### Eliminar un curso de matemáticas
+DELETE {{apiUrl}}/cursos/matematicas/4
+
+###############################################
+# CASOS DE ERROR
+###############################################
+
+### Obtener curso inexistente
+GET {{apiUrl}}/cursos/programacion/999
+
+### Crear curso con datos inválidos
+POST {{apiUrl}}/cursos/programacion
+Content-Type: application/json
+
+{
+  "titulo": "AB",
+  "lenguaje": "ruby",
+  "nivel": "super-avanzado"
+}
+
+### Ruta inexistente
+GET {{apiUrl}}/cursos/fisica
+
