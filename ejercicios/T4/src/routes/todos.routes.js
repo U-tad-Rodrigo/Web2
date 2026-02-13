@@ -79,7 +79,6 @@ router.put('/:id', (req, res) => {
   res.json(todos[index]);
 });
 
-// PATCH /api/todos/:id/toggle
 router.patch('/:id/toggle', (req, res) => {
   const index = todos.findIndex(t => t.id === req.params.id);
   if (index === -1) return res.status(404).json({ error: 'Tarea no encontrada' });
@@ -89,7 +88,6 @@ router.patch('/:id/toggle', (req, res) => {
   res.json(todos[index]);
 });
 
-// DELETE /api/todos/:id
 router.delete('/:id', (req, res) => {
   const index = todos.findIndex(t => t.id === req.params.id);
   if (index === -1) return res.status(404).json({ error: 'Tarea no encontrada' });
@@ -98,4 +96,3 @@ router.delete('/:id', (req, res) => {
 });
 
 export default router;
-
