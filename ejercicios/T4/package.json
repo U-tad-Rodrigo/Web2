@@ -8,12 +8,17 @@
     "dev": "node --watch src/index.js",
     "start": "node src/index.js"
   },
-  "keywords": ["express", "api", "todo", "zod"],
+  "keywords": [
+    "express",
+    "api",
+    "todo",
+    "zod"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "express": "^4.18.2",
     "zod": "^3.22.4"
-  }
+  },
+  "devDependencies": {}
 }
-
