@@ -1,31 +1,34 @@
 import { Router } from 'express';
 import { randomUUID } from 'crypto';
 import { todos } from '../data/todos.js';
-import { todoSchema } from '../schemas/todo.schema.js';
+import { todoSchema, updateTodoSchema } from '../schemas/todo.schema.js';
 
 const router = Router();
+const PRIORITY_VALUES = { high: 3, medium: 2, low: 1 };
 
+// GET /api/todos
 router.get('/', (req, res) => {
   const { completed, priority, tag, search, sortBy, order } = req.query;
   let result = [...todos];
 
-  // Filtros excluyentes (solo uno a la vez)
   if (completed) result = result.filter(t => t.completed === (completed === 'true'));
-  else if (priority) result = result.filter(t => t.priority === priority);
-  else if (tag) result = result.filter(t => t.tags.includes(tag));
-  else if (search) result = result.filter(t => t.title.toLowerCase().includes(search.toLowerCase()));
+  if (priority) result = result.filter(t => t.priority === priority);
+  if (tag) result = result.filter(t => t.tags.includes(tag));
+  if (search) result = result.filter(t => t.title.toLowerCase().includes(search.toLowerCase()));
 
-  // Ordenamiento (puede combinarse con cualquier filtro)
   if (sortBy) {
-    const vals = { high: 3, medium: 2, low: 1 };
-    result.sort((a, b) => (order === 'desc' ? -1 : 1) *
-      (sortBy === 'priority' ? vals[a.priority] - vals[b.priority] : new Date(a[sortBy] || 0) - new Date(b[sortBy] || 0))
-    );
+    result.sort((a, b) => {
+      const comparison = sortBy === 'priority'
+        ? PRIORITY_VALUES[a.priority] - PRIORITY_VALUES[b.priority]
+        : new Date(a[sortBy] || 0) - new Date(b[sortBy] || 0);
+      return order === 'desc' ? -comparison : comparison;
+    });
   }
 
   res.json({ total: result.length, todos: result });
 });
 
+// GET /api/todos/stats
 router.get('/stats', (req, res) => {
   res.json({
     total: todos.length,
@@ -39,31 +42,46 @@ router.get('/stats', (req, res) => {
   });
 });
 
+// GET /api/todos/:id
 router.get('/:id', (req, res) => {
   const todo = todos.find(t => t.id === req.params.id);
-  todo ? res.json(todo) : res.status(404).json({ error: 'Tarea no encontrada' });
+  if (!todo) return res.status(404).json({ error: 'Tarea no encontrada' });
+  res.json(todo);
 });
 
+// POST /api/todos
 router.post('/', (req, res) => {
-  const result = todoSchema.safeParse(req.body);
-  if (!result.success) return res.status(400).json({ error: 'Validación fallida', detalles: result.error.errors });
+  const validation = todoSchema.safeParse(req.body);
+  if (!validation.success) {
+    return res.status(400).json({ error: 'Validación fallida', detalles: validation.error.errors });
+  }
 
-  const todo = { id: randomUUID(), ...result.data, completed: false, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
-  todos.push(todo);
-  res.status(201).json(todo);
+  const newTodo = {
+    id: randomUUID(),
+    ...validation.data,
+    completed: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  todos.push(newTodo);
+  res.status(201).json(newTodo);
 });
 
+// PUT /api/todos/:id
 router.put('/:id', (req, res) => {
   const index = todos.findIndex(t => t.id === req.params.id);
   if (index === -1) return res.status(404).json({ error: 'Tarea no encontrada' });
 
-  const result = todoSchema.partial().safeParse(req.body);
-  if (!result.success) return res.status(400).json({ error: 'Validación fallida', detalles: result.error.errors });
+  const validation = updateTodoSchema.safeParse(req.body);
+  if (!validation.success) {
+    return res.status(400).json({ error: 'Validación fallida', detalles: validation.error.errors });
+  }
 
-  todos[index] = { ...todos[index], ...result.data, updatedAt: new Date().toISOString() };
+  todos[index] = { ...todos[index], ...validation.data, updatedAt: new Date().toISOString() };
   res.json(todos[index]);
 });
 
+// PATCH /api/todos/:id/toggle
 router.patch('/:id/toggle', (req, res) => {
   const index = todos.findIndex(t => t.id === req.params.id);
   if (index === -1) return res.status(404).json({ error: 'Tarea no encontrada' });
@@ -73,11 +91,10 @@ router.patch('/:id/toggle', (req, res) => {
   res.json(todos[index]);
 });
 
-
+// DELETE /api/todos/:id
 router.delete('/:id', (req, res) => {
   const index = todos.findIndex(t => t.id === req.params.id);
   if (index === -1) return res.status(404).json({ error: 'Tarea no encontrada' });
-
   res.json(todos.splice(index, 1)[0]);
 });
 

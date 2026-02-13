@@ -18,4 +18,3 @@ export const rateLimiter = (req, res, next) => {
   requests.set(ip, data);
   next();
 };
-

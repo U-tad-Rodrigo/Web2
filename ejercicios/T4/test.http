@@ -1,7 +1,15 @@
-### API Raíz
+### ============================================
+### TODO API - TESTS COMPLETOS
+### ============================================
+
+### 0. API Raíz
 GET http://localhost:3000/api
 
-### 1. Crear tarea - Prioridad Alta
+### ============================================
+### CREAR TAREAS (POST)
+### ============================================
+
+### 1. Crear tarea - Completa con todos los campos
 # @name tarea1
 POST http://localhost:3000/api/todos
 Content-Type: application/json
@@ -14,18 +22,18 @@ Content-Type: application/json
   "tags": ["universidad", "web2"]
 }
 
-### 2. Crear tarea - Prioridad Media
+### 2. Crear tarea - Sin descripción
 POST http://localhost:3000/api/todos
 Content-Type: application/json
 
 {
   "title": "Estudiar para examen",
   "priority": "medium",
-  "dueDate": "2026-03-20T10:00:00.000Z",
+  "dueDate": "2026-06-20T10:00:00.000Z",
   "tags": ["estudio"]
 }
 
-### 3. Crear tarea - Prioridad Baja
+### 3. Crear tarea - Sin fecha
 POST http://localhost:3000/api/todos
 Content-Type: application/json
 
@@ -36,28 +44,258 @@ Content-Type: application/json
   "tags": ["personal"]
 }
 
-### 4. Listar todas las tareas
+### 4. Crear tarea - Mínima (solo campos requeridos)
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "title": "Tarea mínima",
+  "priority": "low"
+}
+
+### 5. Crear tarea - Con 5 tags (límite)
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "title": "Tarea con muchos tags",
+  "priority": "medium",
+  "tags": ["tag1", "tag2", "tag3", "tag4", "tag5"]
+}
+
+### 6. Crear tarea - Prioridad baja
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "title": "Limpiar escritorio",
+  "priority": "low",
+  "description": "Organizar papeles"
+}
+
+### 7. Crear tarea - Prioridad media
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "title": "Revisar correos",
+  "priority": "medium"
+}
+
+### 8. Crear tarea - Prioridad alta
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "title": "Entrega urgente",
+  "priority": "high",
+  "dueDate": "2026-03-01T18:00:00.000Z"
+}
+
+### ============================================
+### LISTAR Y FILTRAR (GET)
+### ============================================
+
+### 9. Listar todas las tareas
 GET http://localhost:3000/api/todos
 
-### 5. Filtrar por completadas (false)
+### 10. Filtrar por completadas (false)
 GET http://localhost:3000/api/todos?completed=false
 
-### 6. Filtrar por prioridad alta
+### 11. Filtrar por completadas (true)
+GET http://localhost:3000/api/todos?completed=true
+
+### 12. Filtrar por prioridad baja
+GET http://localhost:3000/api/todos?priority=low
+
+### 13. Filtrar por prioridad media
+GET http://localhost:3000/api/todos?priority=medium
+
+### 14. Filtrar por prioridad alta
 GET http://localhost:3000/api/todos?priority=high
 
-### 7. Filtrar por tag
+### 15. Filtrar por tag 'universidad'
 GET http://localhost:3000/api/todos?tag=universidad
 
-### 8. Ordenar por fecha (ascendente)
-GET http://localhost:3000/api/todos?sortBy=dueDate&order=asc
+### 16. Filtrar por tag 'personal'
+GET http://localhost:3000/api/todos?tag=personal
 
-### 9. Búsqueda fuzzy (BONUS)
+### 17. Filtrar por tag 'estudio'
+GET http://localhost:3000/api/todos?tag=estudio
+
+### 18. Búsqueda fuzzy - 'ejercicio'
 GET http://localhost:3000/api/todos?search=ejercicio
 
-### 10. Estadísticas (BONUS)
+### 19. Búsqueda fuzzy - 'examen'
+GET http://localhost:3000/api/todos?search=examen
+
+### 20. Búsqueda fuzzy - 'tarea'
+GET http://localhost:3000/api/todos?search=tarea
+
+### 21. Búsqueda fuzzy - case insensitive
+GET http://localhost:3000/api/todos?search=COMPLETAR
+
+### ============================================
+### ORDENAMIENTO
+### ============================================
+
+### 22. Ordenar por fecha ascendente
+GET http://localhost:3000/api/todos?sortBy=dueDate&order=asc
+
+### 23. Ordenar por fecha descendente
+GET http://localhost:3000/api/todos?sortBy=dueDate&order=desc
+
+### 24. Ordenar por prioridad ascendente
+GET http://localhost:3000/api/todos?sortBy=priority&order=asc
+
+### 25. Ordenar por prioridad descendente
+GET http://localhost:3000/api/todos?sortBy=priority&order=desc
+
+### 26. Ordenar por fecha creación
+GET http://localhost:3000/api/todos?sortBy=createdAt&order=desc
+
+### 27. Ordenar por fecha actualización
+GET http://localhost:3000/api/todos?sortBy=updatedAt&order=desc
+
+### ============================================
+### FILTROS COMBINADOS
+### ============================================
+
+### 28. Completadas + Prioridad alta
+GET http://localhost:3000/api/todos?completed=false&priority=high
+
+### 29. Tag + Ordenamiento
+GET http://localhost:3000/api/todos?tag=universidad&sortBy=dueDate&order=asc
+
+### 30. Búsqueda + Ordenamiento
+GET http://localhost:3000/api/todos?search=tarea&sortBy=priority&order=desc
+
+### 31. Completadas + Tag + Ordenamiento
+GET http://localhost:3000/api/todos?completed=false&tag=estudio&sortBy=dueDate
+
+### 32. Prioridad + Búsqueda
+GET http://localhost:3000/api/todos?priority=high&search=ejercicio
+
+### 33. Todas las opciones combinadas
+GET http://localhost:3000/api/todos?completed=false&priority=medium&sortBy=createdAt&order=desc
+
+### ============================================
+### OBTENER POR ID (GET)
+### ============================================
+
+### 34. Obtener tarea 1 por ID
+GET http://localhost:3000/api/todos/a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d
+
+### 35. Obtener tarea 2 por ID
+GET http://localhost:3000/api/todos/f6e5d4c3-b2a1-4f9e-8d7c-6b5a4e3d2c1b
+
+### 36. Obtener tarea 3 por ID
+GET http://localhost:3000/api/todos/9a8b7c6d-5e4f-4321-ba09-8f7e6d5c4b3a
+
+### ============================================
+### ACTUALIZAR (PUT)
+### ============================================
+
+### 37. Actualizar título
+PUT http://localhost:3000/api/todos/a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d
+Content-Type: application/json
+
+{
+  "title": "Completar ejercicio T4 - ACTUALIZADO"
+}
+
+### 38. Actualizar prioridad
+PUT http://localhost:3000/api/todos/a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d
+Content-Type: application/json
+
+{
+  "priority": "medium"
+}
+
+### 39. Actualizar descripción
+PUT http://localhost:3000/api/todos/a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d
+Content-Type: application/json
+
+{
+  "description": "Ya casi terminado el ejercicio"
+}
+
+### 40. Actualizar múltiples campos
+PUT http://localhost:3000/api/todos/f6e5d4c3-b2a1-4f9e-8d7c-6b5a4e3d2c1b
+Content-Type: application/json
+
+{
+  "title": "Estudiar para examen final",
+  "priority": "high",
+  "description": "Repasar todos los temas"
+}
+
+### 41. Actualizar tags
+PUT http://localhost:3000/api/todos/a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d
+Content-Type: application/json
+
+{
+  "tags": ["universidad", "web2", "completado"]
+}
+
+### 42. Actualizar completed
+PUT http://localhost:3000/api/todos/a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d
+Content-Type: application/json
+
+{
+  "completed": true
+}
+
+### ============================================
+### TOGGLE COMPLETADA (PATCH)
+### ============================================
+
+### 43. Toggle completada - tarea 1
+PATCH http://localhost:3000/api/todos/a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d/toggle
+
+### 44. Toggle completada - tarea 2
+PATCH http://localhost:3000/api/todos/f6e5d4c3-b2a1-4f9e-8d7c-6b5a4e3d2c1b/toggle
+
+### 45. Toggle completada - tarea 3
+PATCH http://localhost:3000/api/todos/9a8b7c6d-5e4f-4321-ba09-8f7e6d5c4b3a/toggle
+
+### 46. Toggle de nuevo - tarea 1
+PATCH http://localhost:3000/api/todos/a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d/toggle
+
+### ============================================
+### ESTADÍSTICAS (GET /stats)
+### ============================================
+
+### 47. Obtener estadísticas
 GET http://localhost:3000/api/todos/stats
 
-### 11. ERROR - Título muy corto
+### ============================================
+### ELIMINAR (DELETE)
+### ============================================
+
+### 48. Eliminar tarea 3
+DELETE http://localhost:3000/api/todos/9a8b7c6d-5e4f-4321-ba09-8f7e6d5c4b3a
+
+### 49. Verificar después de eliminar
+GET http://localhost:3000/api/todos
+
+### 50. Estadísticas después de eliminar
+GET http://localhost:3000/api/todos/stats
+
+### ============================================
+### ERRORES DE VALIDACIÓN - TÍTULO
+### ============================================
+
+### 51. ERROR - Título vacío
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "title": "",
+  "priority": "high"
+}
+
+### 52. ERROR - Título muy corto (2 caracteres)
 POST http://localhost:3000/api/todos
 Content-Type: application/json
 
@@ -66,16 +304,118 @@ Content-Type: application/json
   "priority": "high"
 }
 
-### 12. ERROR - Prioridad inválida
+### 53. ERROR - Título muy corto (1 carácter)
 POST http://localhost:3000/api/todos
 Content-Type: application/json
 
 {
-  "title": "Tarea de prueba",
+  "title": "A",
+  "priority": "low"
+}
+
+### 54. ERROR - Título muy largo (>100)
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "title": "Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud",
+  "priority": "low"
+}
+
+### 55. ERROR - Sin título (campo requerido)
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "priority": "high",
+  "description": "Sin título"
+}
+
+### 56. Título en el límite mínimo (3 caracteres) ✅
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "title": "Abc",
+  "priority": "low"
+}
+
+### 57. Título en el límite máximo (100 caracteres) ✅
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "title": "Este es un título exactamente de cien caracteres para probar el límite máximo permitido correctamente",
+  "priority": "medium"
+}
+
+### ============================================
+### ERRORES DE VALIDACIÓN - DESCRIPCIÓN
+### ============================================
+
+### 58. ERROR - Descripción muy larga (>500)
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "title": "Tarea con descripción larga",
+  "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad.",
+  "priority": "medium"
+}
+
+### ============================================
+### ERRORES DE VALIDACIÓN - PRIORIDAD
+### ============================================
+
+### 59. ERROR - Prioridad inválida 'urgent'
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "title": "Tarea urgente",
   "priority": "urgent"
 }
 
-### 13. ERROR - Fecha en el pasado
+### 60. ERROR - Prioridad inválida 'critical'
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "title": "Tarea crítica",
+  "priority": "critical"
+}
+
+### 61. ERROR - Prioridad en mayúsculas
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "title": "Tarea mayúsculas",
+  "priority": "HIGH"
+}
+
+### 62. ERROR - Sin prioridad (campo requerido)
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "title": "Tarea sin prioridad"
+}
+
+### 63. ERROR - Prioridad vacía
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "title": "Tarea vacía",
+  "priority": ""
+}
+
+### ============================================
+### ERRORES DE VALIDACIÓN - FECHA
+### ============================================
+
+### 64. ERROR - Fecha en el pasado (2020)
 POST http://localhost:3000/api/todos
 Content-Type: application/json
 
@@ -85,7 +425,61 @@ Content-Type: application/json
   "dueDate": "2020-01-01T10:00:00.000Z"
 }
 
-### 14. ERROR - Más de 5 tags
+### 65. ERROR - Fecha de ayer
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "title": "Tarea de ayer",
+  "priority": "medium",
+  "dueDate": "2026-02-12T10:00:00.000Z"
+}
+
+### 66. ERROR - Fecha de hoy (puede fallar si es la misma hora)
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "title": "Tarea de hoy",
+  "priority": "low",
+  "dueDate": "2026-02-13T08:00:00.000Z"
+}
+
+### 67. ERROR - Formato de fecha inválido
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "title": "Fecha mal formateada",
+  "priority": "low",
+  "dueDate": "2026-12-31"
+}
+
+### 68. ERROR - Fecha como string
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "title": "Fecha string",
+  "priority": "low",
+  "dueDate": "mañana"
+}
+
+### 69. Fecha futura válida (mañana) ✅
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "title": "Tarea para mañana",
+  "priority": "medium",
+  "dueDate": "2026-02-14T10:00:00.000Z"
+}
+
+### ============================================
+### ERRORES DE VALIDACIÓN - TAGS
+### ============================================
+
+### 70. ERROR - Más de 5 tags (6 tags)
 POST http://localhost:3000/api/todos
 Content-Type: application/json
 
@@ -94,3 +488,173 @@ Content-Type: application/json
   "priority": "high",
   "tags": ["tag1", "tag2", "tag3", "tag4", "tag5", "tag6"]
 }
+
+### 71. ERROR - Más de 5 tags (10 tags)
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "title": "Tarea con 10 tags",
+  "priority": "low",
+  "tags": ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]
+}
+
+### 72. Tags vacío válido ✅
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "title": "Tarea sin tags",
+  "priority": "low",
+  "tags": []
+}
+
+### 73. 5 tags exactos (límite) ✅
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "title": "Límite de tags",
+  "priority": "medium",
+  "tags": ["uno", "dos", "tres", "cuatro", "cinco"]
+}
+
+### ============================================
+### ERRORES 404 - NO ENCONTRADO
+### ============================================
+
+### 74. ERROR - GET tarea inexistente
+GET http://localhost:3000/api/todos/00000000-0000-0000-0000-000000000000
+
+### 75. ERROR - PUT tarea inexistente
+PUT http://localhost:3000/api/todos/99999999-9999-9999-9999-999999999999
+Content-Type: application/json
+
+{
+  "title": "No existe"
+}
+
+### 76. ERROR - PATCH tarea inexistente
+PATCH http://localhost:3000/api/todos/11111111-1111-1111-1111-111111111111/toggle
+
+### 77. ERROR - DELETE tarea inexistente
+DELETE http://localhost:3000/api/todos/22222222-2222-2222-2222-222222222222
+
+### 78. ERROR - ID mal formateado
+GET http://localhost:3000/api/todos/not-a-uuid
+
+### 79. ERROR - ID vacío
+GET http://localhost:3000/api/todos/
+
+### ============================================
+### CASOS ESPECIALES Y EDGE CASES
+### ============================================
+
+### 80. Crear con todos los campos nulos/vacíos opcionales ✅
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "title": "Solo requeridos",
+  "priority": "low",
+  "description": "",
+  "tags": []
+}
+
+### 81. Actualizar sin enviar ningún campo
+PUT http://localhost:3000/api/todos/a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d
+Content-Type: application/json
+
+{}
+
+### 82. Caracteres especiales en título ✅
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "title": "Tarea con émojis 🚀 y símbolos @#$%",
+  "priority": "low"
+}
+
+### 83. Caracteres unicode en descripción ✅
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "title": "Unicode test",
+  "description": "Español: ñ, á, é. Francés: ç, è. Alemán: ü, ö. Japonés: 日本語",
+  "priority": "low"
+}
+
+### 84. Tags con espacios ✅
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "title": "Tags espacios",
+  "priority": "low",
+  "tags": ["tag con espacios", "otro tag"]
+}
+
+### 85. Tags duplicados ✅
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "title": "Tags duplicados",
+  "priority": "low",
+  "tags": ["duplicado", "duplicado", "único"]
+}
+
+### ============================================
+### VERIFICACIÓN FINAL
+### ============================================
+
+### 86. Listar todas las tareas finales
+GET http://localhost:3000/api/todos
+
+### 87. Estadísticas finales
+GET http://localhost:3000/api/todos/stats
+
+### 88. Filtrar solo completadas finales
+GET http://localhost:3000/api/todos?completed=true
+
+### 89. Filtrar solo pendientes finales
+GET http://localhost:3000/api/todos?completed=false
+
+### 90. Todas con prioridad alta
+GET http://localhost:3000/api/todos?priority=high
+
+### 91. Todas con prioridad media
+GET http://localhost:3000/api/todos?priority=medium
+
+### 92. Todas con prioridad baja
+GET http://localhost:3000/api/todos?priority=low
+
+### 93. Ordenar todo por fecha
+GET http://localhost:3000/api/todos?sortBy=dueDate&order=asc
+
+### 94. Ordenar todo por prioridad
+GET http://localhost:3000/api/todos?sortBy=priority&order=desc
+
+### 95. Buscar 'tarea'
+GET http://localhost:3000/api/todos?search=tarea
+
+### 96. Buscar 'ejercicio'
+GET http://localhost:3000/api/todos?search=ejercicio
+
+### 97. Combinar completed + priority + sort
+GET http://localhost:3000/api/todos?completed=false&priority=high&sortBy=dueDate&order=asc
+
+### 98. Obtener tarea específica
+GET http://localhost:3000/api/todos/a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d
+
+### 99. Estadísticas final
+GET http://localhost:3000/api/todos/stats
+
+### 100. Lista completa final
+GET http://localhost:3000/api/todos
+
+### ============================================
+### FIN DE TESTS - 100 TESTS COMPLETOS
+### ============================================
