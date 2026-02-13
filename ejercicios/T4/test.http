@@ -1,0 +1,96 @@
+### API Raíz
+GET http://localhost:3000/api
+
+### 1. Crear tarea - Prioridad Alta
+# @name tarea1
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "title": "Completar ejercicio T4",
+  "description": "Crear API de tareas con Express y Zod",
+  "priority": "high",
+  "dueDate": "2026-12-31T23:59:59.000Z",
+  "tags": ["universidad", "web2"]
+}
+
+### 2. Crear tarea - Prioridad Media
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "title": "Estudiar para examen",
+  "priority": "medium",
+  "dueDate": "2026-03-20T10:00:00.000Z",
+  "tags": ["estudio"]
+}
+
+### 3. Crear tarea - Prioridad Baja
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "title": "Hacer las compras",
+  "description": "Leche, pan y frutas",
+  "priority": "low",
+  "tags": ["personal"]
+}
+
+### 4. Listar todas las tareas
+GET http://localhost:3000/api/todos
+
+### 5. Filtrar por completadas (false)
+GET http://localhost:3000/api/todos?completed=false
+
+### 6. Filtrar por prioridad alta
+GET http://localhost:3000/api/todos?priority=high
+
+### 7. Filtrar por tag
+GET http://localhost:3000/api/todos?tag=universidad
+
+### 8. Ordenar por fecha (ascendente)
+GET http://localhost:3000/api/todos?sortBy=dueDate&order=asc
+
+### 9. Búsqueda fuzzy (BONUS)
+GET http://localhost:3000/api/todos?search=ejercicio
+
+### 10. Estadísticas (BONUS)
+GET http://localhost:3000/api/todos/stats
+
+### 11. ERROR - Título muy corto
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "title": "Hi",
+  "priority": "high"
+}
+
+### 12. ERROR - Prioridad inválida
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "title": "Tarea de prueba",
+  "priority": "urgent"
+}
+
+### 13. ERROR - Fecha en el pasado
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "title": "Tarea con fecha pasada",
+  "priority": "high",
+  "dueDate": "2020-01-01T10:00:00.000Z"
+}
+
+### 14. ERROR - Más de 5 tags
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "title": "Tarea con muchos tags",
+  "priority": "high",
+  "tags": ["tag1", "tag2", "tag3", "tag4", "tag5", "tag6"]
+}

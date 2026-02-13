@@ -1,0 +1,19 @@
+{
+  "name": "t4-todo-api",
+  "version": "1.0.0",
+  "description": "Todo API con Express y Zod",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/index.js",
+    "start": "node src/index.js"
+  },
+  "keywords": ["express", "api", "todo", "zod"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "zod": "^3.22.4"
+  }
+}
+

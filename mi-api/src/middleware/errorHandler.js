@@ -44,4 +44,3 @@ export const errorHandler = (err, req, res, next) => {
     ...(isDev && { stack: err.stack, message: err.message })
   });
 };
-

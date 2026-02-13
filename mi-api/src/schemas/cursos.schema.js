@@ -2,33 +2,38 @@ import { z } from 'zod';
 
 export const createCursoSchema = z.object({
   body: z.object({
-    titulo: z.string()
-      .min(3, 'El título debe tener al menos 3 caracteres')
-      .max(100, 'El título no puede exceder 100 caracteres'),
-    lenguaje: z.enum(['javascript', 'python', 'java', 'csharp']),
-    nivel: z.enum(['basico', 'intermedio', 'avanzado']),
-    descripcion: z.string().optional()
+    nombre: z.string()
+      .min(3, 'El nombre debe tener al menos 3 caracteres')
+      .max(100, 'El nombre no puede exceder 100 caracteres'),
+    descripcion: z.string()
+      .min(10, 'La descripción debe tener al menos 10 caracteres')
+      .max(500, 'La descripción no puede exceder 500 caracteres'),
+    duracion: z.number()
+      .int('La duración debe ser un número entero')
+      .positive('La duración debe ser mayor a 0'),
+    nivel: z.enum(['principiante', 'intermedio', 'avanzado'], {
+      errorMap: () => ({ message: 'El nivel debe ser: principiante, intermedio o avanzado' })
+    })
   })
 });
 
 export const updateCursoSchema = z.object({
   body: z.object({
-    titulo: z.string().min(3).max(100),
-    lenguaje: z.enum(['javascript', 'python', 'java', 'csharp']),
-    nivel: z.enum(['basico', 'intermedio', 'avanzado']),
-    descripcion: z.string().optional()
-  }),
-  params: z.object({
-    id: z.string().regex(/^\d+$/, 'ID debe ser numérico')
-  })
-});
-
-export const partialUpdateCursoSchema = z.object({
-  body: z.object({
-    titulo: z.string().min(3).max(100).optional(),
-    lenguaje: z.enum(['javascript', 'python', 'java', 'csharp']).optional(),
-    nivel: z.enum(['basico', 'intermedio', 'avanzado']).optional(),
-    descripcion: z.string().optional()
+    nombre: z.string()
+      .min(3, 'El nombre debe tener al menos 3 caracteres')
+      .max(100, 'El nombre no puede exceder 100 caracteres')
+      .optional(),
+    descripcion: z.string()
+      .min(10, 'La descripción debe tener al menos 10 caracteres')
+      .max(500, 'La descripción no puede exceder 500 caracteres')
+      .optional(),
+    duracion: z.number()
+      .int('La duración debe ser un número entero')
+      .positive('La duración debe ser mayor a 0')
+      .optional(),
+    nivel: z.enum(['principiante', 'intermedio', 'avanzado'], {
+      errorMap: () => ({ message: 'El nivel debe ser: principiante, intermedio o avanzado' })
+    }).optional()
   }),
   params: z.object({
     id: z.string().regex(/^\d+$/, 'ID debe ser numérico')
@@ -40,4 +45,3 @@ export const idParamSchema = z.object({
     id: z.string().regex(/^\d+$/, 'ID debe ser numérico')
   })
 });
-

@@ -1,137 +1,326 @@
-### Variables
-@baseUrl = http://localhost:3000
-@apiUrl = {{baseUrl}}/api
+### USUARIOS ###
 
-### Health Check
-GET {{baseUrl}}/health
+# 1. Obtener todos los usuarios (debe retornar 3 usuarios iniciales)
+GET http://localhost:3000/api/usuarios
 
-### API Info
-GET {{apiUrl}}
+###
 
-###############################################
-# CURSOS DE PROGRAMACIÓN
-###############################################
+# 2. Obtener usuario por ID (Juan Pérez - junior)
+GET http://localhost:3000/api/usuarios/1
 
-### Obtener todos los cursos de programación
-GET {{apiUrl}}/cursos/programacion
+###
 
-### Obtener cursos filtrados por nivel
-GET {{apiUrl}}/cursos/programacion?nivel=basico
+# 3. Obtener usuario por ID (María García - senior)
+GET http://localhost:3000/api/usuarios/2
 
-### Obtener cursos filtrados por lenguaje
-GET {{apiUrl}}/cursos/programacion?lenguaje=javascript
+###
 
-### Obtener cursos ordenados por vistas
-GET {{apiUrl}}/cursos/programacion?orden=vistas
+# 4. Obtener usuario por ID (Carlos López - mid-senior)
+GET http://localhost:3000/api/usuarios/3
 
-### Obtener cursos ordenados por título
-GET {{apiUrl}}/cursos/programacion?orden=titulo
+###
 
-### Obtener un curso específico
-GET {{apiUrl}}/cursos/programacion/1
-
-### Crear un nuevo curso de programación
-POST {{apiUrl}}/cursos/programacion
+# 5. Crear nuevo usuario con nivel junior
+POST http://localhost:3000/api/usuarios
 Content-Type: application/json
 
 {
-  "titulo": "TypeScript desde Cero",
-  "lenguaje": "javascript",
-  "nivel": "intermedio",
-  "descripcion": "Aprende TypeScript de forma práctica"
+  "nombre": "Pedro Martínez",
+  "nivel": "junior"
 }
 
-### Actualizar completamente un curso (PUT)
-PUT {{apiUrl}}/cursos/programacion/1
+###
+
+# 6. Crear nuevo usuario con nivel mid-senior
+POST http://localhost:3000/api/usuarios
 Content-Type: application/json
 
 {
-  "titulo": "JavaScript Moderno y ES2024",
-  "lenguaje": "javascript",
-  "nivel": "basico",
-  "descripcion": "Curso actualizado con las últimas características"
+  "nombre": "Ana Rodríguez",
+  "nivel": "mid-senior"
 }
 
-### Actualizar parcialmente un curso (PATCH)
-PATCH {{apiUrl}}/cursos/programacion/1
+###
+
+# 7. Crear nuevo usuario con nivel senior
+POST http://localhost:3000/api/usuarios
 Content-Type: application/json
 
 {
-  "titulo": "JavaScript Moderno - Actualizado 2026"
+  "nombre": "Luis Fernández",
+  "nivel": "senior"
 }
 
-### Eliminar un curso
-DELETE {{apiUrl}}/cursos/programacion/4
+###
 
-###############################################
-# CURSOS DE MATEMÁTICAS
-###############################################
-
-### Obtener todos los cursos de matemáticas
-GET {{apiUrl}}/cursos/matematicas
-
-### Obtener cursos filtrados por nivel
-GET {{apiUrl}}/cursos/matematicas?nivel=basico
-
-### Obtener cursos filtrados por tema
-GET {{apiUrl}}/cursos/matematicas?tema=calculo
-
-### Obtener cursos ordenados por vistas
-GET {{apiUrl}}/cursos/matematicas?orden=vistas
-
-### Obtener un curso específico de matemáticas
-GET {{apiUrl}}/cursos/matematicas/1
-
-### Crear un nuevo curso de matemáticas
-POST {{apiUrl}}/cursos/matematicas
+# 8. Actualizar usuario 1 (cambiar nombre y nivel)
+PUT http://localhost:3000/api/usuarios/1
 Content-Type: application/json
 
 {
-  "titulo": "Geometría Analítica",
-  "tema": "geometria",
-  "nivel": "intermedio",
-  "descripcion": "Introducción a la geometría analítica"
+  "nombre": "Juan Pérez Actualizado",
+  "nivel": "senior"
 }
 
-### Actualizar completamente un curso de matemáticas (PUT)
-PUT {{apiUrl}}/cursos/matematicas/1
+###
+
+# 9. Actualizar usuario 2 (solo nivel)
+PUT http://localhost:3000/api/usuarios/2
 Content-Type: application/json
 
 {
-  "titulo": "Cálculo Diferencial Avanzado",
-  "tema": "calculo",
-  "nivel": "avanzado",
-  "descripcion": "Profundización en cálculo diferencial"
+  "nivel": "mid-senior"
 }
 
-### Actualizar parcialmente un curso de matemáticas (PATCH)
-PATCH {{apiUrl}}/cursos/matematicas/2
+###
+
+# 10. Eliminar usuario 3
+DELETE http://localhost:3000/api/usuarios/3
+
+###
+
+# 11. Verificar que el usuario 3 fue eliminado (debe dar 404)
+GET http://localhost:3000/api/usuarios/3
+
+###
+
+### CURSOS ###
+
+# 12. Obtener todos los cursos (debe retornar 3 cursos iniciales)
+GET http://localhost:3000/api/cursos
+
+###
+
+# 13. Obtener curso por ID (Desarrollo Web)
+GET http://localhost:3000/api/cursos/1
+
+###
+
+# 14. Crear nuevo curso
+POST http://localhost:3000/api/cursos
 Content-Type: application/json
 
 {
+  "nombre": "Python para Data Science",
+  "descripcion": "Aprende Python aplicado a ciencia de datos y machine learning",
+  "duracion": 50,
+  "nivel": "intermedio"
+}
+
+###
+
+# 15. Crear curso nivel principiante
+POST http://localhost:3000/api/cursos
+Content-Type: application/json
+
+{
+  "nombre": "HTML y CSS Básico",
+  "descripcion": "Fundamentos de desarrollo web con HTML5 y CSS3",
+  "duracion": 15,
+  "nivel": "principiante"
+}
+
+###
+
+# 16. Actualizar curso 1 (cambiar duración y nivel)
+PUT http://localhost:3000/api/cursos/1
+Content-Type: application/json
+
+{
+  "nombre": "Desarrollo Web Full Stack",
+  "descripcion": "Curso completo de desarrollo web full stack actualizado",
+  "duracion": 45,
   "nivel": "avanzado"
 }
 
-### Eliminar un curso de matemáticas
-DELETE {{apiUrl}}/cursos/matematicas/4
+###
 
-###############################################
-# CASOS DE ERROR
-###############################################
+# 17. Eliminar curso 2
+DELETE http://localhost:3000/api/cursos/2
 
-### Obtener curso inexistente
-GET {{apiUrl}}/cursos/programacion/999
+###
 
-### Crear curso con datos inválidos
-POST {{apiUrl}}/cursos/programacion
+# 18. Verificar que el curso 2 fue eliminado (debe dar 404)
+GET http://localhost:3000/api/cursos/2
+
+###
+
+### PRUEBAS DE VALIDACIÓN - USUARIOS ###
+
+# 19. Error - Usuario con nombre muy corto (menos de 3 caracteres)
+POST http://localhost:3000/api/usuarios
 Content-Type: application/json
 
 {
-  "titulo": "AB",
-  "lenguaje": "ruby",
-  "nivel": "super-avanzado"
+  "nombre": "Ab",
+  "nivel": "junior"
 }
 
-### Ruta inexistente
-GET {{apiUrl}}/cursos/fisica
+###
 
+# 20. Error - Usuario sin nombre (campo requerido)
+POST http://localhost:3000/api/usuarios
+Content-Type: application/json
+
+{
+  "nivel": "junior"
+}
+
+###
+
+# 21. Error - Usuario con nivel inválido (solo acepta: junior, mid-senior, senior)
+POST http://localhost:3000/api/usuarios
+Content-Type: application/json
+
+{
+  "nombre": "Test Usuario",
+  "nivel": "expert"
+}
+
+###
+
+# 22. Error - Usuario sin nivel (campo requerido)
+POST http://localhost:3000/api/usuarios
+Content-Type: application/json
+
+{
+  "nombre": "Test Usuario"
+}
+
+###
+
+# 23. Error - ID no numérico en la URL
+GET http://localhost:3000/api/usuarios/abc
+
+###
+
+# 24. Error - Usuario no encontrado (ID alto)
+GET http://localhost:3000/api/usuarios/999
+
+###
+
+### PRUEBAS DE VALIDACIÓN - CURSOS ###
+
+# 25. Error - Curso sin descripción (campo requerido)
+POST http://localhost:3000/api/cursos
+Content-Type: application/json
+
+{
+  "nombre": "Curso Test",
+  "duracion": 30,
+  "nivel": "principiante"
+}
+
+###
+
+# 26. Error - Curso con descripción muy corta (mínimo 10 caracteres)
+POST http://localhost:3000/api/cursos
+Content-Type: application/json
+
+{
+  "nombre": "Curso Test",
+  "descripcion": "Corta",
+  "duracion": 30,
+  "nivel": "principiante"
+}
+
+###
+
+# 27. Error - Curso sin duración (campo requerido)
+POST http://localhost:3000/api/cursos
+Content-Type: application/json
+
+{
+  "nombre": "Curso Test",
+  "descripcion": "Descripción válida del curso de prueba",
+  "nivel": "principiante"
+}
+
+###
+
+# 28. Error - Curso con duración negativa
+POST http://localhost:3000/api/cursos
+Content-Type: application/json
+
+{
+  "nombre": "Curso Test",
+  "descripcion": "Descripción válida del curso de prueba",
+  "duracion": -5,
+  "nivel": "principiante"
+}
+
+###
+
+# 29. Error - Curso con nivel inválido (solo acepta: principiante, intermedio, avanzado)
+POST http://localhost:3000/api/cursos
+Content-Type: application/json
+
+{
+  "nombre": "Curso Test",
+  "descripcion": "Descripción válida del curso de prueba",
+  "duracion": 30,
+  "nivel": "experto"
+}
+
+###
+
+# 30. Error - Curso no encontrado
+GET http://localhost:3000/api/cursos/999
+
+###
+
+### HEALTH CHECK Y RUTAS ###
+
+# 31. Health check (debe retornar status ok)
+GET http://localhost:3000/health
+
+###
+
+# 32. Ruta raíz de la API (debe mostrar endpoints disponibles)
+GET http://localhost:3000/api
+
+###
+
+# 33. Ruta no encontrada (debe retornar 404)
+GET http://localhost:3000/api/ruta-inexistente
+
+###
+
+### PRUEBAS EXITOSAS COMPLETAS ###
+
+# 34. Flujo completo: Crear -> Leer -> Actualizar -> Verificar
+POST http://localhost:3000/api/usuarios
+Content-Type: application/json
+
+{
+  "nombre": "Usuario Flujo Test",
+  "nivel": "junior"
+}
+
+###
+
+# 35. Ahora busca el usuario recién creado (verifica el ID que te dieron arriba)
+GET http://localhost:3000/api/usuarios/4
+
+###
+
+# 36. Actualiza ese usuario
+PUT http://localhost:3000/api/usuarios/4
+Content-Type: application/json
+
+{
+  "nombre": "Usuario Flujo Test Actualizado",
+  "nivel": "senior"
+}
+
+###
+
+# 37. Verifica la actualización
+GET http://localhost:3000/api/usuarios/4
+
+###
+
+# 38. Lista todos los usuarios finales
+GET http://localhost:3000/api/usuarios
+
+###

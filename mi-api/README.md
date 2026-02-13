@@ -1,37 +1,14 @@
-# API de Cursos - Express 5
+# API REST - mi-api
 
-API REST completa construida con Express 5, implementando CRUD para cursos de programación y matemáticas.
+API REST simple con Express 5, siguiendo el documento T4.md hasta el punto 9.
 
-## 🚀 Características
-
-- **Express 5** con manejo automático de errores async
-- **Validación con Zod** en todas las rutas
-- **Arquitectura modular** (controladores, rutas, middleware)
-- **Manejo centralizado de errores**
-- **Variables de entorno** con Node.js nativo
-- **Seguridad** con Helmet y CORS
-- **ESM** (ES Modules)
-
-## 📦 Instalación
+## 🚀 Instalación
 
 ```bash
+# Instalar dependencias
 npm install
-```
 
-## 🔧 Configuración
-
-El archivo `.env` ya está configurado con valores por defecto:
-
-```env
-NODE_ENV=development
-PORT=3000
-JWT_SECRET=tu_secreto_super_seguro_minimo_32_caracteres_aqui_2024
-```
-
-## 🏃 Ejecutar
-
-```bash
-# Modo desarrollo (con reinicio automático)
+# Modo desarrollo (con auto-reload)
 npm run dev
 
 # Modo producción
@@ -40,106 +17,88 @@ npm start
 
 ## 📚 Endpoints
 
-### Cursos de Programación
+### Usuarios
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
-| GET | `/api/cursos/programacion` | Listar todos (con filtros) |
-| GET | `/api/cursos/programacion/:id` | Obtener uno |
-| POST | `/api/cursos/programacion` | Crear |
-| PUT | `/api/cursos/programacion/:id` | Actualizar completo |
-| PATCH | `/api/cursos/programacion/:id` | Actualizar parcial |
-| DELETE | `/api/cursos/programacion/:id` | Eliminar |
+| GET | /api/usuarios | Obtener todos los usuarios |
+| GET | /api/usuarios/:id | Obtener usuario por ID |
+| POST | /api/usuarios | Crear nuevo usuario |
+| PUT | /api/usuarios/:id | Actualizar usuario |
+| DELETE | /api/usuarios/:id | Eliminar usuario |
 
-**Filtros disponibles:**
-- `?nivel=basico|intermedio|avanzado`
-- `?lenguaje=javascript|python|java|csharp`
-- `?orden=vistas|titulo`
-- `?limit=10&offset=0`
+**Modelo Usuario:**
+- `id` (number) - Generado automáticamente
+- `nombre` (string) - 3-100 caracteres
+- `nivel` (enum) - "junior", "mid-senior" o "senior"
 
-### Cursos de Matemáticas
-
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| GET | `/api/cursos/matematicas` | Listar todos (con filtros) |
-| GET | `/api/cursos/matematicas/:id` | Obtener uno |
-| POST | `/api/cursos/matematicas` | Crear |
-| PUT | `/api/cursos/matematicas/:id` | Actualizar completo |
-| PATCH | `/api/cursos/matematicas/:id` | Actualizar parcial |
-| DELETE | `/api/cursos/matematicas/:id` | Eliminar |
-
-**Filtros disponibles:**
-- `?nivel=basico|intermedio|avanzado`
-- `?tema=calculo|algebra|geometria|estadistica`
-- `?orden=vistas|titulo`
-- `?limit=10&offset=0`
-
-## 🧪 Probar la API
-
-Usa el archivo `test.http` con la extensión REST Client de VSCode:
-
-1. Instala la extensión "REST Client" en VSCode
-2. Abre `test.http`
-3. Haz clic en "Send Request" sobre cualquier petición
-
-## 📁 Estructura del Proyecto
-
+**Ejemplo POST /api/usuarios:**
+```json
+{
+  "nombre": "Juan Pérez",
+  "nivel": "junior"
+}
 ```
-mi-api/
-├── src/
-│   ├── index.js                 # Punto de entrada
-│   ├── app.js                   # Configuración Express
-│   ├── config/
-│   │   └── env.js              # Validación de entorno con Zod
-│   ├── routes/
-│   │   ├── index.js            # Agregador de rutas
-│   │   ├── cursos.routes.js    # Rutas de programación
-│   │   └── matematicas.routes.js # Rutas de matemáticas
-│   ├── controllers/
-│   │   ├── cursos.controller.js
-│   │   └── matematicas.controller.js
-│   ├── middleware/
-│   │   ├── errorHandler.js     # Manejo de errores
-│   │   └── validateRequest.js  # Validación con Zod
-│   ├── schemas/
-│   │   ├── cursos.schema.js
-│   │   └── matematicas.schema.js
-│   └── data/
-│       └── cursos.js           # Datos en memoria
-├── .env
-├── .gitignore
-├── package.json
-├── test.http
-└── README.md
+
+### Cursos
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET | /api/cursos | Obtener todos los cursos |
+| GET | /api/cursos/:id | Obtener curso por ID |
+| POST | /api/cursos | Crear nuevo curso |
+| PUT | /api/cursos/:id | Actualizar curso |
+| DELETE | /api/cursos/:id | Eliminar curso |
+
+**Modelo Curso:**
+- `id` (number) - Generado automáticamente
+- `nombre` (string) - 3-100 caracteres
+- `descripcion` (string) - 10-500 caracteres
+- `duracion` (number) - Horas del curso (entero positivo)
+- `nivel` (enum) - "principiante", "intermedio" o "avanzado"
+
+**Ejemplo POST /api/cursos:**
+```json
+{
+  "nombre": "Python para Data Science",
+  "descripcion": "Aprende Python aplicado a ciencia de datos",
+  "duracion": 50,
+  "nivel": "intermedio"
+}
 ```
 
 ## 🛠️ Tecnologías
 
-- **Express 5.0.1** - Framework web
-- **Zod 3.22.4** - Validación de schemas
-- **Helmet 7.1.0** - Seguridad HTTP
-- **CORS 2.8.5** - Cross-Origin Resource Sharing
-- **Node.js 20+** - Runtime
+- **Express 5** - Framework web con manejo automático de async/await
+- **Zod** - Validación de datos
+- **CORS** - Habilitado para todas las rutas
+- **ES Modules** - Uso de import/export
 
-## ✅ Estado del Proyecto
+## 📋 Estructura del Proyecto
 
-**✓ T4 COMPLETO** - Todos los requisitos implementados:
+```
+src/
+├── app.js              # Configuración de Express
+├── index.js            # Punto de entrada
+├── controllers/        # Lógica de negocio
+├── data/              # Datos en memoria
+├── middleware/        # Validación y manejo de errores
+├── routes/            # Definición de rutas
+└── schemas/           # Esquemas de validación Zod
+```
 
-- ✅ Estructura modular
-- ✅ Express 5 configurado
-- ✅ CRUD completo para programación
-- ✅ CRUD completo para matemáticas
-- ✅ Validación con Zod
-- ✅ Manejo de errores centralizado
-- ✅ Middleware personalizado
-- ✅ Variables de entorno validadas
-- ✅ Filtros y ordenamiento
-- ✅ Archivo test.http con todas las pruebas
+## ✅ Conceptos Implementados (T4.md hasta punto 9)
 
-## 📝 Próximos Pasos
+1. ✅ Express 5 con ES Modules
+2. ✅ Configuración con `type: "module"`
+3. ✅ Estructura modular
+4. ✅ Routing con Express Router
+5. ✅ CRUD completo para Usuarios y Cursos
+6. ✅ Routers modulares
+7. ✅ Middleware personalizado
+8. ✅ Validación con Zod
+9. ✅ Manejo de errores centralizado
 
-- Integrar base de datos (MongoDB en T5)
-- Añadir autenticación JWT
-- Implementar paginación avanzada
-- Añadir tests unitarios
+## 🧪 Probar la API
 
+Usa el archivo `test.http` con REST Client (VS Code) o cualquier cliente HTTP.

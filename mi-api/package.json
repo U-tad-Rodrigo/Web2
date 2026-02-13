@@ -2,18 +2,26 @@
   "name": "mi-api",
   "version": "1.0.0",
   "type": "module",
+  "description": "API REST con CRUD de usuarios y cursos",
+  "main": "src/index.js",
   "scripts": {
-    "dev": "node --watch --env-file=.env src/index.js",
-    "start": "node --env-file=.env src/index.js"
+    "dev": "node --watch src/index.js",
+    "start": "node src/index.js"
   },
+  "keywords": [
+    "api",
+    "rest",
+    "express",
+    "crud"
+  ],
+  "author": "",
+  "license": "ISC",
   "engines": {
-    "node": ">=20.11.0"
+    "node": ">=18.0.0"
   },
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^5.0.1",
-    "zod": "^3.22.4",
-    "helmet": "^7.1.0",
-    "cors": "^2.8.5"
+    "zod": "^3.22.4"
   }
 }
-
