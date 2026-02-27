@@ -82,7 +82,6 @@ movieSchema.pre('save', function (next) {
 
 movieSchema.index({ genre: 1 });
 movieSchema.index({ timesRented: -1 });
-movieSchema.index({ title: 'text' });
 
 const Movie = mongoose.model('Movie', movieSchema);
 

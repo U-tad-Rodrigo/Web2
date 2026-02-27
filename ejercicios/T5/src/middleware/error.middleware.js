@@ -1,14 +1,15 @@
 import mongoose from 'mongoose';
 
-export const notFound = (req, res, next) => {
+export const notFound = (req, res) => {
   res.status(404).json({
     error: true,
     message: `Ruta no encontrada: ${req.method} ${req.originalUrl}`
   });
 };
 
-export const errorHandler = (err, req, res, next) => {
+export const errorHandler = (err, req, res, _next) => {
   console.error('❌ Error:', err.message);
+  console.error('📍 Stack:', err.stack);
 
   // Validación de Mongoose
   if (err instanceof mongoose.Error.ValidationError) {

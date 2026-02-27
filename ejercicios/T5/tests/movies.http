@@ -1,5 +1,10 @@
 @baseUrl = http://localhost:3000/api
-@movieId = REEMPLAZA_CON_ID_REAL
+@matrixId = 69a1adb9c27acc788ced199d
+@terminatorId = 69a1adbbc27acc788ced199f
+@shiningId = 69a1adbfc27acc788ced19a1
+@groundhogId = 69a1adc1c27acc788ced19a3
+@godfatherId = 69a1adc4c27acc788ced19a5
+@alienId = 69a1adc9c27acc788ced19a7
 
 ### ─────────────────────────────────────
 ###  HEALTH CHECK
@@ -124,32 +129,32 @@ GET {{baseUrl}}/movies?genre=scifi&page=1&limit=2
 ###  OBTENER POR ID
 ### ─────────────────────────────────────
 
-### 19. Obtener película por ID (reemplaza el ID)
-GET {{baseUrl}}/movies/{{movieId}}
+### 19. Obtener Groundhog Day por ID
+GET {{baseUrl}}/movies/{{groundhogId}}
 
 ### ─────────────────────────────────────
 ###  ACTUALIZAR
 ### ─────────────────────────────────────
 
 ### 20. Actualizar solo el título
-PUT {{baseUrl}}/movies/{{movieId}}
+PUT {{baseUrl}}/movies/{{groundhogId}}
 Content-Type: application/json
 
 {
-  "title": "The Matrix Reloaded"
+  "title": "Groundhog Day - Editada"
 }
 
 ### 21. Actualizar año y género
-PUT {{baseUrl}}/movies/{{movieId}}
+PUT {{baseUrl}}/movies/{{godfatherId}}
 Content-Type: application/json
 
 {
-  "year": 2003,
-  "genre": "action"
+  "year": 1973,
+  "genre": "drama"
 }
 
 ### 22. Actualizar copias totales (recalcula availableCopies)
-PUT {{baseUrl}}/movies/{{movieId}}
+PUT {{baseUrl}}/movies/{{alienId}}
 Content-Type: application/json
 
 {
@@ -157,75 +162,72 @@ Content-Type: application/json
 }
 
 ### 23. Actualizar múltiples campos a la vez
-PUT {{baseUrl}}/movies/{{movieId}}
+PUT {{baseUrl}}/movies/{{groundhogId}}
 Content-Type: application/json
 
 {
-  "title": "The Matrix Revolutions",
-  "year": 2003,
-  "director": "Lilly Wachowski"
+  "title": "Groundhog Day - Actualizada",
+  "year": 1993,
+  "director": "Harold Ramis"
 }
 
 ### ─────────────────────────────────────
 ###  ALQUILER Y DEVOLUCIÓN
 ### ─────────────────────────────────────
 
-### 24. Alquilar película (1ª vez)
-POST {{baseUrl}}/movies/{{movieId}}/rent
+### 24. Alquilar The Shining (1ª vez) - tiene 2 copias
+PATCH {{baseUrl}}/movies/{{shiningId}}/rent
 
-### 25. Alquilar película (2ª vez)
-POST {{baseUrl}}/movies/{{movieId}}/rent
+### 25. Alquilar The Shining (2ª vez) - última copia
+PATCH {{baseUrl}}/movies/{{shiningId}}/rent
 
-### 26. Alquilar película (3ª vez - agota las copias si copies=3)
-POST {{baseUrl}}/movies/{{movieId}}/rent
+### 26. ERROR - Alquilar sin copias disponibles (400)
+PATCH {{baseUrl}}/movies/{{shiningId}}/rent
 
-### 27. ERROR - Alquilar sin copias disponibles (400)
-POST {{baseUrl}}/movies/{{movieId}}/rent
+### 27. Devolver The Shining (1ª devolución)
+PATCH {{baseUrl}}/movies/{{shiningId}}/return
 
-### 28. Devolver película
-POST {{baseUrl}}/movies/{{movieId}}/return
+### 28. Devolver The Shining (2ª devolución) - todas disponibles de nuevo
+PATCH {{baseUrl}}/movies/{{shiningId}}/return
 
-### 29. Devolver otra vez
-POST {{baseUrl}}/movies/{{movieId}}/return
-
-### 30. ERROR - Devolver cuando ya están todas disponibles (400)
-POST {{baseUrl}}/movies/{{movieId}}/return
+### 29. ERROR - Devolver cuando ya están todas disponibles (400)
+PATCH {{baseUrl}}/movies/{{shiningId}}/return
 
 ### ─────────────────────────────────────
 ###  CARÁTULAS
 ### ─────────────────────────────────────
 
 ### 31. Subir carátula
-PATCH {{baseUrl}}/movies/{{movieId}}/cover
-Content-Type: multipart/form-data; boundary=----Boundary
+PATCH {{baseUrl}}/movies/{{godfatherId}}/cover
+Content-Type: multipart/form-data; boundary=boundary
 
-------Boundary
+--boundary
 Content-Disposition: form-data; name="cover"; filename="poster.jpg"
 Content-Type: image/jpeg
 
 < ./fixtures/poster.jpg
-------Boundary--
+--boundary--
 
 ### 32. Reemplazar carátula (sube otra vez, borra la anterior)
-PATCH {{baseUrl}}/movies/{{movieId}}/cover
-Content-Type: multipart/form-data; boundary=----Boundary
+PATCH {{baseUrl}}/movies/{{godfatherId}}/cover
+Content-Type: multipart/form-data; boundary=boundary
 
-------Boundary
+--boundary
 Content-Disposition: form-data; name="cover"; filename="poster.jpg"
 Content-Type: image/jpeg
 
 < ./fixtures/poster.jpg
-------Boundary--
+--boundary--
 
 ### 33. Obtener carátula como imagen
-GET {{baseUrl}}/movies/{{movieId}}/cover
+GET {{baseUrl}}/movies/{{godfatherId}}/cover
 
-### 34. Acceder a carátula por URL directa (reemplaza NOMBRE_ARCHIVO)
-GET http://localhost:3000/uploads/NOMBRE_ARCHIVO.jpg
+### 34. Acceder a carátula por URL directa (ejecuta antes los tests 31/32 y reemplaza el nombre)
+# @prompt coverFile Nombre del archivo en storage (ej: cover-123456789-987654321.jpg)
+GET http://localhost:3000/uploads/{{coverFile}}
 
 ### 35. ERROR - Obtener carátula de película sin carátula (404)
-### (usa un ID de película que no tenga carátula)
-GET {{baseUrl}}/movies/000000000000000000000001/cover
+GET {{baseUrl}}/movies/{{alienId}}/cover
 
 ### ─────────────────────────────────────
 ###  ESTADÍSTICAS Y BONUS
@@ -245,7 +247,7 @@ GET {{baseUrl}}/movies/available?page=1&limit=3
 ### ─────────────────────────────────────
 
 ### 39. Valorar con 5 estrellas
-POST {{baseUrl}}/movies/{{movieId}}/rate
+POST {{baseUrl}}/movies/{{alienId}}/rate
 Content-Type: application/json
 
 {
@@ -253,7 +255,7 @@ Content-Type: application/json
 }
 
 ### 40. Valorar con 3 estrellas (promedio debería ser 4)
-POST {{baseUrl}}/movies/{{movieId}}/rate
+POST {{baseUrl}}/movies/{{alienId}}/rate
 Content-Type: application/json
 
 {
@@ -261,7 +263,7 @@ Content-Type: application/json
 }
 
 ### 41. Valorar con 4 estrellas (promedio debería ser 4)
-POST {{baseUrl}}/movies/{{movieId}}/rate
+POST {{baseUrl}}/movies/{{alienId}}/rate
 Content-Type: application/json
 
 {
@@ -273,7 +275,7 @@ Content-Type: application/json
 ### ─────────────────────────────────────
 
 ### 42. Eliminar película (también borra su carátula)
-DELETE {{baseUrl}}/movies/{{movieId}}
+DELETE {{baseUrl}}/movies/{{godfatherId}}
 
 ### ─────────────────────────────────────
 ###  ERRORES DE VALIDACIÓN (400)
@@ -354,7 +356,7 @@ Content-Type: application/json
 }
 
 ### 50. ERROR - PUT sin ningún campo válido (400)
-PUT {{baseUrl}}/movies/{{movieId}}
+PUT {{baseUrl}}/movies/{{groundhogId}}
 Content-Type: application/json
 
 {
@@ -362,7 +364,7 @@ Content-Type: application/json
 }
 
 ### 51. ERROR - Valoración por debajo del mínimo (< 1)
-POST {{baseUrl}}/movies/{{movieId}}/rate
+POST {{baseUrl}}/movies/{{alienId}}/rate
 Content-Type: application/json
 
 {
@@ -370,7 +372,7 @@ Content-Type: application/json
 }
 
 ### 52. ERROR - Valoración por encima del máximo (> 5)
-POST {{baseUrl}}/movies/{{movieId}}/rate
+POST {{baseUrl}}/movies/{{alienId}}/rate
 Content-Type: application/json
 
 {
@@ -396,10 +398,10 @@ Content-Type: application/json
 DELETE {{baseUrl}}/movies/000000000000000000000000
 
 ### 56. ERROR - Alquilar película inexistente (404)
-POST {{baseUrl}}/movies/000000000000000000000000/rent
+PATCH {{baseUrl}}/movies/000000000000000000000000/rent
 
 ### 57. ERROR - Devolver película inexistente (404)
-POST {{baseUrl}}/movies/000000000000000000000000/return
+PATCH {{baseUrl}}/movies/000000000000000000000000/return
 
 ### 58. ERROR - Carátula de película inexistente (404)
 GET {{baseUrl}}/movies/000000000000000000000000/cover
@@ -431,7 +433,7 @@ Content-Type: application/json
 DELETE {{baseUrl}}/movies/no-es-un-id
 
 ### 63. ERROR - Alquilar con ID inválido
-POST {{baseUrl}}/movies/no-es-un-id/rent
+PATCH {{baseUrl}}/movies/no-es-un-id/rent
 
 ### 64. ERROR - Ruta inexistente (404 notFound)
 GET http://localhost:3000/api/rutaquenoexiste

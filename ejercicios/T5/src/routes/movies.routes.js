@@ -15,24 +15,24 @@ import {
 } from '../controllers/movies.controller.js';
 import { validate, validateObjectId } from '../middleware/validate.middleware.js';
 import { uploadCover } from '../middleware/upload.middleware.js';
-import { createMovieSchema, updateMovieSchema, rateMovieSchema } from '../schemas/movie.schema.js';
+import { createMovieSchema, updateMovieSchema, rateMovieSchema, getMoviesSchema } from '../schemas/movie.schema.js';
 
 const router = Router();
 
 // Rutas estáticas ANTES de las dinámicas con :id
 router.get('/stats/top', getTopMovies);
-router.get('/available', getAvailableMovies);
+router.get('/available', validate(getMoviesSchema), getAvailableMovies);
 
 // CRUD
-router.get('/', getMovies);
+router.get('/', validate(getMoviesSchema), getMovies);
 router.get('/:id', validateObjectId(), getMovie);
 router.post('/', validate(createMovieSchema), createMovie);
 router.put('/:id', validateObjectId(), validate(updateMovieSchema), updateMovie);
 router.delete('/:id', validateObjectId(), deleteMovie);
 
 // Alquiler / Devolución
-router.post('/:id/rent', validateObjectId(), rentMovie);
-router.post('/:id/return', validateObjectId(), returnMovie);
+router.patch('/:id/rent', validateObjectId(), rentMovie);
+router.patch('/:id/return', validateObjectId(), returnMovie);
 
 // Carátula
 router.patch('/:id/cover', validateObjectId(), uploadCover, uploadMovieCover);
@@ -42,4 +42,3 @@ router.get('/:id/cover', validateObjectId(), getMovieCover);
 router.post('/:id/rate', validateObjectId(), validate(rateMovieSchema), rateMovie);
 
 export default router;
-

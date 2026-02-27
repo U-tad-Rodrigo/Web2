@@ -1,7 +1,11 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import routes from './routes/index.js';
 import { errorHandler, notFound } from './middleware/error.middleware.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 
@@ -11,7 +15,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Archivos estáticos (carátulas)
-app.use('/uploads', express.static('storage'));
+app.use('/uploads', express.static(path.join(__dirname, '..', 'storage')));
 
 // Health check
 app.get('/health', (req, res) => {

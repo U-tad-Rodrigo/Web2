@@ -27,8 +27,13 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-export const uploadCover = multer({
-  storage,
-  fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 }
-}).single('cover');
+export const uploadCover = (req, res, next) => {
+  multer({
+    storage,
+    fileFilter,
+    limits: { fileSize: 5 * 1024 * 1024 }
+  }).single('cover')(req, res, (err) => {
+    if (err) return next(err);
+    next();
+  });
+};
