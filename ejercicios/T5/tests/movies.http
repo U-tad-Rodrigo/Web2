@@ -1,0 +1,437 @@
+@baseUrl = http://localhost:3000/api
+@movieId = REEMPLAZA_CON_ID_REAL
+
+### ─────────────────────────────────────
+###  HEALTH CHECK
+### ─────────────────────────────────────
+
+### 1. Health check
+GET http://localhost:3000/health
+
+### ─────────────────────────────────────
+###  CREAR PELÍCULAS
+### ─────────────────────────────────────
+
+### 2. Crear película - The Matrix (scifi)
+POST {{baseUrl}}/movies
+Content-Type: application/json
+
+{
+  "title": "The Matrix",
+  "director": "Lana Wachowski",
+  "year": 1999,
+  "genre": "scifi",
+  "copies": 3
+}
+
+### 3. Crear película - Terminator 2 (action)
+POST {{baseUrl}}/movies
+Content-Type: application/json
+
+{
+  "title": "Terminator 2",
+  "director": "James Cameron",
+  "year": 1991,
+  "genre": "action",
+  "copies": 5
+}
+
+### 4. Crear película - The Shining (horror)
+POST {{baseUrl}}/movies
+Content-Type: application/json
+
+{
+  "title": "The Shining",
+  "director": "Stanley Kubrick",
+  "year": 1980,
+  "genre": "horror",
+  "copies": 2
+}
+
+### 5. Crear película - Groundhog Day (comedy)
+POST {{baseUrl}}/movies
+Content-Type: application/json
+
+{
+  "title": "Groundhog Day",
+  "director": "Harold Ramis",
+  "year": 1993,
+  "genre": "comedy",
+  "copies": 4
+}
+
+### 6. Crear película - The Godfather (drama)
+POST {{baseUrl}}/movies
+Content-Type: application/json
+
+{
+  "title": "The Godfather",
+  "director": "Francis Ford Coppola",
+  "year": 1972,
+  "genre": "drama",
+  "copies": 6
+}
+
+### 7. Crear película con copies por defecto (sin especificar copies → default 5)
+POST {{baseUrl}}/movies
+Content-Type: application/json
+
+{
+  "title": "Alien",
+  "director": "Ridley Scott",
+  "year": 1979,
+  "genre": "scifi"
+}
+
+### ─────────────────────────────────────
+###  LISTAR Y FILTRAR
+### ─────────────────────────────────────
+
+### 8. Listar todas las películas
+GET {{baseUrl}}/movies
+
+### 9. Paginación - página 1, 3 por página
+GET {{baseUrl}}/movies?page=1&limit=3
+
+### 10. Paginación - página 2, 3 por página
+GET {{baseUrl}}/movies?page=2&limit=3
+
+### 11. Filtrar por género action
+GET {{baseUrl}}/movies?genre=action
+
+### 12. Filtrar por género horror
+GET {{baseUrl}}/movies?genre=horror
+
+### 13. Filtrar por género comedy
+GET {{baseUrl}}/movies?genre=comedy
+
+### 14. Filtrar por género drama
+GET {{baseUrl}}/movies?genre=drama
+
+### 15. Filtrar por género scifi
+GET {{baseUrl}}/movies?genre=scifi
+
+### 16. Buscar por título - 'matrix'
+GET {{baseUrl}}/movies?search=matrix
+
+### 17. Buscar por título - 'the'
+GET {{baseUrl}}/movies?search=the
+
+### 18. Filtro + paginación combinados
+GET {{baseUrl}}/movies?genre=scifi&page=1&limit=2
+
+### ─────────────────────────────────────
+###  OBTENER POR ID
+### ─────────────────────────────────────
+
+### 19. Obtener película por ID (reemplaza el ID)
+GET {{baseUrl}}/movies/{{movieId}}
+
+### ─────────────────────────────────────
+###  ACTUALIZAR
+### ─────────────────────────────────────
+
+### 20. Actualizar solo el título
+PUT {{baseUrl}}/movies/{{movieId}}
+Content-Type: application/json
+
+{
+  "title": "The Matrix Reloaded"
+}
+
+### 21. Actualizar año y género
+PUT {{baseUrl}}/movies/{{movieId}}
+Content-Type: application/json
+
+{
+  "year": 2003,
+  "genre": "action"
+}
+
+### 22. Actualizar copias totales (recalcula availableCopies)
+PUT {{baseUrl}}/movies/{{movieId}}
+Content-Type: application/json
+
+{
+  "copies": 10
+}
+
+### 23. Actualizar múltiples campos a la vez
+PUT {{baseUrl}}/movies/{{movieId}}
+Content-Type: application/json
+
+{
+  "title": "The Matrix Revolutions",
+  "year": 2003,
+  "director": "Lilly Wachowski"
+}
+
+### ─────────────────────────────────────
+###  ALQUILER Y DEVOLUCIÓN
+### ─────────────────────────────────────
+
+### 24. Alquilar película (1ª vez)
+POST {{baseUrl}}/movies/{{movieId}}/rent
+
+### 25. Alquilar película (2ª vez)
+POST {{baseUrl}}/movies/{{movieId}}/rent
+
+### 26. Alquilar película (3ª vez - agota las copias si copies=3)
+POST {{baseUrl}}/movies/{{movieId}}/rent
+
+### 27. ERROR - Alquilar sin copias disponibles (400)
+POST {{baseUrl}}/movies/{{movieId}}/rent
+
+### 28. Devolver película
+POST {{baseUrl}}/movies/{{movieId}}/return
+
+### 29. Devolver otra vez
+POST {{baseUrl}}/movies/{{movieId}}/return
+
+### 30. ERROR - Devolver cuando ya están todas disponibles (400)
+POST {{baseUrl}}/movies/{{movieId}}/return
+
+### ─────────────────────────────────────
+###  CARÁTULAS
+### ─────────────────────────────────────
+
+### 31. Subir carátula
+PATCH {{baseUrl}}/movies/{{movieId}}/cover
+Content-Type: multipart/form-data; boundary=----Boundary
+
+------Boundary
+Content-Disposition: form-data; name="cover"; filename="poster.jpg"
+Content-Type: image/jpeg
+
+< ./fixtures/poster.jpg
+------Boundary--
+
+### 32. Reemplazar carátula (sube otra vez, borra la anterior)
+PATCH {{baseUrl}}/movies/{{movieId}}/cover
+Content-Type: multipart/form-data; boundary=----Boundary
+
+------Boundary
+Content-Disposition: form-data; name="cover"; filename="poster.jpg"
+Content-Type: image/jpeg
+
+< ./fixtures/poster.jpg
+------Boundary--
+
+### 33. Obtener carátula como imagen
+GET {{baseUrl}}/movies/{{movieId}}/cover
+
+### 34. Acceder a carátula por URL directa (reemplaza NOMBRE_ARCHIVO)
+GET http://localhost:3000/uploads/NOMBRE_ARCHIVO.jpg
+
+### 35. ERROR - Obtener carátula de película sin carátula (404)
+### (usa un ID de película que no tenga carátula)
+GET {{baseUrl}}/movies/000000000000000000000001/cover
+
+### ─────────────────────────────────────
+###  ESTADÍSTICAS Y BONUS
+### ─────────────────────────────────────
+
+### 36. Top 5 más alquiladas
+GET {{baseUrl}}/movies/stats/top
+
+### 37. Películas con copias disponibles
+GET {{baseUrl}}/movies/available
+
+### 38. Películas disponibles con paginación
+GET {{baseUrl}}/movies/available?page=1&limit=3
+
+### ─────────────────────────────────────
+###  VALORACIÓN (BONUS)
+### ─────────────────────────────────────
+
+### 39. Valorar con 5 estrellas
+POST {{baseUrl}}/movies/{{movieId}}/rate
+Content-Type: application/json
+
+{
+  "rating": 5
+}
+
+### 40. Valorar con 3 estrellas (promedio debería ser 4)
+POST {{baseUrl}}/movies/{{movieId}}/rate
+Content-Type: application/json
+
+{
+  "rating": 3
+}
+
+### 41. Valorar con 4 estrellas (promedio debería ser 4)
+POST {{baseUrl}}/movies/{{movieId}}/rate
+Content-Type: application/json
+
+{
+  "rating": 4
+}
+
+### ─────────────────────────────────────
+###  ELIMINAR
+### ─────────────────────────────────────
+
+### 42. Eliminar película (también borra su carátula)
+DELETE {{baseUrl}}/movies/{{movieId}}
+
+### ─────────────────────────────────────
+###  ERRORES DE VALIDACIÓN (400)
+### ─────────────────────────────────────
+
+### 43. ERROR - Título demasiado corto (mínimo 2 caracteres)
+POST {{baseUrl}}/movies
+Content-Type: application/json
+
+{
+  "title": "X",
+  "director": "Alguien",
+  "year": 2000,
+  "genre": "drama"
+}
+
+### 44. ERROR - Sin título
+POST {{baseUrl}}/movies
+Content-Type: application/json
+
+{
+  "director": "Director",
+  "year": 2000,
+  "genre": "drama"
+}
+
+### 45. ERROR - Sin director
+POST {{baseUrl}}/movies
+Content-Type: application/json
+
+{
+  "title": "Sin director",
+  "year": 2000,
+  "genre": "comedy"
+}
+
+### 46. ERROR - Sin género
+POST {{baseUrl}}/movies
+Content-Type: application/json
+
+{
+  "title": "Sin género",
+  "director": "Director",
+  "year": 2000
+}
+
+### 47. ERROR - Género inválido
+POST {{baseUrl}}/movies
+Content-Type: application/json
+
+{
+  "title": "Película inválida",
+  "director": "Director",
+  "year": 2000,
+  "genre": "thriller"
+}
+
+### 48. ERROR - Año demasiado antiguo (< 1888)
+POST {{baseUrl}}/movies
+Content-Type: application/json
+
+{
+  "title": "Muy antigua",
+  "director": "Nadie",
+  "year": 1800,
+  "genre": "drama"
+}
+
+### 49. ERROR - Año en el futuro
+POST {{baseUrl}}/movies
+Content-Type: application/json
+
+{
+  "title": "Del futuro",
+  "director": "Nadie",
+  "year": 2099,
+  "genre": "scifi"
+}
+
+### 50. ERROR - PUT sin ningún campo válido (400)
+PUT {{baseUrl}}/movies/{{movieId}}
+Content-Type: application/json
+
+{
+  "campoInventado": "valor"
+}
+
+### 51. ERROR - Valoración por debajo del mínimo (< 1)
+POST {{baseUrl}}/movies/{{movieId}}/rate
+Content-Type: application/json
+
+{
+  "rating": 0
+}
+
+### 52. ERROR - Valoración por encima del máximo (> 5)
+POST {{baseUrl}}/movies/{{movieId}}/rate
+Content-Type: application/json
+
+{
+  "rating": 6
+}
+
+### ─────────────────────────────────────
+###  ERRORES 404 - NO ENCONTRADO
+### ─────────────────────────────────────
+
+### 53. ERROR - GET película inexistente (404)
+GET {{baseUrl}}/movies/000000000000000000000000
+
+### 54. ERROR - PUT película inexistente (404)
+PUT {{baseUrl}}/movies/000000000000000000000000
+Content-Type: application/json
+
+{
+  "title": "No existe"
+}
+
+### 55. ERROR - DELETE película inexistente (404)
+DELETE {{baseUrl}}/movies/000000000000000000000000
+
+### 56. ERROR - Alquilar película inexistente (404)
+POST {{baseUrl}}/movies/000000000000000000000000/rent
+
+### 57. ERROR - Devolver película inexistente (404)
+POST {{baseUrl}}/movies/000000000000000000000000/return
+
+### 58. ERROR - Carátula de película inexistente (404)
+GET {{baseUrl}}/movies/000000000000000000000000/cover
+
+### 59. ERROR - Valorar película inexistente (404)
+POST {{baseUrl}}/movies/000000000000000000000000/rate
+Content-Type: application/json
+
+{
+  "rating": 4
+}
+
+### ─────────────────────────────────────
+###  ERRORES 400 - ID INVÁLIDO
+### ─────────────────────────────────────
+
+### 60. ERROR - GET con ID inválido
+GET {{baseUrl}}/movies/id-que-no-es-objectid
+
+### 61. ERROR - PUT con ID inválido
+PUT {{baseUrl}}/movies/no-es-un-id
+Content-Type: application/json
+
+{
+  "title": "test"
+}
+
+### 62. ERROR - DELETE con ID inválido
+DELETE {{baseUrl}}/movies/no-es-un-id
+
+### 63. ERROR - Alquilar con ID inválido
+POST {{baseUrl}}/movies/no-es-un-id/rent
+
+### 64. ERROR - Ruta inexistente (404 notFound)
+GET http://localhost:3000/api/rutaquenoexiste
