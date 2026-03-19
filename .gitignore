@@ -1,3 +1,11 @@
 node_modules/
 .env
 .env.local
+
+# Documentación generada o de proceso
+**/docs/
+
+# Ignorar todos los archivos Markdown
+*.md
+*.markdown
+
