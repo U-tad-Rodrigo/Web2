@@ -64,6 +64,12 @@ const movieSchema = new mongoose.Schema(
       type: Number,
       default: 0,
       select: false
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+      index: true
     }
   },
   {

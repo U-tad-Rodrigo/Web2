@@ -1,0 +1,73 @@
+@baseUrl = http://localhost:3000/api
+@accessToken = pega_aqui_access_token
+@refreshToken = pega_aqui_refresh_token
+
+### Registro
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Admin Demo",
+  "age": 28,
+  "email": "admin.demo@ejemplo.com",
+  "password": "MiPassword123"
+}
+
+### Login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin.demo@ejemplo.com",
+  "password": "MiPassword123"
+}
+
+### Me (requiere token)
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{accessToken}}
+
+### Refresh de access token
+POST {{baseUrl}}/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+### Logout (revoca refresh token actual)
+POST {{baseUrl}}/auth/logout
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+### Logout global (revoca todos)
+POST {{baseUrl}}/auth/logout-all
+Authorization: Bearer {{accessToken}}
+
+### Crear pelicula protegida
+POST {{baseUrl}}/movies
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "title": "Movie protegida",
+  "director": "Director protegido",
+  "year": 2024,
+  "genre": "drama",
+  "copies": 2
+}
+
+### Error esperado: crear pelicula sin token (401)
+POST {{baseUrl}}/movies
+Content-Type: application/json
+
+{
+  "title": "Sin token",
+  "director": "Anon",
+  "year": 2023,
+  "genre": "comedy",
+  "copies": 1
+}
+

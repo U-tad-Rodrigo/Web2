@@ -7,6 +7,9 @@ import { handleHttpError } from '../utils/handleError.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const UPLOAD_DIR = path.join(__dirname, '..', '..', 'storage');
 
+const isAdmin = (user) => user?.role === 'admin';
+const isOwner = (movie, user) => movie?.createdBy && movie.createdBy.toString() === user?._id?.toString();
+
 // Wrapper para capturar errores async y pasarlos a next()
 const asyncHandler = (fn) => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
@@ -69,19 +72,26 @@ export const getMovie = asyncHandler(async (req, res) => {
 
 // POST /api/movies
 export const createMovie = asyncHandler(async (req, res) => {
-  const movie = await Movie.create(req.body);
+  const movie = await Movie.create({
+    ...req.body,
+    createdBy: req.user?._id || null
+  });
   res.status(201).json({ data: movie });
 });
 
 // PUT /api/movies/:id
 // Zod .strip() ya eliminó campos no permitidos, req.body solo contiene campos válidos
 export const updateMovie = asyncHandler(async (req, res) => {
+  const current = await Movie.findById(req.params.id);
+  if (!current) return handleHttpError(res, 'Película no encontrada', 404);
+
+  if (!isAdmin(req.user) && !isOwner(current, req.user)) {
+    return handleHttpError(res, 'NOT_ALLOWED', 403);
+  }
+
   const safeBody = { ...req.body };
 
   if (safeBody.copies !== undefined) {
-    const current = await Movie.findById(req.params.id);
-    if (!current) return handleHttpError(res, 'Película no encontrada', 404);
-
     const rentedCopies = current.copies - current.availableCopies;
     safeBody.availableCopies = Math.max(0, safeBody.copies - rentedCopies);
   }
@@ -96,8 +106,14 @@ export const updateMovie = asyncHandler(async (req, res) => {
 
 // DELETE /api/movies/:id
 export const deleteMovie = asyncHandler(async (req, res) => {
-  const movie = await Movie.findByIdAndDelete(req.params.id);
+  const movie = await Movie.findById(req.params.id);
   if (!movie) return handleHttpError(res, 'Película no encontrada', 404);
+
+  if (!isAdmin(req.user) && !isOwner(movie, req.user)) {
+    return handleHttpError(res, 'NOT_ALLOWED', 403);
+  }
+
+  await Movie.findByIdAndDelete(req.params.id);
 
   if (movie.cover) {
     const filePath = path.join(UPLOAD_DIR, movie.cover);
@@ -152,6 +168,11 @@ export const uploadMovieCover = asyncHandler(async (req, res) => {
   if (!movie) {
     await fs.unlink(req.file.path).catch(() => {});
     return handleHttpError(res, 'Película no encontrada', 404);
+  }
+
+  if (!isAdmin(req.user) && !isOwner(movie, req.user)) {
+    await fs.unlink(req.file.path).catch(() => {});
+    return handleHttpError(res, 'NOT_ALLOWED', 403);
   }
 
   if (movie.cover) {

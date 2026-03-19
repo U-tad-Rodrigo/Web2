@@ -16,6 +16,8 @@ import {
 import { validate, validateObjectId } from '../middleware/validate.middleware.js';
 import { uploadCover } from '../middleware/upload.middleware.js';
 import { createMovieSchema, updateMovieSchema, rateMovieSchema, getMoviesSchema } from '../schemas/movie.schema.js';
+import authMiddleware from '../middleware/session.middleware.js';
+import checkRol from '../middleware/rol.middleware.js';
 
 const router = Router();
 
@@ -26,19 +28,19 @@ router.get('/available', validate(getMoviesSchema), getAvailableMovies);
 // CRUD
 router.get('/', validate(getMoviesSchema), getMovies);
 router.get('/:id', validateObjectId(), getMovie);
-router.post('/', validate(createMovieSchema), createMovie);
-router.put('/:id', validateObjectId(), validate(updateMovieSchema), updateMovie);
-router.delete('/:id', validateObjectId(), deleteMovie);
+router.post('/', authMiddleware, checkRol(['admin', 'user']), validate(createMovieSchema), createMovie);
+router.put('/:id', authMiddleware, checkRol(['admin', 'user']), validateObjectId(), validate(updateMovieSchema), updateMovie);
+router.delete('/:id', authMiddleware, checkRol(['admin', 'user']), validateObjectId(), deleteMovie);
 
 // Alquiler / Devolución
-router.patch('/:id/rent', validateObjectId(), rentMovie);
-router.patch('/:id/return', validateObjectId(), returnMovie);
+router.patch('/:id/rent', authMiddleware, checkRol(['admin', 'user']), validateObjectId(), rentMovie);
+router.patch('/:id/return', authMiddleware, checkRol(['admin', 'user']), validateObjectId(), returnMovie);
 
 // Carátula
-router.patch('/:id/cover', validateObjectId(), uploadCover, uploadMovieCover);
+router.patch('/:id/cover', authMiddleware, checkRol(['admin', 'user']), validateObjectId(), uploadCover, uploadMovieCover);
 router.get('/:id/cover', validateObjectId(), getMovieCover);
 
 // Valoración (BONUS)
-router.post('/:id/rate', validateObjectId(), validate(rateMovieSchema), rateMovie);
+router.post('/:id/rate', authMiddleware, checkRol(['admin', 'user']), validateObjectId(), validate(rateMovieSchema), rateMovie);
 
 export default router;

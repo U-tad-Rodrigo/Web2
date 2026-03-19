@@ -1,4 +1,5 @@
 @baseUrl = http://localhost:3000/api
+@accessToken = pega_aqui_access_token
 @matrixId = 69a1adb9c27acc788ced199d
 @terminatorId = 69a1adbbc27acc788ced199f
 @shiningId = 69a1adbfc27acc788ced19a1
@@ -16,6 +17,9 @@ GET http://localhost:3000/health
 ### ─────────────────────────────────────
 ###  CREAR PELÍCULAS
 ### ─────────────────────────────────────
+
+### Nota: desde T7, endpoints de escritura requieren JWT
+### Authorization: Bearer {{accessToken}}
 
 ### 2. Crear película - The Matrix (scifi)
 POST {{baseUrl}}/movies
