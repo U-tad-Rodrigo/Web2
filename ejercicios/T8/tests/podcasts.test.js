@@ -250,6 +250,22 @@ describe('Podcast endpoints', () => {
         .send({});
       expect(res.statusCode).toBe(400);
     });
+
+    test('400 → ID con formato inválido', async () => {
+      const { token } = await registerAndLogin({ name: 'AutorA', email: 'a@test.com', password: 'password123' });
+      const res = await request(app).put('/api/podcasts/id-no-valido')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ title: 'Nuevo titulo valido' });
+      expect(res.statusCode).toBe(400);
+    });
+
+    test('404 → podcast con ID válido pero no existe', async () => {
+      const { token } = await registerAndLogin({ name: 'AutorA', email: 'a@test.com', password: 'password123' });
+      const res = await request(app).put('/api/podcasts/000000000000000000000001')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ title: 'Nuevo titulo valido' });
+      expect(res.statusCode).toBe(404);
+    });
   });
 
   // ─── DELETE /api/podcasts/:id ──────────────────────────────────────────────
@@ -294,6 +310,13 @@ describe('Podcast endpoints', () => {
       const res = await request(app).delete('/api/podcasts/000000000000000000000001')
         .set('Authorization', `Bearer ${token}`);
       expect(res.statusCode).toBe(404);
+    });
+
+    test('400 → ID con formato inválido', async () => {
+      const { token } = await registerAndLogin({ name: 'Admin', email: 'admin@test.com', password: 'password123', role: 'admin' });
+      const res = await request(app).delete('/api/podcasts/id-no-valido')
+        .set('Authorization', `Bearer ${token}`);
+      expect(res.statusCode).toBe(400);
     });
   });
 
@@ -387,6 +410,22 @@ describe('Podcast endpoints', () => {
         .set('Authorization', `Bearer ${token}`)
         .send({});
       expect(res.statusCode).toBe(400);
+    });
+
+    test('400 → ID con formato inválido', async () => {
+      const { token } = await registerAndLogin({ name: 'Admin', email: 'admin@test.com', password: 'password123', role: 'admin' });
+      const res = await request(app).patch('/api/podcasts/id-no-valido/publish')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ published: true });
+      expect(res.statusCode).toBe(400);
+    });
+
+    test('404 → podcast con ID válido pero no existe', async () => {
+      const { token } = await registerAndLogin({ name: 'Admin', email: 'admin@test.com', password: 'password123', role: 'admin' });
+      const res = await request(app).patch('/api/podcasts/000000000000000000000001/publish')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ published: true });
+      expect(res.statusCode).toBe(404);
     });
   });
 });
