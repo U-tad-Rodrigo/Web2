@@ -6,6 +6,7 @@ export const errorHandler = (err, req, res, next) => {
   const status = err.status || 500;
   const message = err.message || 'Error interno del servidor';
 
+  /* istanbul ignore next */
   if (process.env.NODE_ENV !== 'test') {
     console.error(err);
   }

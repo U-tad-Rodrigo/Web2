@@ -44,26 +44,47 @@ describe('Coverage → middleware y catch blocks de controladores', () => {
   describe('errorHandler middleware (error.middleware.js)', () => {
     test('500 → errores inesperados de BD devuelven 500 con mensaje', async () => {
       const spy = jest.spyOn(User, 'findOne').mockRejectedValueOnce(new Error('DB connection lost'));
-      const res = await request(app).post('/api/auth/login').send({
-        email: 'test@test.com',
-        password: 'password123',
-      });
-      expect(res.statusCode).toBe(500);
-      expect(res.body).toHaveProperty('message');
-      spy.mockRestore();
+      try {
+        const res = await request(app).post('/api/auth/login').send({
+          email: 'test@test.com',
+          password: 'password123',
+        });
+        expect(res.statusCode).toBe(500);
+        expect(res.body).toHaveProperty('message');
+      } finally {
+        spy.mockRestore();
+      }
     });
 
     test('errorHandler usa err.status si está definido en el error', async () => {
       const customErr = new Error('Unprocessable Entity');
       customErr.status = 422;
       const spy = jest.spyOn(User, 'findOne').mockRejectedValueOnce(customErr);
-      const res = await request(app).post('/api/auth/login').send({
-        email: 'test@test.com',
-        password: 'password123',
-      });
-      expect(res.statusCode).toBe(422);
-      expect(res.body.message).toBe('Unprocessable Entity');
-      spy.mockRestore();
+      try {
+        const res = await request(app).post('/api/auth/login').send({
+          email: 'test@test.com',
+          password: 'password123',
+        });
+        expect(res.statusCode).toBe(422);
+        expect(res.body.message).toBe('Unprocessable Entity');
+      } finally {
+        spy.mockRestore();
+      }
+    });
+
+    test('errorHandler usa mensaje genérico cuando err.message está vacío (branch || fallback)', async () => {
+      const errSinMensaje = { status: 503 }; // sin .message
+      const spy = jest.spyOn(User, 'findOne').mockRejectedValueOnce(errSinMensaje);
+      try {
+        const res = await request(app).post('/api/auth/login').send({
+          email: 'test@test.com',
+          password: 'password123',
+        });
+        expect(res.statusCode).toBe(503);
+        expect(res.body.message).toMatch(/error interno/i);
+      } finally {
+        spy.mockRestore();
+      }
     });
   });
 
@@ -100,7 +121,23 @@ describe('Coverage → middleware y catch blocks de controladores', () => {
     });
   });
 
-  // ─── checkRol → unit tests (línea 3) ─────────────────────────────────────
+  // ─── notifySlackNewAdmin → fetch + catch (líneas 17-22) ─────────────────
+
+  describe('auth controller → Slack webhook (notifySlackNewAdmin)', () => {
+    test('201 → admin registrado ejecuta fetch a Slack aunque falle (cubre líneas 17-22)', async () => {
+      // Usar URL local inalcanzable → fetch lanza ECONNREFUSED → catch lo absorbe silenciosamente
+      process.env.SLACK_WEBHOOK_URL = 'http://127.0.0.1:19999/fake-slack';
+      try {
+        const res = await request(app).post('/api/auth/register').send({
+          name: 'Slack Admin', email: 'slack@test.com', password: 'password123', role: 'admin',
+        });
+        expect(res.statusCode).toBe(201);
+        expect(res.body.user.role).toBe('admin');
+      } finally {
+        delete process.env.SLACK_WEBHOOK_URL;
+      }
+    });
+  });
 
   describe('checkRol middleware → unit tests', () => {
     const makeMockRes = () => ({
@@ -145,26 +182,50 @@ describe('Coverage → middleware y catch blocks de controladores', () => {
 
   // ─── auth controller → catch blocks ──────────────────────────────────────
 
-  describe('auth controller → catch blocks (líneas 60 y 85)', () => {
+  describe('auth controller → catch blocks (líneas 60, 85 y 108)', () => {
     test('500 → error inesperado en register activa el catch', async () => {
       const spy = jest.spyOn(User, 'findOne').mockRejectedValueOnce(new Error('DB register error'));
-      const res = await request(app).post('/api/auth/register').send({
-        name: 'Test User',
-        email: 'test@test.com',
-        password: 'password123',
-      });
-      expect(res.statusCode).toBe(500);
-      spy.mockRestore();
+      try {
+        const res = await request(app).post('/api/auth/register').send({
+          name: 'Test User', email: 'test@test.com', password: 'password123',
+        });
+        expect(res.statusCode).toBe(500);
+      } finally { spy.mockRestore(); }
     });
 
     test('500 → error inesperado en login activa el catch', async () => {
       const spy = jest.spyOn(User, 'findOne').mockRejectedValueOnce(new Error('DB login error'));
-      const res = await request(app).post('/api/auth/login').send({
-        email: 'test@test.com',
-        password: 'password123',
+      try {
+        const res = await request(app).post('/api/auth/login').send({
+          email: 'test@test.com', password: 'password123',
+        });
+        expect(res.statusCode).toBe(500);
+      } finally { spy.mockRestore(); }
+    });
+
+    test('500 → error inesperado en changePassword activa el catch (línea 108)', async () => {
+      // Crear usuario real y obtener token
+      await request(app).post('/api/auth/register').send({
+        name: 'Pass User', email: 'pass@test.com', password: 'oldpassword',
       });
-      expect(res.statusCode).toBe(500);
-      spy.mockRestore();
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: 'pass@test.com', password: 'oldpassword',
+      });
+      const token = loginRes.body.token;
+      const realUser = await User.findOne({ email: 'pass@test.com' });
+
+      // Primera llamada → session middleware (devuelve el usuario real)
+      // Segunda llamada → controller → lanza error
+      const spy = jest.spyOn(User, 'findById')
+        .mockResolvedValueOnce(realUser)
+        .mockRejectedValueOnce(new Error('DB error on changePassword'));
+      try {
+        const res = await request(app)
+          .patch('/api/auth/change-password')
+          .set('Authorization', `Bearer ${token}`)
+          .send({ currentPassword: 'oldpassword', newPassword: 'newpassword' });
+        expect(res.statusCode).toBe(500);
+      } finally { spy.mockRestore(); }
     });
   });
 
@@ -187,79 +248,81 @@ describe('Coverage → middleware y catch blocks de controladores', () => {
       const spy = jest.spyOn(Podcast, 'find').mockImplementationOnce(() => {
         throw new Error('DB error en find');
       });
-      const res = await request(app).get('/api/podcasts');
-      expect(res.statusCode).toBe(500);
-      spy.mockRestore();
+      try {
+        const res = await request(app).get('/api/podcasts');
+        expect(res.statusCode).toBe(500);
+      } finally { spy.mockRestore(); }
     });
 
     test('500 → error en getPodcastById (línea 48)', async () => {
       const spy = jest.spyOn(Podcast, 'findById').mockImplementationOnce(() => {
         throw new Error('DB error en findById');
       });
-      const res = await request(app).get('/api/podcasts/000000000000000000000001');
-      expect(res.statusCode).toBe(500);
-      spy.mockRestore();
+      try {
+        const res = await request(app).get('/api/podcasts/000000000000000000000001');
+        expect(res.statusCode).toBe(500);
+      } finally { spy.mockRestore(); }
     });
 
     test('500 → error en createPodcast (línea 61)', async () => {
       const spy = jest.spyOn(Podcast, 'create').mockRejectedValueOnce(new Error('DB error en create'));
-      const res = await request(app)
-        .post('/api/podcasts')
-        .set('Authorization', `Bearer ${adminToken}`)
-        .send({
-          title: 'Test Podcast',
-          description: 'Descripcion valida con suficientes caracteres',
-          category: 'tech',
-          duration: 300,
-        });
-      expect(res.statusCode).toBe(500);
-      spy.mockRestore();
+      try {
+        const res = await request(app)
+          .post('/api/podcasts')
+          .set('Authorization', `Bearer ${adminToken}`)
+          .send({ title: 'Test Podcast', description: 'Descripcion valida con suficientes caracteres', category: 'tech', duration: 300 });
+        expect(res.statusCode).toBe(500);
+      } finally { spy.mockRestore(); }
     });
 
     test('500 → error en updatePodcast (línea 87)', async () => {
       const spy = jest.spyOn(Podcast, 'findById').mockImplementationOnce(() => {
         throw new Error('DB error en findById update');
       });
-      const res = await request(app)
-        .put('/api/podcasts/000000000000000000000001')
-        .set('Authorization', `Bearer ${adminToken}`)
-        .send({ title: 'Titulo actualizado valido' });
-      expect(res.statusCode).toBe(500);
-      spy.mockRestore();
+      try {
+        const res = await request(app)
+          .put('/api/podcasts/000000000000000000000001')
+          .set('Authorization', `Bearer ${adminToken}`)
+          .send({ title: 'Titulo actualizado valido' });
+        expect(res.statusCode).toBe(500);
+      } finally { spy.mockRestore(); }
     });
 
     test('500 → error en deletePodcast (línea 106)', async () => {
       const spy = jest.spyOn(Podcast, 'findByIdAndDelete').mockImplementationOnce(() => {
         throw new Error('DB error en findByIdAndDelete');
       });
-      const res = await request(app)
-        .delete('/api/podcasts/000000000000000000000001')
-        .set('Authorization', `Bearer ${adminToken}`);
-      expect(res.statusCode).toBe(500);
-      spy.mockRestore();
+      try {
+        const res = await request(app)
+          .delete('/api/podcasts/000000000000000000000001')
+          .set('Authorization', `Bearer ${adminToken}`);
+        expect(res.statusCode).toBe(500);
+      } finally { spy.mockRestore(); }
     });
 
     test('500 → error en listAllPodcastsAdmin (línea 118)', async () => {
       const spy = jest.spyOn(Podcast, 'find').mockImplementationOnce(() => {
         throw new Error('DB error en find admin');
       });
-      const res = await request(app)
-        .get('/api/podcasts/admin/all')
-        .set('Authorization', `Bearer ${adminToken}`);
-      expect(res.statusCode).toBe(500);
-      spy.mockRestore();
+      try {
+        const res = await request(app)
+          .get('/api/podcasts/admin/all')
+          .set('Authorization', `Bearer ${adminToken}`);
+        expect(res.statusCode).toBe(500);
+      } finally { spy.mockRestore(); }
     });
 
     test('500 → error en togglePublishPodcast (línea 140)', async () => {
       const spy = jest.spyOn(Podcast, 'findById').mockImplementationOnce(() => {
         throw new Error('DB error en findById publish');
       });
-      const res = await request(app)
-        .patch('/api/podcasts/000000000000000000000001/publish')
-        .set('Authorization', `Bearer ${adminToken}`)
-        .send({ published: true });
-      expect(res.statusCode).toBe(500);
-      spy.mockRestore();
+      try {
+        const res = await request(app)
+          .patch('/api/podcasts/000000000000000000000001/publish')
+          .set('Authorization', `Bearer ${adminToken}`)
+          .send({ published: true });
+        expect(res.statusCode).toBe(500);
+      } finally { spy.mockRestore(); }
     });
   });
 });
