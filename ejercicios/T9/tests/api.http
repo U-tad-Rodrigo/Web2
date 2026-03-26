@@ -1,0 +1,160 @@
+### ─── Auth ──────────────────────────────────────────────────
+
+### Registrar usuario
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Ada Lovelace",
+  "email": "ada@biblioteca.com",
+  "password": "secret123"
+}
+
+###
+
+### Login (admin del seed)
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@biblioteca.com",
+  "password": "admin1234"
+}
+
+###
+
+### Perfil propio
+GET http://localhost:3000/api/auth/me
+Authorization: Bearer {{token}}
+
+### ─── Books ──────────────────────────────────────────────────
+
+### Listar libros
+GET http://localhost:3000/api/books
+
+###
+
+### Buscar por título, autor o género
+GET http://localhost:3000/api/books?search=quijote
+
+###
+
+### Filtrar por género
+GET http://localhost:3000/api/books?genre=Novela&available=true
+
+###
+
+### Paginación
+GET http://localhost:3000/api/books?page=1&limit=5
+
+###
+
+### Obtener libro por ID
+GET http://localhost:3000/api/books/1
+
+###
+
+### Crear libro (admin)
+POST http://localhost:3000/api/books
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "title": "El Principito",
+  "author": "Antoine de Saint-Exupéry",
+  "genre": "Fábula",
+  "isbn": "978-84-261-3229-7",
+  "synopsis": "Un piloto conoce a un pequeño príncipe venido de otro planeta.",
+  "year": 1943,
+  "totalCopies": 5
+}
+
+###
+
+### Actualizar libro (admin)
+PUT http://localhost:3000/api/books/5
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "totalCopies": 10,
+  "available": true
+}
+
+###
+
+### Eliminar libro (admin)
+DELETE http://localhost:3000/api/books/5
+Authorization: Bearer {{adminToken}}
+
+### ─── Loans ──────────────────────────────────────────────────
+
+### Solicitar préstamo
+POST http://localhost:3000/api/loans
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "bookId": 1,
+  "dueDate": "2026-04-30T23:59:59.000Z"
+}
+
+###
+
+### Mis préstamos
+GET http://localhost:3000/api/loans/me
+Authorization: Bearer {{token}}
+
+###
+
+### Todos los préstamos (admin)
+GET http://localhost:3000/api/loans
+Authorization: Bearer {{adminToken}}
+
+###
+
+### Filtrar préstamos activos (admin)
+GET http://localhost:3000/api/loans?active=true
+Authorization: Bearer {{adminToken}}
+
+###
+
+### Devolver libro
+PATCH http://localhost:3000/api/loans/1/return
+Authorization: Bearer {{token}}
+
+### ─── Reviews ─────────────────────────────────────────────────
+
+### Ver reseñas de un libro
+GET http://localhost:3000/api/books/1/reviews
+
+###
+
+### Crear reseña
+POST http://localhost:3000/api/books/1/reviews
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "rating": 5,
+  "comment": "Una obra maestra de la literatura universal."
+}
+
+###
+
+### Actualizar reseña
+PUT http://localhost:3000/api/books/1/reviews/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "rating": 4,
+  "comment": "Muy buena, aunque un poco extensa."
+}
+
+###
+
+### Eliminar reseña
+DELETE http://localhost:3000/api/books/1/reviews/1
+Authorization: Bearer {{token}}
+
