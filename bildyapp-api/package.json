@@ -1,0 +1,29 @@
+{
+  "name": "bildyapp-api",
+  "version": "1.0.0",
+  "description": "BildyApp — API REST gestión de usuarios",
+  "main": "src/index.js",
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "dev": "node --watch --env-file=.env src/index.js",
+    "start": "node --env-file=.env src/index.js"
+  },
+  "author": "Rodrigo",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "express-mongo-sanitize": "^2.2.0",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.13.2",
+    "multer": "^2.0.0",
+    "zod": "^3.24.2"
+  }
+}
+
