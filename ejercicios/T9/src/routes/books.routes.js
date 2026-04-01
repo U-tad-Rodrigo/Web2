@@ -10,14 +10,11 @@ import {
 import {
   getBookReviews,
   createReview,
-  updateReview,
-  deleteReview,
 } from '../controllers/reviews.controller.js';
-import { authenticate } from '../middleware/auth.middleware.js';
-import { requireAdmin } from '../middleware/auth.middleware.js';
+import { authenticate, requireAdmin, requireLibrarianOrAdmin } from '../middleware/auth.middleware.js';
 import { validate, validateQuery } from '../middleware/validate.middleware.js';
 import { createBookSchema, updateBookSchema, bookQuerySchema } from '../schemas/book.schema.js';
-import { createReviewSchema, updateReviewSchema } from '../schemas/review.schema.js';
+import { createReviewSchema } from '../schemas/review.schema.js';
 
 const router = Router();
 
@@ -40,6 +37,7 @@ const router = Router();
  *       - in: query
  *         name: available
  *         schema: { type: boolean }
+ *         description: true = con copias disponibles
  *       - in: query
  *         name: page
  *         schema: { type: integer, default: 1 }
@@ -76,7 +74,7 @@ router.get('/:id', getBook);
  * /books:
  *   post:
  *     tags: [Books]
- *     summary: Crear un libro (admin)
+ *     summary: Crear un libro (librarian/admin)
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -89,16 +87,16 @@ router.get('/:id', getBook);
  *       201:
  *         description: Libro creado
  *       403:
- *         description: Se requiere rol ADMIN
+ *         description: Se requiere rol LIBRARIAN o ADMIN
  */
-router.post('/', authenticate, requireAdmin, validate(createBookSchema), createBook);
+router.post('/', authenticate, requireLibrarianOrAdmin, validate(createBookSchema), createBook);
 
 /**
  * @openapi
  * /books/{id}:
  *   put:
  *     tags: [Books]
- *     summary: Actualizar un libro (admin)
+ *     summary: Actualizar un libro (librarian/admin)
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -116,7 +114,7 @@ router.post('/', authenticate, requireAdmin, validate(createBookSchema), createB
  *       200:
  *         description: Libro actualizado
  */
-router.put('/:id', authenticate, requireAdmin, validate(updateBookSchema), updateBook);
+router.put('/:id', authenticate, requireLibrarianOrAdmin, validate(updateBookSchema), updateBook);
 
 /**
  * @openapi
@@ -161,7 +159,7 @@ router.get('/:bookId/reviews', getBookReviews);
  * /books/{bookId}/reviews:
  *   post:
  *     tags: [Reviews]
- *     summary: Crear una reseña (usuario autenticado)
+ *     summary: Crear una reseña (requiere préstamo devuelto)
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -178,62 +176,13 @@ router.get('/:bookId/reviews', getBookReviews);
  *     responses:
  *       201:
  *         description: Reseña creada
+ *       403:
+ *         description: No has devuelto este libro
  *       409:
  *         description: Ya existe una reseña de este usuario para el libro
  */
 router.post('/:bookId/reviews', authenticate, validate(createReviewSchema), createReview);
 
-/**
- * @openapi
- * /books/{bookId}/reviews/{id}:
- *   put:
- *     tags: [Reviews]
- *     summary: Actualizar una reseña
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: bookId
- *         required: true
- *         schema: { type: integer }
- *       - in: path
- *         name: id
- *         required: true
- *         schema: { type: integer }
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/ReviewInput'
- *     responses:
- *       200:
- *         description: Reseña actualizada
- */
-router.put('/:bookId/reviews/:id', authenticate, validate(updateReviewSchema), updateReview);
-
-/**
- * @openapi
- * /books/{bookId}/reviews/{id}:
- *   delete:
- *     tags: [Reviews]
- *     summary: Eliminar una reseña
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: bookId
- *         required: true
- *         schema: { type: integer }
- *       - in: path
- *         name: id
- *         required: true
- *         schema: { type: integer }
- *     responses:
- *       200:
- *         description: Reseña eliminada
- */
-router.delete('/:bookId/reviews/:id', authenticate, deleteReview);
-
 export default router;
+
 

@@ -1,8 +1,11 @@
 // src/controllers/loans.controller.js
 import prisma from '../config/prisma.js';
 
+const MAX_ACTIVE_LOANS = 3;
+const LOAN_DAYS = 14;
+
 /**
- * GET /api/loans/me  — préstamos del usuario autenticado
+ * GET /api/loans  — préstamos del usuario autenticado
  */
 export const getMyLoans = async (req, res, next) => {
   try {
@@ -11,7 +14,7 @@ export const getMyLoans = async (req, res, next) => {
       include: {
         book: { select: { id: true, title: true, author: true, isbn: true } },
       },
-      orderBy: { loanedAt: 'desc' },
+      orderBy: { loanDate: 'desc' },
     });
     res.json({ data: loans });
   } catch (err) {
@@ -20,12 +23,12 @@ export const getMyLoans = async (req, res, next) => {
 };
 
 /**
- * GET /api/loans  — todos los préstamos (admin)
+ * GET /api/loans/all  — todos los préstamos (librarian/admin)
  */
 export const getAllLoans = async (req, res, next) => {
   try {
-    const { active } = req.query;
-    const where = active !== undefined ? { active: active === 'true' } : {};
+    const { status } = req.query;
+    const where = status ? { status } : {};
 
     const loans = await prisma.loan.findMany({
       where,
@@ -33,7 +36,7 @@ export const getAllLoans = async (req, res, next) => {
         user: { select: { id: true, name: true, email: true } },
         book: { select: { id: true, title: true, author: true, isbn: true } },
       },
-      orderBy: { loanedAt: 'desc' },
+      orderBy: { loanDate: 'desc' },
     });
     res.json({ data: loans });
   } catch (err) {
@@ -46,43 +49,57 @@ export const getAllLoans = async (req, res, next) => {
  */
 export const createLoan = async (req, res, next) => {
   try {
-    const { bookId, dueDate } = req.body;
+    const { bookId } = req.body;
 
-    // 1. Verificar que el libro existe y está disponible
+    // 1. Verificar que el libro existe y tiene ejemplares disponibles
     const book = await prisma.book.findUnique({ where: { id: bookId } });
     if (!book) {
       return res.status(404).json({ error: true, message: 'Libro no encontrado' });
     }
-    if (!book.available) {
-      return res.status(409).json({ error: true, message: 'El libro no está disponible' });
+    if (book.available <= 0) {
+      return res.status(409).json({ error: true, message: 'No hay ejemplares disponibles' });
     }
 
-    // 2. Verificar que el usuario no tiene ya este libro prestado
+    // 2. Máximo 3 préstamos activos por usuario
+    const activeCount = await prisma.loan.count({
+      where: { userId: req.user.id, status: 'ACTIVE' },
+    });
+    if (activeCount >= MAX_ACTIVE_LOANS) {
+      return res.status(409).json({
+        error: true,
+        message: `No puedes tener más de ${MAX_ACTIVE_LOANS} préstamos activos simultáneos`,
+      });
+    }
+
+    // 3. No puede pedir el mismo libro dos veces (ya activo)
     const existingLoan = await prisma.loan.findFirst({
-      where: { userId: req.user.id, bookId, active: true },
+      where: { userId: req.user.id, bookId, status: 'ACTIVE' },
     });
     if (existingLoan) {
       return res.status(409).json({ error: true, message: 'Ya tienes este libro en préstamo' });
     }
 
-    // 3. Crear el préstamo y actualizar disponibilidad en transacción
+    // 4. Duración del préstamo: 14 días
+    const dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + LOAN_DAYS);
+
+    // 5. Crear préstamo y decrementar available en transacción
     const loan = await prisma.$transaction(async (tx) => {
       const newLoan = await tx.loan.create({
         data: {
           userId: req.user.id,
           bookId,
-          dueDate: new Date(dueDate),
+          dueDate,
         },
         include: {
           book: { select: { id: true, title: true, author: true } },
         },
       });
 
-      // Si no quedan copias disponibles, marcar como no disponible
-      const activeLoans = await tx.loan.count({ where: { bookId, active: true } });
-      if (activeLoans >= book.totalCopies) {
-        await tx.book.update({ where: { id: bookId }, data: { available: false } });
-      }
+      await tx.book.update({
+        where: { id: bookId },
+        data: { available: { decrement: 1 } },
+      });
 
       return newLoan;
     });
@@ -94,7 +111,7 @@ export const createLoan = async (req, res, next) => {
 };
 
 /**
- * PATCH /api/loans/:id/return  — devolver préstamo
+ * PUT /api/loans/:id/return  — devolver libro
  */
 export const returnLoan = async (req, res, next) => {
   try {
@@ -105,24 +122,27 @@ export const returnLoan = async (req, res, next) => {
       return res.status(404).json({ error: true, message: 'Préstamo no encontrado' });
     }
 
-    // Solo el dueño o admin puede devolver
-    if (loan.userId !== req.user.id && req.user.role !== 'ADMIN') {
+    // Solo el dueño o librarian/admin puede devolver
+    if (loan.userId !== req.user.id && req.user.role !== 'LIBRARIAN' && req.user.role !== 'ADMIN') {
       return res.status(403).json({ error: true, message: 'No tienes permisos para devolver este préstamo' });
     }
 
-    if (!loan.active) {
+    if (loan.status === 'RETURNED') {
       return res.status(409).json({ error: true, message: 'El préstamo ya fue devuelto' });
     }
 
     const updated = await prisma.$transaction(async (tx) => {
       const returned = await tx.loan.update({
         where: { id: loanId },
-        data: { active: false, returnedAt: new Date() },
+        data: { status: 'RETURNED', returnDate: new Date() },
         include: { book: { select: { id: true, title: true } } },
       });
 
-      // Restaurar disponibilidad del libro
-      await tx.book.update({ where: { id: loan.bookId }, data: { available: true } });
+      // Incrementar available del libro
+      await tx.book.update({
+        where: { id: loan.bookId },
+        data: { available: { increment: 1 } },
+      });
 
       return returned;
     });
@@ -132,4 +152,5 @@ export const returnLoan = async (req, res, next) => {
     next(err);
   }
 };
+
 

@@ -24,17 +24,17 @@ model User {
 }
 
 model Book {
-  id          Int      @id @default(autoincrement())
-  title       String
-  author      String
-  genre       String
-  isbn        String   @unique
-  synopsis    String?  @db.Text
-  year        Int?
-  totalCopies Int      @default(1)
-  available   Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            Int      @id @default(autoincrement())
+  title         String
+  author        String
+  genre         String
+  isbn          String   @unique
+  description   String?  @db.Text
+  publishedYear Int?
+  copies        Int      @default(1)
+  available     Int      @default(1)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   loans   Loan[]
   reviews Review[]
@@ -46,11 +46,11 @@ model Book {
 }
 
 model Loan {
-  id         Int       @id @default(autoincrement())
-  loanedAt   DateTime  @default(now())
+  id         Int        @id @default(autoincrement())
+  loanDate   DateTime   @default(now())
   dueDate    DateTime
-  returnedAt DateTime?
-  active     Boolean   @default(true)
+  returnDate DateTime?
+  status     LoanStatus @default(ACTIVE)
 
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId Int
@@ -80,6 +80,13 @@ model Review {
 
 enum Role {
   USER
+  LIBRARIAN
   ADMIN
+}
+
+enum LoanStatus {
+  ACTIVE
+  RETURNED
+  OVERDUE
 }
 

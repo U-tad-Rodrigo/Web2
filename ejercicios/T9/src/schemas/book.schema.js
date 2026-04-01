@@ -5,9 +5,9 @@ export const createBookSchema = z.object({
   author: z.string().min(1, 'El autor es requerido'),
   genre: z.string().min(1, 'El género es requerido'),
   isbn: z.string().min(1, 'El ISBN es requerido'),
-  synopsis: z.string().optional(),
-  year: z.number().int().min(1000).max(new Date().getFullYear()).optional(),
-  totalCopies: z.number().int().min(1).default(1),
+  description: z.string().optional(),
+  publishedYear: z.number().int().min(1000).max(new Date().getFullYear()).optional(),
+  copies: z.number().int().min(1).default(1),
 });
 
 export const updateBookSchema = createBookSchema.partial();

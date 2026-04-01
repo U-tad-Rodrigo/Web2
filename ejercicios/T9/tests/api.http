@@ -12,7 +12,7 @@ Content-Type: application/json
 
 ###
 
-### Login (admin del seed)
+### Login admin
 POST http://localhost:3000/api/auth/login
 Content-Type: application/json
 
@@ -23,9 +23,155 @@ Content-Type: application/json
 
 ###
 
+### Login bibliotecario (LIBRARIAN)
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "bibliotecario@biblioteca.com",
+  "password": "librarian1234"
+}
+
+###
+
+### Login lector (USER)
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "lector@biblioteca.com",
+  "password": "user1234"
+}
+
+###
+
 ### Perfil propio
 GET http://localhost:3000/api/auth/me
 Authorization: Bearer {{token}}
+
+### ─── Books ──────────────────────────────────────────────────
+
+### Listar libros
+GET http://localhost:3000/api/books
+
+###
+
+### Buscar por título, autor o género
+GET http://localhost:3000/api/books?search=quijote
+
+###
+
+### Filtrar por género y disponibilidad
+GET http://localhost:3000/api/books?genre=Novela&available=true
+
+###
+
+### Paginación
+GET http://localhost:3000/api/books?page=1&limit=5
+
+###
+
+### Obtener libro por ID
+GET http://localhost:3000/api/books/1
+
+###
+
+### Crear libro (librarian o admin)
+POST http://localhost:3000/api/books
+Content-Type: application/json
+Authorization: Bearer {{librarianToken}}
+
+{
+  "title": "El Principito",
+  "author": "Antoine de Saint-Exupéry",
+  "genre": "Fábula",
+  "isbn": "978-84-261-3229-7",
+  "description": "Un piloto conoce a un pequeño príncipe venido de otro planeta.",
+  "publishedYear": 1943,
+  "copies": 5
+}
+
+###
+
+### Actualizar libro (librarian o admin)
+PUT http://localhost:3000/api/books/5
+Content-Type: application/json
+Authorization: Bearer {{librarianToken}}
+
+{
+  "copies": 10,
+  "available": 8
+}
+
+###
+
+### Eliminar libro (solo admin)
+DELETE http://localhost:3000/api/books/5
+Authorization: Bearer {{adminToken}}
+
+### ─── Loans ──────────────────────────────────────────────────
+
+### Solicitar préstamo (dueDate = automático, 14 días)
+POST http://localhost:3000/api/loans
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "bookId": 1
+}
+
+###
+
+### Mis préstamos
+GET http://localhost:3000/api/loans
+Authorization: Bearer {{token}}
+
+###
+
+### Todos los préstamos (librarian/admin)
+GET http://localhost:3000/api/loans/all
+Authorization: Bearer {{adminToken}}
+
+###
+
+### Filtrar préstamos por estado (ACTIVE | RETURNED | OVERDUE)
+GET http://localhost:3000/api/loans/all?status=ACTIVE
+Authorization: Bearer {{adminToken}}
+
+###
+
+### Devolver libro
+PUT http://localhost:3000/api/loans/1/return
+Authorization: Bearer {{token}}
+
+### ─── Reviews ─────────────────────────────────────────────────
+
+### Ver reseñas de un libro
+GET http://localhost:3000/api/books/1/reviews
+
+###
+
+### Crear reseña (requiere haber devuelto el libro)
+POST http://localhost:3000/api/books/1/reviews
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "rating": 5,
+  "comment": "Una obra maestra de la literatura universal."
+}
+
+###
+
+### Eliminar mi reseña
+DELETE http://localhost:3000/api/reviews/1
+Authorization: Bearer {{token}}
+
+### ─── Health ──────────────────────────────────────────────────
+
+### Health check
+GET http://localhost:3000/health
+
 
 ### ─── Books ──────────────────────────────────────────────────
 

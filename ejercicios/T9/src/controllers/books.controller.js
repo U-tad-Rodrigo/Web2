@@ -10,7 +10,8 @@ export const getBooks = async (req, res, next) => {
     const skip = (page - 1) * limit;
 
     const where = {
-      ...(available !== undefined && { available }),
+      ...(available === true && { available: { gt: 0 } }),
+      ...(available === false && { available: 0 }),
       ...(genre && { genre: { contains: genre, mode: 'insensitive' } }),
       ...(search && {
         OR: [
@@ -68,7 +69,6 @@ export const getBook = async (req, res, next) => {
       return res.status(404).json({ error: true, message: 'Libro no encontrado' });
     }
 
-    // Calcular puntuación media
     const avgRating =
       book.reviews.length
         ? book.reviews.reduce((acc, r) => acc + r.rating, 0) / book.reviews.length
@@ -81,11 +81,23 @@ export const getBook = async (req, res, next) => {
 };
 
 /**
- * POST /api/books  (admin)
+ * POST /api/books  (librarian/admin)
  */
 export const createBook = async (req, res, next) => {
   try {
-    const book = await prisma.book.create({ data: req.body });
+    const { title, author, genre, isbn, description, publishedYear, copies } = req.body;
+    const book = await prisma.book.create({
+      data: {
+        title,
+        author,
+        genre,
+        isbn,
+        description,
+        publishedYear,
+        copies: copies ?? 1,
+        available: copies ?? 1,
+      },
+    });
     res.status(201).json({ data: book });
   } catch (err) {
     next(err);
@@ -93,13 +105,23 @@ export const createBook = async (req, res, next) => {
 };
 
 /**
- * PUT /api/books/:id  (admin)
+ * PUT /api/books/:id  (librarian/admin)
  */
 export const updateBook = async (req, res, next) => {
   try {
+    const { title, author, genre, isbn, description, publishedYear, copies, available } = req.body;
     const book = await prisma.book.update({
       where: { id: Number(req.params.id) },
-      data: req.body,
+      data: {
+        ...(title !== undefined && { title }),
+        ...(author !== undefined && { author }),
+        ...(genre !== undefined && { genre }),
+        ...(isbn !== undefined && { isbn }),
+        ...(description !== undefined && { description }),
+        ...(publishedYear !== undefined && { publishedYear }),
+        ...(copies !== undefined && { copies }),
+        ...(available !== undefined && { available }),
+      },
     });
     res.json({ data: book });
   } catch (err) {
@@ -118,4 +140,5 @@ export const deleteBook = async (req, res, next) => {
     next(err);
   }
 };
+
 

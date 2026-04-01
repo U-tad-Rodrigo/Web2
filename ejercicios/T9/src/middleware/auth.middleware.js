@@ -28,3 +28,10 @@ export const requireAdmin = (req, res, next) => {
   next();
 };
 
+export const requireLibrarianOrAdmin = (req, res, next) => {
+  if (req.user?.role !== 'LIBRARIAN' && req.user?.role !== 'ADMIN') {
+    return res.status(403).json({ error: true, message: 'Acceso denegado: se requiere rol LIBRARIAN o ADMIN' });
+  }
+  next();
+};
+
