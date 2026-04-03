@@ -59,8 +59,6 @@ const companySchema = new Schema(
   }
 );
 
-// ── Index único sobre CIF (excluye eliminados para permitir reutilización) ─────
-companySchema.index({ cif: 1 }, { unique: true });
 
 // ── Soft delete helper ────────────────────────────────────────────────────────
 companySchema.methods.softDelete = async function () {

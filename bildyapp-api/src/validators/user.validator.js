@@ -50,24 +50,31 @@ export const personalDataSchema = z.object({
 
 // ── 4b) Onboarding: datos de compañía ────────────────────────────────────────
 // Bonus: discriminatedUnion según isFreelance
-const companyBase = z.object({
-  name:    z.string().trim().min(1, 'El nombre de la empresa es obligatorio'),
-  cif:     z.string().trim().min(1, 'El CIF es obligatorio').transform((v) => v.toUpperCase()),
-  address: addressSchema
+
+// Autónomo: name/cif/address son opcionales — se heredan del perfil del usuario
+const freelanceCompany = z.object({
+  isFreelance: z.literal(true),
+  name:        z.string().trim().optional(),
+  cif:         z.string().trim().optional(),
+  address:     addressSchema
 });
 
-const freelanceCompany = companyBase.extend({
-  isFreelance: z.literal(true)
+// Empresa regular: name y cif son obligatorios
+const regularCompany = z.object({
+  isFreelance: z.literal(false),
+  name:        z.string().trim().min(1, 'El nombre de la empresa es obligatorio'),
+  cif:         z.string().trim().min(1, 'El CIF es obligatorio').transform((v) => v.toUpperCase()),
+  address:     addressSchema
 });
 
-const regularCompany = companyBase.extend({
-  isFreelance: z.literal(false).default(false)
-});
-
-export const companySchema = z.discriminatedUnion('isFreelance', [
-  freelanceCompany,
-  regularCompany
-]);
+// z.preprocess inyecta isFreelance:false si no viene en el body
+export const companySchema = z.preprocess(
+  (data) => ({
+    isFreelance: false,
+    ...(typeof data === 'object' && data !== null ? data : {})
+  }),
+  z.discriminatedUnion('isFreelance', [freelanceCompany, regularCompany])
+);
 
 // ── 5) Logo — validado en middleware Multer, no necesita esquema Zod ──────────
 

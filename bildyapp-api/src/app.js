@@ -3,7 +3,12 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { sanitize as mongoSanitize } from 'express-mongo-sanitize';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { notFound, errorHandler } from './middleware/error-handler.js';
+import userRoutes from './routes/user.routes.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 
@@ -33,17 +38,19 @@ app.use((req, _res, next) => {
   next();
 });
 
+// ── Archivos estáticos — logos subidos con Multer ─────────────────────────────
+app.use('/uploads', express.static(path.resolve(__dirname, '../uploads')));
+
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// ── Rutas API (se añadirán en fases posteriores) ──────────────────────────────
-// app.use('/api/user', userRoutes);
+// ── Rutas API ─────────────────────────────────────────────────────────────────
+app.use('/api/user', userRoutes);
 
 // ── Manejo de errores ─────────────────────────────────────────────────────────
 app.use(notFound);
 app.use(errorHandler);
 
 export default app;
-
