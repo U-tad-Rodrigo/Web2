@@ -1,9 +1,11 @@
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import { fileURLToPath } from 'url';
 
-// ── Carpeta de destino ────────────────────────────────────────────────────────
-const UPLOADS_DIR = 'uploads';
+// ── Ruta absoluta a uploads/ (independiente de process.cwd()) ────────────────
+const __dirname   = path.dirname(fileURLToPath(import.meta.url));
+const UPLOADS_DIR = path.resolve(__dirname, '../../uploads');
 
 // Crea la carpeta si no existe (sincrono al inicio, no en cada petición)
 if (!fs.existsSync(UPLOADS_DIR)) {

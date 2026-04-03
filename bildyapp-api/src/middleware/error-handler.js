@@ -13,7 +13,7 @@ export const notFound = (req, res) => {
 // ── Middleware centralizado (4 parámetros obligatorios en Express) ─────────────
 // eslint-disable-next-line no-unused-vars
 export const errorHandler = (err, req, res, _next) => {
-  console.error(`❌ [${err.name}] ${err.message}`);
+  console.error(`[ERROR] [${err.name}] ${err.message}`);
 
   // ── AppError (errores controlados) ────────────────────────────────────────
   if (err instanceof AppError) {
@@ -62,4 +62,3 @@ export const errorHandler = (err, req, res, _next) => {
     message: process.env.NODE_ENV === 'production' ? 'Error interno del servidor' : err.message
   });
 };
-

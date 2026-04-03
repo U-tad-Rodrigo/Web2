@@ -15,6 +15,10 @@ export const authenticate = async (req, _res, next) => {
     }
 
     const token = authHeader.split(' ')[1];
+
+    if (!token) {
+      return next(AppError.unauthorized('Token no proporcionado'));
+    }
     const secret = process.env.JWT_SECRET;
 
     if (!secret) return next(AppError.internal('JWT_SECRET no configurado'));

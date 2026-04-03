@@ -14,20 +14,20 @@ class NotificationService extends EventEmitter {
 
   _registerListeners() {
     this.on('user:registered', ({ email }) => {
-      console.log(`📧 [user:registered] Nuevo usuario registrado: ${email}`);
+      console.log(`[user:registered] Nuevo usuario registrado: ${email}`);
     });
 
     this.on('user:verified', ({ email }) => {
-      console.log(`✅ [user:verified] Email verificado: ${email}`);
+      console.log(`[user:verified] Email verificado: ${email}`);
     });
 
     this.on('user:invited', ({ email, invitedBy }) => {
-      console.log(`📨 [user:invited] ${invitedBy} invitó a: ${email}`);
+      console.log(`[user:invited] ${invitedBy} invito a: ${email}`);
     });
 
     this.on('user:deleted', ({ email, soft }) => {
       const type = soft ? 'soft' : 'hard';
-      console.log(`🗑️  [user:deleted] Usuario eliminado (${type}): ${email}`);
+      console.log(`[user:deleted] Usuario eliminado (${type}): ${email}`);
     });
   }
 }
