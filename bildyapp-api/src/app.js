@@ -15,15 +15,18 @@ const app = express();
 // ── Seguridad ─────────────────────────────────────────────────────────────────
 app.use(helmet());
 
-app.use(
-  rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 min
-    max: 100,
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: { error: true, code: 'RATE_LIMIT', message: 'Demasiadas peticiones, inténtalo más tarde' }
-  })
-);
+// Rate limiter — se evalua en cada peticion para que los tests puedan desactivarlo
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 min
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: true, code: 'RATE_LIMIT', message: 'Demasiadas peticiones, intentalo mas tarde' }
+});
+app.use((req, res, next) => {
+  if (process.env.NODE_ENV === 'test') return next();
+  return limiter(req, res, next);
+});
 
 // ── CORS ──────────────────────────────────────────────────────────────────────
 app.use(cors());
