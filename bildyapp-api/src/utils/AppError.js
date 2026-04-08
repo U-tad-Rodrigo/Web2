@@ -35,6 +35,12 @@ export class AppError extends Error {
     return new AppError(message, 409, code);
   }
 
+  static validation(message = 'Error de validación', details = []) {
+    const err = new AppError(message, 422, 'VALIDATION_ERROR');
+    err.details = details;
+    return err;
+  }
+
   static tooManyRequests(message, code = 'TOO_MANY_REQUESTS') {
     return new AppError(message, 429, code);
   }

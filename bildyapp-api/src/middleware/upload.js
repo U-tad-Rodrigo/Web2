@@ -1,7 +1,7 @@
 import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
-import { fileURLToPath } from 'url';
+import path from 'node:path';
+import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
 // ── Ruta absoluta a uploads/ (independiente de process.cwd()) ────────────────
 const __dirname   = path.dirname(fileURLToPath(import.meta.url));
