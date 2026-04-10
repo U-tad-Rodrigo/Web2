@@ -351,6 +351,8 @@
 
     let socket = null;
     let currentRoomId = null;
+    let currentRoom = null;
+    let roomUsers = new Map();
     let typingClearTimeout = null;
     const onlineUsers = new Map();
 
@@ -378,15 +380,22 @@
       });
 
       socket.on('room:joined', ({ room, messages, users }) => {
+        currentRoom = room;
+        roomUsers.clear();
+        users.forEach((u) => roomUsers.set(String(u._id), u));
         renderMessages(messages);
-        updateChatHeader(room, users);
+        updateChatHeader(room, [...roomUsers.values()]);
       });
 
       socket.on('room:user-joined', ({ user: u }) => {
+        roomUsers.set(String(u._id), u);
+        if (currentRoom) updateChatHeader(currentRoom, [...roomUsers.values()]);
         appendSystemMsg(u.username + ' se unió a la sala');
       });
 
       socket.on('room:user-left', ({ user: u }) => {
+        roomUsers.delete(String(u._id));
+        if (currentRoom) updateChatHeader(currentRoom, [...roomUsers.values()]);
         appendSystemMsg(u.username + ' salió de la sala');
       });
 
@@ -440,6 +449,8 @@
       if (currentRoomId) socket.emit('room:leave', { roomId: currentRoomId });
 
       currentRoomId = roomId;
+      currentRoom = null;
+      roomUsers.clear();
 
       document.querySelectorAll('.room-item').forEach((el) => {
         el.classList.toggle('active', el.dataset.id === roomId);
