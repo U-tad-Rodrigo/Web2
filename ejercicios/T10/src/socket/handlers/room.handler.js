@@ -5,6 +5,8 @@ export const registerRoomHandlers = (io, socket, onlineUsers) => {
   // room:join
   socket.on('room:join', async ({ roomId }) => {
     try {
+      if (socket.rooms.has(roomId)) return;
+
       const room = await Room.findById(roomId);
       if (!room) return socket.emit('error', { message: 'Sala no encontrada' });
 
@@ -16,10 +18,11 @@ export const registerRoomHandlers = (io, socket, onlineUsers) => {
         .sort({ createdAt: 1 })
         .limit(50);
 
-      // Usuarios online en esta sala
+      // Usuarios online en esta sala (deduplicados por userId)
       const socketsInRoom = await io.in(roomId).fetchSockets();
-      const usersInRoom = socketsInRoom
-        .map((s) => onlineUsers.get(s.id))
+      const userIdsInRoom = [...new Set(socketsInRoom.map((s) => String(s.user._id)))];
+      const usersInRoom = userIdsInRoom
+        .map((id) => onlineUsers.get(id))
         .filter(Boolean);
 
       socket.emit('room:joined', { room, messages, users: usersInRoom });
@@ -35,9 +38,13 @@ export const registerRoomHandlers = (io, socket, onlineUsers) => {
 
   // room:leave
   socket.on('room:leave', ({ roomId }) => {
-    socket.leave(roomId);
-    socket.to(roomId).emit('room:user-left', {
-      user: { _id: socket.user._id, username: socket.user.username },
-    });
+    try {
+      socket.leave(roomId);
+      socket.to(roomId).emit('room:user-left', {
+        user: { _id: socket.user._id, username: socket.user.username },
+      });
+    } catch (err) {
+      socket.emit('error', { message: err.message });
+    }
   });
 };

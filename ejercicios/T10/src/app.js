@@ -28,6 +28,8 @@ app.get('/health', (_req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/rooms', roomsRoutes);
 
+setupSocket(io);
+
 // 404
 app.use((req, res) => {
   res.status(404).json({ error: true, message: `Ruta no encontrada: ${req.originalUrl}` });
@@ -38,7 +40,5 @@ app.use((err, _req, res, _next) => {
   const status = err.status || 500;
   res.status(status).json({ error: true, message: err.message || 'Error interno del servidor' });
 });
-
-setupSocket(io);
 
 export { app, httpServer };

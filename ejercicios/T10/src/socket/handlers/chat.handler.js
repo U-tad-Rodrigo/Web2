@@ -5,6 +5,7 @@ export const registerChatHandlers = (io, socket) => {
   socket.on('chat:message', async ({ roomId, content }) => {
     try {
       if (!roomId || !content?.trim()) return;
+      if (!socket.rooms.has(roomId)) return socket.emit('error', { message: 'No estás en esa sala' });
 
       const message = await Message.create({
         room: roomId,
@@ -18,7 +19,7 @@ export const registerChatHandlers = (io, socket) => {
         _id: message._id,
         content: message.content,
         user: message.user,
-        createdAt: message.createdAt,
+        timestamp: message.createdAt,
       });
     } catch (err) {
       socket.emit('error', { message: err.message });
@@ -27,7 +28,7 @@ export const registerChatHandlers = (io, socket) => {
 
   // chat:typing
   socket.on('chat:typing', ({ roomId }) => {
-    if (!roomId) return;
+    if (!roomId || !socket.rooms.has(roomId)) return;
     socket.to(roomId).emit('chat:typing', {
       user: { _id: socket.user._id, username: socket.user.username },
     });

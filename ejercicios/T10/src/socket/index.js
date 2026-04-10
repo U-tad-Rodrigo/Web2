@@ -3,7 +3,7 @@ import User from '../models/user.model.js';
 import { registerRoomHandlers } from './handlers/room.handler.js';
 import { registerChatHandlers } from './handlers/chat.handler.js';
 
-// socketId -> { _id, username }
+// userId (string) -> { _id, username, connections }
 const onlineUsers = new Map();
 
 export const setupSocket = (io) => {
@@ -23,16 +23,21 @@ export const setupSocket = (io) => {
   });
 
   io.on('connection', (socket) => {
-    const { _id, username } = socket.user;
+    const userId = String(socket.user._id);
+    const { username } = socket.user;
+    const isFirstConnection = !onlineUsers.has(userId);
 
-    // Registrar usuario online
-    onlineUsers.set(socket.id, { _id, username });
+    // Enviar lista actual ANTES de registrar, para no aparecer en la propia lista
+    socket.emit('users:online', Array.from(onlineUsers.values()).map(({ _id, username: u }) => ({ _id, username: u })));
 
-    // Notificar a todos que este usuario se conectó
-    socket.broadcast.emit('user:online', { userId: _id, username });
+    // Registrar — clave por userId evita duplicados por múltiples pestañas
+    const connections = (onlineUsers.get(userId)?.connections ?? 0) + 1;
+    onlineUsers.set(userId, { _id: userId, username, connections });
 
-    // Enviar lista de usuarios online al nuevo socket
-    socket.emit('users:online', Array.from(onlineUsers.values()));
+    // Notificar solo en la primera conexión del usuario
+    if (isFirstConnection) {
+      socket.broadcast.emit('user:online', { userId, username });
+    }
 
     // Registrar handlers de sala y chat
     registerRoomHandlers(io, socket, onlineUsers);
@@ -40,8 +45,14 @@ export const setupSocket = (io) => {
 
     // Desconexión
     socket.on('disconnect', () => {
-      onlineUsers.delete(socket.id);
-      socket.broadcast.emit('user:offline', { userId: _id, username });
+      const entry = onlineUsers.get(userId);
+      if (!entry) return;
+      if (entry.connections <= 1) {
+        onlineUsers.delete(userId);
+        socket.broadcast.emit('user:offline', { userId, username });
+      } else {
+        onlineUsers.set(userId, { ...entry, connections: entry.connections - 1 });
+      }
     });
   });
 };
