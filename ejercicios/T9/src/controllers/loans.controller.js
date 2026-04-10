@@ -127,11 +127,15 @@ export const returnLoan = async (req, res, next) => {
       return res.status(403).json({ error: true, message: 'No tienes permisos para devolver este préstamo' });
     }
 
-    if (loan.status === 'RETURNED') {
-      return res.status(409).json({ error: true, message: 'El préstamo ya fue devuelto' });
-    }
-
     const updated = await prisma.$transaction(async (tx) => {
+      // Re-leer el préstamo dentro de la transacción para evitar race condition
+      const current = await tx.loan.findUnique({ where: { id: loanId } });
+      if (current.status === 'RETURNED') {
+        const err = new Error('El préstamo ya fue devuelto');
+        err.status = 409;
+        throw err;
+      }
+
       const returned = await tx.loan.update({
         where: { id: loanId },
         data: { status: 'RETURNED', returnDate: new Date() },
