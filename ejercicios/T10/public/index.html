@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ChatApp — Acceso</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card {
+      background: #1a1d27;
+      border: 1px solid #2d3148;
+      border-radius: 12px;
+      padding: 40px;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #f8fafc;
+    }
+
+    .subtitle {
+      font-size: 0.875rem;
+      color: #94a3b8;
+      margin-bottom: 28px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: #0f1117;
+      border-radius: 8px;
+      padding: 4px;
+      margin-bottom: 24px;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 8px;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: #94a3b8;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .tab.active {
+      background: #2d3148;
+      color: #f8fafc;
+      font-weight: 600;
+    }
+
+    .form { display: none; flex-direction: column; gap: 16px; }
+    .form.active { display: flex; }
+
+    label {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      font-weight: 500;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px 14px;
+      background: #0f1117;
+      border: 1px solid #2d3148;
+      border-radius: 8px;
+      color: #f8fafc;
+      font-size: 0.9rem;
+      transition: border-color 0.15s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #6366f1;
+    }
+
+    button[type="submit"] {
+      padding: 10px;
+      background: #6366f1;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    button[type="submit"]:hover { background: #4f46e5; }
+    button[type="submit"]:disabled { background: #3d3f6b; cursor: not-allowed; }
+
+    .alert {
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      display: none;
+    }
+
+    .alert.error { background: #3b1a1a; color: #f87171; border: 1px solid #7f1d1d; display: block; }
+    .alert.success { background: #1a3b2a; color: #4ade80; border: 1px solid #14532d; display: block; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>ChatApp</h1>
+    <p class="subtitle">Comunicación en tiempo real</p>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('login')">Iniciar sesión</button>
+      <button class="tab" onclick="switchTab('register')">Registrarse</button>
+    </div>
+
+    <div id="alert" class="alert"></div>
+
+    <!-- Login -->
+    <form id="loginForm" class="form active" onsubmit="handleLogin(event)">
+      <div>
+        <label>Email</label>
+        <input type="email" id="loginEmail" required placeholder="tu@email.com" />
+      </div>
+      <div>
+        <label>Contraseña</label>
+        <input type="password" id="loginPassword" required placeholder="••••••••" />
+      </div>
+      <button type="submit" id="loginBtn">Entrar</button>
+    </form>
+
+    <!-- Register -->
+    <form id="registerForm" class="form" onsubmit="handleRegister(event)">
+      <div>
+        <label>Username</label>
+        <input type="text" id="regUsername" required placeholder="usuario123" minlength="3" />
+      </div>
+      <div>
+        <label>Email</label>
+        <input type="email" id="regEmail" required placeholder="tu@email.com" />
+      </div>
+      <div>
+        <label>Contraseña</label>
+        <input type="password" id="regPassword" required placeholder="••••••••" minlength="6" />
+      </div>
+      <button type="submit" id="registerBtn">Crear cuenta</button>
+    </form>
+  </div>
+
+  <script>
+    // Redirigir si ya está autenticado
+    if (localStorage.getItem('token')) window.location.href = '/chat.html';
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach((t, i) => {
+        t.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'register'));
+      });
+      document.getElementById('loginForm').classList.toggle('active', tab === 'login');
+      document.getElementById('registerForm').classList.toggle('active', tab === 'register');
+      hideAlert();
+    }
+
+    function showAlert(msg, type = 'error') {
+      const el = document.getElementById('alert');
+      el.textContent = msg;
+      el.className = `alert ${type}`;
+    }
+
+    function hideAlert() {
+      document.getElementById('alert').className = 'alert';
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const btn = document.getElementById('loginBtn');
+      btn.disabled = true;
+      btn.textContent = 'Entrando...';
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: document.getElementById('loginEmail').value,
+            password: document.getElementById('loginPassword').value,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message);
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        window.location.href = '/chat.html';
+      } catch (err) {
+        showAlert(err.message);
+        btn.disabled = false;
+        btn.textContent = 'Entrar';
+      }
+    }
+
+    async function handleRegister(e) {
+      e.preventDefault();
+      const btn = document.getElementById('registerBtn');
+      btn.disabled = true;
+      btn.textContent = 'Creando cuenta...';
+      try {
+        const res = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: document.getElementById('regUsername').value,
+            email: document.getElementById('regEmail').value,
+            password: document.getElementById('regPassword').value,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message);
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        window.location.href = '/chat.html';
+      } catch (err) {
+        showAlert(err.message);
+        btn.disabled = false;
+        btn.textContent = 'Crear cuenta';
+      }
+    }
+  </script>
+</body>
+</html>

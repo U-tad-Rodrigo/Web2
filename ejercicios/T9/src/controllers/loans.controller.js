@@ -51,49 +51,44 @@ export const createLoan = async (req, res, next) => {
   try {
     const { bookId } = req.body;
 
-    // 1. Verificar que el libro existe y tiene ejemplares disponibles
-    const book = await prisma.book.findUnique({ where: { id: bookId } });
-    if (!book) {
-      return res.status(404).json({ error: true, message: 'Libro no encontrado' });
-    }
-    if (book.available <= 0) {
-      return res.status(409).json({ error: true, message: 'No hay ejemplares disponibles' });
-    }
-
-    // 2. Máximo 3 préstamos activos por usuario
-    const activeCount = await prisma.loan.count({
-      where: { userId: req.user.id, status: 'ACTIVE' },
-    });
-    if (activeCount >= MAX_ACTIVE_LOANS) {
-      return res.status(409).json({
-        error: true,
-        message: `No puedes tener más de ${MAX_ACTIVE_LOANS} préstamos activos simultáneos`,
-      });
-    }
-
-    // 3. No puede pedir el mismo libro dos veces (ya activo)
-    const existingLoan = await prisma.loan.findFirst({
-      where: { userId: req.user.id, bookId, status: 'ACTIVE' },
-    });
-    if (existingLoan) {
-      return res.status(409).json({ error: true, message: 'Ya tienes este libro en préstamo' });
-    }
-
-    // 4. Duración del préstamo: 14 días
     const dueDate = new Date();
     dueDate.setDate(dueDate.getDate() + LOAN_DAYS);
 
-    // 5. Crear préstamo y decrementar available en transacción
+    // Todas las comprobaciones y la creación en una sola transacción (evita TOCTOU)
     const loan = await prisma.$transaction(async (tx) => {
+      const book = await tx.book.findUnique({ where: { id: bookId } });
+      if (!book) {
+        const err = new Error('Libro no encontrado');
+        err.status = 404;
+        throw err;
+      }
+      if (book.available <= 0) {
+        const err = new Error('No hay ejemplares disponibles');
+        err.status = 409;
+        throw err;
+      }
+
+      const activeCount = await tx.loan.count({
+        where: { userId: req.user.id, status: 'ACTIVE' },
+      });
+      if (activeCount >= MAX_ACTIVE_LOANS) {
+        const err = new Error(`No puedes tener más de ${MAX_ACTIVE_LOANS} préstamos activos simultáneos`);
+        err.status = 409;
+        throw err;
+      }
+
+      const existingLoan = await tx.loan.findFirst({
+        where: { userId: req.user.id, bookId, status: 'ACTIVE' },
+      });
+      if (existingLoan) {
+        const err = new Error('Ya tienes este libro en préstamo');
+        err.status = 409;
+        throw err;
+      }
+
       const newLoan = await tx.loan.create({
-        data: {
-          userId: req.user.id,
-          bookId,
-          dueDate,
-        },
-        include: {
-          book: { select: { id: true, title: true, author: true } },
-        },
+        data: { userId: req.user.id, bookId, dueDate },
+        include: { book: { select: { id: true, title: true, author: true } } },
       });
 
       await tx.book.update({

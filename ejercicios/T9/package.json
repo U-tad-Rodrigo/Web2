@@ -19,6 +19,9 @@
   "keywords": ["express", "api", "supabase", "postgresql", "prisma"],
   "author": "Rodrigo",
   "license": "ISC",
+  "prisma": {
+    "seed": "node --env-file=.env prisma/seed.js"
+  },
   "dependencies": {
     "@prisma/client": "^6.2.1",
     "bcryptjs": "^3.0.3",

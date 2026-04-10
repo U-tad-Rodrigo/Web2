@@ -109,7 +109,7 @@ export const createBook = async (req, res, next) => {
  */
 export const updateBook = async (req, res, next) => {
   try {
-    const { title, author, genre, isbn, description, publishedYear, copies, available } = req.body;
+    const { title, author, genre, isbn, description, publishedYear, copies } = req.body;
     const book = await prisma.book.update({
       where: { id: Number(req.params.id) },
       data: {
@@ -120,7 +120,6 @@ export const updateBook = async (req, res, next) => {
         ...(description !== undefined && { description }),
         ...(publishedYear !== undefined && { publishedYear }),
         ...(copies !== undefined && { copies }),
-        ...(available !== undefined && { available }),
       },
     });
     res.json({ data: book });

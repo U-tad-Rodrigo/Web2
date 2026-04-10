@@ -1,0 +1,25 @@
+{
+  "name": "chat-realtime",
+  "version": "1.0.0",
+  "description": "Chat en tiempo real con Socket.IO, Express y MongoDB",
+  "main": "src/index.js",
+  "type": "module",
+  "engines": {
+    "node": ">=20.11.0"
+  },
+  "scripts": {
+    "dev": "node --watch --env-file=.env src/index.js",
+    "start": "node --env-file=.env src/index.js"
+  },
+  "keywords": ["express", "socket.io", "mongodb", "realtime", "chat"],
+  "author": "Rodrigo",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.0.3",
+    "socket.io": "^4.7.2"
+  }
+}

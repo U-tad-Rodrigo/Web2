@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ChatApp</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 260px;
+      min-width: 260px;
+      background: #1a1d27;
+      border-right: 1px solid #2d3148;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-header {
+      padding: 16px;
+      border-bottom: 1px solid #2d3148;
+    }
+
+    .sidebar-header h2 { font-size: 1rem; font-weight: 700; color: #f8fafc; }
+
+    .user-info {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      padding: 8px 16px;
+      border-bottom: 1px solid #2d3148;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .user-dot { width: 8px; height: 8px; background: #4ade80; border-radius: 50%; flex-shrink: 0; }
+
+    .section-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 12px 16px 6px;
+    }
+
+    .rooms-list, .users-list { list-style: none; overflow-y: auto; }
+    .rooms-list { flex: 1; }
+
+    .room-item {
+      padding: 8px 16px;
+      cursor: pointer;
+      border-radius: 6px;
+      margin: 0 8px;
+      font-size: 0.875rem;
+      color: #94a3b8;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.1s;
+    }
+
+    .room-item:hover { background: #2d3148; color: #e2e8f0; }
+    .room-item.active { background: #2d3148; color: #f8fafc; font-weight: 600; }
+
+    .room-hash { color: #475569; font-weight: 700; }
+    .room-item.active .room-hash { color: #6366f1; }
+
+    .create-room-btn {
+      margin: 8px;
+      padding: 8px;
+      background: transparent;
+      border: 1px dashed #2d3148;
+      border-radius: 6px;
+      color: #64748b;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.1s;
+      width: calc(100% - 16px);
+    }
+
+    .create-room-btn:hover { border-color: #6366f1; color: #6366f1; }
+
+    .users-section { border-top: 1px solid #2d3148; max-height: 200px; }
+
+    .user-item {
+      padding: 6px 16px;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logout-btn {
+      margin: 8px;
+      padding: 8px;
+      background: transparent;
+      border: 1px solid #2d3148;
+      border-radius: 6px;
+      color: #64748b;
+      font-size: 0.8rem;
+      cursor: pointer;
+      width: calc(100% - 16px);
+      transition: all 0.1s;
+    }
+
+    .logout-btn:hover { border-color: #f87171; color: #f87171; }
+
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    .chat-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid #2d3148;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 56px;
+    }
+
+    .chat-header-placeholder { font-size: 0.875rem; color: #475569; }
+
+    .chat-header-name { font-size: 0.95rem; font-weight: 700; color: #f8fafc; }
+    .chat-header-count { font-size: 0.8rem; color: #94a3b8; }
+    .chat-header-sep { color: #2d3148; }
+    .chat-header-desc { font-size: 0.8rem; color: #475569; }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #475569;
+      gap: 8px;
+    }
+
+    .empty-state .icon { font-size: 3rem; }
+    .empty-state p { font-size: 0.9rem; }
+
+    .msg { display: flex; gap: 10px; padding: 4px 0; }
+
+    .msg-avatar {
+      width: 32px; height: 32px;
+      background: #2d3148;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #6366f1;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .msg-body { flex: 1; }
+
+    .msg-meta { display: flex; align-items: baseline; gap: 8px; margin-bottom: 2px; }
+
+    .msg-author { font-size: 0.85rem; font-weight: 700; color: #c7d2fe; }
+    .msg.own .msg-author { color: #86efac; }
+    .msg-time { font-size: 0.72rem; color: #475569; }
+    .msg-content { font-size: 0.875rem; color: #cbd5e1; line-height: 1.4; word-break: break-word; }
+
+    .system-msg { text-align: center; font-size: 0.75rem; color: #475569; padding: 8px 0; }
+
+    .typing-indicator { padding: 4px 24px; font-size: 0.78rem; color: #6366f1; height: 24px; }
+
+    .input-area {
+      padding: 16px 24px;
+      border-top: 1px solid #2d3148;
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+    }
+
+    .input-area textarea {
+      flex: 1;
+      padding: 10px 14px;
+      background: #0f1117;
+      border: 1px solid #2d3148;
+      border-radius: 8px;
+      color: #f8fafc;
+      font-size: 0.9rem;
+      resize: none;
+      max-height: 120px;
+      line-height: 1.5;
+      font-family: inherit;
+      transition: border-color 0.15s;
+    }
+
+    .input-area textarea:focus { outline: none; border-color: #6366f1; }
+    .input-area textarea:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .send-btn {
+      padding: 10px 16px;
+      background: #6366f1;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: background 0.15s;
+    }
+
+    .send-btn:hover { background: #4f46e5; }
+    .send-btn:disabled { background: #2d3148; cursor: not-allowed; }
+
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6);
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: #1a1d27;
+      border: 1px solid #2d3148;
+      border-radius: 12px;
+      padding: 24px;
+      width: 360px;
+    }
+
+    .modal h3 { font-size: 1rem; font-weight: 700; margin-bottom: 16px; }
+
+    .modal input {
+      width: 100%;
+      padding: 10px 14px;
+      background: #0f1117;
+      border: 1px solid #2d3148;
+      border-radius: 8px;
+      color: #f8fafc;
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+    }
+
+    .modal input:focus { outline: none; border-color: #6366f1; }
+
+    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+
+    .modal-actions button {
+      padding: 8px 16px;
+      border-radius: 6px;
+      border: none;
+      font-size: 0.85rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn-cancel { background: #2d3148; color: #94a3b8; }
+    .btn-confirm { background: #6366f1; color: #fff; }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #2d3148; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2>ChatApp</h2>
+    </div>
+    <div class="user-info">
+      <div class="user-dot"></div>
+      <span id="currentUsername"></span>
+    </div>
+
+    <p class="section-title">Salas</p>
+    <ul class="rooms-list" id="roomsList"></ul>
+    <button class="create-room-btn" onclick="openCreateRoom()">+ Nueva sala</button>
+
+    <div class="users-section">
+      <p class="section-title">Online</p>
+      <ul class="users-list" id="usersList"></ul>
+    </div>
+
+    <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
+  </aside>
+
+  <main class="main">
+    <div class="chat-header" id="chatHeader">
+      <span class="chat-header-placeholder">Selecciona una sala para empezar</span>
+    </div>
+
+    <div class="messages" id="messages">
+      <div class="empty-state">
+        <div class="icon">💬</div>
+        <p>Selecciona una sala para chatear</p>
+      </div>
+    </div>
+
+    <div class="typing-indicator" id="typingIndicator"></div>
+
+    <div class="input-area">
+      <textarea
+        id="messageInput"
+        placeholder="Selecciona una sala primero..."
+        rows="1"
+        disabled
+        onkeydown="handleKey(event)"
+        oninput="handleTyping()"
+      ></textarea>
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()" disabled>↑</button>
+    </div>
+  </main>
+
+  <div class="modal-overlay" id="createRoomModal">
+    <div class="modal">
+      <h3>Nueva sala</h3>
+      <input type="text" id="roomName" placeholder="Nombre de la sala" maxlength="50" />
+      <input type="text" id="roomDesc" placeholder="Descripción (opcional)" maxlength="200" />
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeCreateRoom()">Cancelar</button>
+        <button class="btn-confirm" onclick="createRoom()">Crear</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+
+    if (!token || !user) window.location.href = '/';
+
+    document.getElementById('currentUsername').textContent = user?.username || '';
+
+    let socket = null;
+    let currentRoomId = null;
+    let typingClearTimeout = null;
+    const onlineUsers = new Map();
+
+    function connectSocket() {
+      socket = io({ auth: { token } });
+
+      socket.on('connect_error', (err) => {
+        if (err.message === 'Token inválido' || err.message === 'Token requerido') logout();
+      });
+
+      socket.on('users:online', (users) => {
+        onlineUsers.clear();
+        users.forEach((u) => onlineUsers.set(String(u._id), u));
+        renderOnlineUsers();
+      });
+
+      socket.on('user:online', ({ userId, username }) => {
+        onlineUsers.set(String(userId), { _id: userId, username });
+        renderOnlineUsers();
+      });
+
+      socket.on('user:offline', ({ userId }) => {
+        onlineUsers.delete(String(userId));
+        renderOnlineUsers();
+      });
+
+      socket.on('room:joined', ({ room, messages, users }) => {
+        renderMessages(messages);
+        updateChatHeader(room, users);
+      });
+
+      socket.on('room:user-joined', ({ user: u }) => {
+        appendSystemMsg(u.username + ' se unió a la sala');
+      });
+
+      socket.on('room:user-left', ({ user: u }) => {
+        appendSystemMsg(u.username + ' salió de la sala');
+      });
+
+      socket.on('chat:message', (msg) => {
+        appendMessage(msg);
+        scrollToBottom();
+      });
+
+      socket.on('chat:typing', ({ user: u }) => {
+        showTyping(u.username);
+      });
+    }
+
+    async function loadRooms() {
+      try {
+        const res = await fetch('/api/rooms', {
+          headers: { Authorization: 'Bearer ' + token },
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message);
+        renderRooms(data.rooms);
+      } catch (err) {
+        console.error('Error cargando salas:', err.message);
+      }
+    }
+
+    function renderRooms(rooms) {
+      const list = document.getElementById('roomsList');
+      list.innerHTML = '';
+      rooms.forEach((room) => {
+        const li = document.createElement('li');
+        li.className = 'room-item' + (room._id === currentRoomId ? ' active' : '');
+        li.dataset.id = room._id;
+
+        const hash = document.createElement('span');
+        hash.className = 'room-hash';
+        hash.textContent = '#';
+
+        const name = document.createElement('span');
+        name.textContent = room.name;
+
+        li.appendChild(hash);
+        li.appendChild(name);
+        li.addEventListener('click', () => joinRoom(room._id, room.name));
+        list.appendChild(li);
+      });
+    }
+
+    function joinRoom(roomId, roomName) {
+      if (currentRoomId === roomId) return;
+      if (currentRoomId) socket.emit('room:leave', { roomId: currentRoomId });
+
+      currentRoomId = roomId;
+
+      document.querySelectorAll('.room-item').forEach((el) => {
+        el.classList.toggle('active', el.dataset.id === roomId);
+      });
+
+      const input = document.getElementById('messageInput');
+      input.disabled = false;
+      input.placeholder = 'Mensaje en #' + roomName;
+      document.getElementById('sendBtn').disabled = false;
+
+      socket.emit('room:join', { roomId });
+    }
+
+    function updateChatHeader(room, users) {
+      const header = document.getElementById('chatHeader');
+      header.innerHTML = '';
+
+      const name = document.createElement('span');
+      name.className = 'chat-header-name';
+      name.textContent = '#' + room.name;
+      header.appendChild(name);
+
+      const count = document.createElement('span');
+      count.className = 'chat-header-count';
+      count.textContent = users.length + ' usuario' + (users.length !== 1 ? 's' : '');
+      header.appendChild(count);
+
+      if (room.description) {
+        const sep = document.createElement('span');
+        sep.className = 'chat-header-sep';
+        sep.textContent = '·';
+        header.appendChild(sep);
+
+        const desc = document.createElement('span');
+        desc.className = 'chat-header-desc';
+        desc.textContent = room.description;
+        header.appendChild(desc);
+      }
+    }
+
+    function renderMessages(messages) {
+      const container = document.getElementById('messages');
+      container.innerHTML = '';
+      if (!messages.length) {
+        const sys = document.createElement('div');
+        sys.className = 'system-msg';
+        sys.textContent = 'No hay mensajes aún. ¡Sé el primero!';
+        container.appendChild(sys);
+        return;
+      }
+      messages.forEach((msg) => appendMessage(msg));
+      scrollToBottom();
+    }
+
+    function appendMessage(msg) {
+      const container = document.getElementById('messages');
+
+      const emptyState = container.querySelector('.empty-state');
+      if (emptyState) emptyState.remove();
+
+      const isOwn = String(msg.user._id) === String(user._id);
+      const time = new Date(msg.createdAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+
+      const div = document.createElement('div');
+      div.className = 'msg' + (isOwn ? ' own' : '');
+
+      const avatar = document.createElement('div');
+      avatar.className = 'msg-avatar';
+      avatar.textContent = (msg.user.username || '?')[0].toUpperCase();
+
+      const body = document.createElement('div');
+      body.className = 'msg-body';
+
+      const meta = document.createElement('div');
+      meta.className = 'msg-meta';
+
+      const author = document.createElement('span');
+      author.className = 'msg-author';
+      author.textContent = msg.user.username;
+
+      const timeEl = document.createElement('span');
+      timeEl.className = 'msg-time';
+      timeEl.textContent = time;
+
+      meta.appendChild(author);
+      meta.appendChild(timeEl);
+
+      const content = document.createElement('div');
+      content.className = 'msg-content';
+      content.textContent = msg.content;
+
+      body.appendChild(meta);
+      body.appendChild(content);
+      div.appendChild(avatar);
+      div.appendChild(body);
+      container.appendChild(div);
+    }
+
+    function appendSystemMsg(text) {
+      const container = document.getElementById('messages');
+      const div = document.createElement('div');
+      div.className = 'system-msg';
+      div.textContent = text;
+      container.appendChild(div);
+      scrollToBottom();
+    }
+
+    function renderOnlineUsers() {
+      const list = document.getElementById('usersList');
+      list.innerHTML = '';
+      onlineUsers.forEach(({ username }) => {
+        const li = document.createElement('li');
+        li.className = 'user-item';
+
+        const dot = document.createElement('div');
+        dot.className = 'user-dot';
+
+        const name = document.createElement('span');
+        name.textContent = username;
+
+        li.appendChild(dot);
+        li.appendChild(name);
+        list.appendChild(li);
+      });
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('messageInput');
+      const content = input.value.trim();
+      if (!content || !currentRoomId) return;
+      socket.emit('chat:message', { roomId: currentRoomId, content });
+      input.value = '';
+      input.style.height = 'auto';
+    }
+
+    function handleKey(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    }
+
+    function handleTyping() {
+      if (!currentRoomId) return;
+      socket.emit('chat:typing', { roomId: currentRoomId });
+      const ta = document.getElementById('messageInput');
+      ta.style.height = 'auto';
+      ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
+    }
+
+    function showTyping(username) {
+      const el = document.getElementById('typingIndicator');
+      el.textContent = username + ' está escribiendo...';
+      clearTimeout(typingClearTimeout);
+      typingClearTimeout = setTimeout(() => { el.textContent = ''; }, 2000);
+    }
+
+    function scrollToBottom() {
+      const container = document.getElementById('messages');
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function openCreateRoom() {
+      document.getElementById('createRoomModal').classList.add('open');
+      document.getElementById('roomName').focus();
+    }
+
+    function closeCreateRoom() {
+      document.getElementById('createRoomModal').classList.remove('open');
+      document.getElementById('roomName').value = '';
+      document.getElementById('roomDesc').value = '';
+    }
+
+    async function createRoom() {
+      const name = document.getElementById('roomName').value.trim();
+      if (!name) return;
+      try {
+        const res = await fetch('/api/rooms', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + token,
+          },
+          body: JSON.stringify({
+            name,
+            description: document.getElementById('roomDesc').value.trim(),
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message);
+        closeCreateRoom();
+        await loadRooms();
+        joinRoom(data.room._id, data.room.name);
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeCreateRoom();
+    });
+
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      if (socket) socket.disconnect();
+      window.location.href = '/';
+    }
+
+    connectSocket();
+    loadRooms();
+  </script>
+</body>
+</html>

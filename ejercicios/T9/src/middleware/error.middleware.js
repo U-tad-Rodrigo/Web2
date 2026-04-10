@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
 
 export const notFound = (req, res) => {
-  res.status(404).json({ message: `Ruta no encontrada: ${req.originalUrl}` });
+  res.status(404).json({ error: true, message: `Ruta no encontrada: ${req.originalUrl}` });
 };
 
 export const errorHandler = (err, req, res, _next) => {
