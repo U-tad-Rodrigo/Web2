@@ -45,6 +45,15 @@ export const setupSocket = (io) => {
 
     // Desconexión
     socket.on('disconnect', () => {
+      // Notificar a cada sala antes de limpiar presencia
+      socket.rooms.forEach((roomId) => {
+        if (roomId !== socket.id) {
+          socket.to(roomId).emit('room:user-left', {
+            user: { _id: socket.user._id, username: socket.user.username },
+          });
+        }
+      });
+
       const entry = onlineUsers.get(userId);
       if (!entry) return;
       if (entry.connections <= 1) {

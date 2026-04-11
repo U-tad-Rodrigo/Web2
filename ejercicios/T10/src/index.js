@@ -6,6 +6,11 @@ if (!process.env.JWT_SECRET) {
   process.exit(1);
 }
 
+if (!process.env.MONGODB_URI) {
+  console.error('ERROR: MONGODB_URI no está definida en las variables de entorno');
+  process.exit(1);
+}
+
 const PORT = process.env.PORT || 3000;
 
 connectDB().then(() => {

@@ -354,6 +354,7 @@
     let currentRoom = null;
     let roomUsers = new Map();
     let typingClearTimeout = null;
+    let typingDebounceTimeout = null;
     const onlineUsers = new Map();
 
     function connectSocket() {
@@ -361,6 +362,10 @@
 
       socket.on('connect_error', (err) => {
         if (err.message === 'Token inválido' || err.message === 'Token requerido') logout();
+      });
+
+      socket.on('connect', () => {
+        if (currentRoomId) socket.emit('room:join', { roomId: currentRoomId });
       });
 
       socket.on('users:online', (users) => {
@@ -594,11 +599,14 @@
     }
 
     function handleTyping() {
-      if (!currentRoomId) return;
-      socket.emit('chat:typing', { roomId: currentRoomId });
       const ta = document.getElementById('messageInput');
       ta.style.height = 'auto';
       ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
+      if (!currentRoomId) return;
+      clearTimeout(typingDebounceTimeout);
+      typingDebounceTimeout = setTimeout(() => {
+        socket.emit('chat:typing', { roomId: currentRoomId });
+      }, 300);
     }
 
     function showTyping(username) {

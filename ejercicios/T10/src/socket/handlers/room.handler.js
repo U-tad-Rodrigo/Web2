@@ -39,6 +39,7 @@ export const registerRoomHandlers = (io, socket, onlineUsers) => {
   // room:leave
   socket.on('room:leave', ({ roomId }) => {
     try {
+      if (!roomId || !socket.rooms.has(roomId)) return;
       socket.leave(roomId);
       socket.to(roomId).emit('room:user-left', {
         user: { _id: socket.user._id, username: socket.user.username },

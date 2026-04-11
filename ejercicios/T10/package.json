@@ -9,11 +9,15 @@
   },
   "scripts": {
     "dev": "node --watch --env-file=.env src/index.js",
-    "start": "node --env-file=.env src/index.js"
+    "start": "node --env-file=.env src/index.js",
+    "test": "node --test tests/api.test.js"
   },
   "keywords": ["express", "socket.io", "mongodb", "realtime", "chat"],
   "author": "Rodrigo",
   "license": "ISC",
+  "devDependencies": {
+    "mongodb-memory-server": "^10.1.2"
+  },
   "dependencies": {
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
