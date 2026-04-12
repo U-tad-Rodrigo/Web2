@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(npm install:*)",
-      "Bash(npm test:*)"
+      "Bash(npm test:*)",
+      "Bash(git -C \"C:/Users/Rodrigo/CARRERA/ASIGNATURAS/PW2S — Web Servidor/codigo/Web2\" log --oneline)",
+      "Bash(node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand)"
     ]
   }
 }

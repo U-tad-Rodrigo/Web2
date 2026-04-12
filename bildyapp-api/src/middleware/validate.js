@@ -16,14 +16,11 @@ export const validate = (schema) => (req, _res, next) => {
     next();
   } catch (err) {
     if (err instanceof ZodError) {
-      // Formatea los errores en un array legible
       const details = err.errors.map((e) => ({
         field:   e.path.join('.'),
         message: e.message
       }));
-      const appErr = AppError.badRequest('Error de validación', 'VALIDATION_ERROR');
-      appErr.details = details;
-      return next(appErr);
+      return next(AppError.validation('Error de validación', details));
     }
     next(err);
   }

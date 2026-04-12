@@ -1,6 +1,7 @@
 import multer from 'multer';
 import path from 'node:path';
 import fs from 'node:fs';
+import { randomBytes } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 
 // ── Ruta absoluta a uploads/ (independiente de process.cwd()) ────────────────
@@ -19,7 +20,7 @@ const storage = multer.diskStorage({
   },
   filename: (_req, file, cb) => {
     const ext  = path.extname(file.originalname).toLowerCase();
-    const name = `logo-${Date.now()}${ext}`;
+    const name = `logo-${randomBytes(16).toString('hex')}${ext}`;
     cb(null, name);
   }
 });

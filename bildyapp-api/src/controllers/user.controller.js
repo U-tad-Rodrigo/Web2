@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { randomInt, randomBytes, createHash } from 'node:crypto';
 import User from '../models/User.js';
 import Company from '../models/Company.js';
 import { AppError } from '../utils/AppError.js';
@@ -19,8 +20,11 @@ const generateTokens = (userId) => {
   return { accessToken, refreshToken };
 };
 
+// SHA-256 del token — evita guardar el valor raw en BD
+const hashToken = (token) => createHash('sha256').update(token).digest('hex');
+
 const generateVerificationCode = () =>
-  String(Math.floor(100000 + Math.random() * 900000));
+  String(randomInt(100000, 1000000));
 
 // ── 1) Registro ───────────────────────────────────────────────────────────────
 // POST /api/user/register
@@ -52,7 +56,7 @@ export const register = async (req, res, next) => {
 
     const { accessToken, refreshToken } = generateTokens(user._id);
 
-    await User.findByIdAndUpdate(user._id, { refreshToken });
+    await User.findByIdAndUpdate(user._id, { refreshToken: hashToken(refreshToken) });
 
     notificationService.emit('user:registered', { email });
 
@@ -65,6 +69,9 @@ export const register = async (req, res, next) => {
       }
     });
   } catch (err) {
+    if (err.code === 11000) {
+      return next(AppError.conflict('Ya existe una cuenta verificada con ese email', 'EMAIL_TAKEN'));
+    }
     next(err);
   }
 };
@@ -144,7 +151,7 @@ export const login = async (req, res, next) => {
 
     const { accessToken, refreshToken } = generateTokens(user._id);
 
-    await User.findByIdAndUpdate(user._id, { refreshToken });
+    await User.findByIdAndUpdate(user._id, { refreshToken: hashToken(refreshToken) });
 
     return res.json({
       error: false,
@@ -309,14 +316,14 @@ export const refreshToken = async (req, res, next) => {
     // Cargamos refreshToken (select:false) para comparar con el almacenado
     const user = await User.findById(payload.id).select('+refreshToken');
 
-    if (!user || user.deleted || user.refreshToken !== token) {
+    if (!user || user.deleted || user.refreshToken !== hashToken(token)) {
       return next(AppError.unauthorized('Refresh token invalido', 'INVALID_REFRESH_TOKEN'));
     }
 
     // Rotacion: generamos nuevo par de tokens
     const { accessToken, refreshToken: newRefresh } = generateTokens(user._id);
 
-    await User.findByIdAndUpdate(user._id, { refreshToken: newRefresh });
+    await User.findByIdAndUpdate(user._id, { refreshToken: hashToken(newRefresh) });
 
     return res.json({ error: false, data: { accessToken, refreshToken: newRefresh } });
   } catch (err) {
@@ -396,13 +403,13 @@ export const inviteUser = async (req, res, next) => {
       return next(AppError.badRequest('Debes tener una empresa para poder invitar', 'NO_COMPANY'));
     }
 
-    const existing = await User.findOne({ email });
+    const existing = await User.findOne({ email, deleted: false });
     if (existing) {
       return next(AppError.conflict('Ya existe un usuario con ese email', 'EMAIL_TAKEN'));
     }
 
-    // Contrasena temporal aleatoria (el invitado debera cambiarla)
-    const tempPassword    = Math.random().toString(36).slice(-8) + 'Aa1!';
+    // Contrasena temporal aleatoria segura (el invitado debera cambiarla)
+    const tempPassword    = randomBytes(12).toString('base64url') + 'Aa1!';
     const hashedPassword  = await bcrypt.hash(tempPassword, 12);
     const verificationCode = generateVerificationCode();
 
