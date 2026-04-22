@@ -1,5 +1,6 @@
 import cors from 'cors';
 import express from 'express';
+import helmet from 'helmet';
 import pinoHttp from 'pino-http';
 import logger from './config/logger.js';
 import prisma from './config/prisma.js';
@@ -8,6 +9,7 @@ import routes from './routes/index.js';
 
 const app = express();
 
+app.use(helmet());
 app.use(pinoHttp({ logger }));
 app.use(cors());
 app.use(express.json());

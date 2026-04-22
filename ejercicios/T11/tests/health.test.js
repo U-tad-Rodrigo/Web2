@@ -1,6 +1,7 @@
 import { describe, it, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import app from '../src/app.js';
+import prisma from '../src/config/prisma.js';
 
 let server;
 let baseUrl;
@@ -14,7 +15,10 @@ before(async () => {
   });
 });
 
-after(() => server.close());
+after(async () => {
+  server.close();
+  await prisma.$disconnect();
+});
 
 describe('GET /api/health', () => {
   it('responde con shape correcta independientemente del estado de BD', async () => {
