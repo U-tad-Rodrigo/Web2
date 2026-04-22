@@ -1,14 +1,14 @@
-import './config/env.js';
+import { env } from './config/env.js';
 import app from './app.js';
 import prisma from './config/prisma.js';
 import logger from './config/logger.js';
 
-const PORT = process.env.PORT || 3000;
+const PORT = env.PORT;
 
 const startServer = async () => {
   try {
     await prisma.$connect();
-    logger.info('Conectado a Supabase (PostgreSQL)');
+    logger.info('Conectado a la base de datos');
 
     const server = app.listen(PORT, () => {
       logger.info({ port: PORT, env: process.env.NODE_ENV }, 'Servidor iniciado');

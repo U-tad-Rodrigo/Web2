@@ -9,19 +9,16 @@ export const errorHandler = (err, req, res, _next) => {
   logger.error(err);
 
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
-    const prismaErrors = {
-      P2002: { status: 409, message: 'Ya existe un registro con ese valor' },
-      P2025: { status: 404, message: 'Registro no encontrado' },
-      P2003: { status: 400, message: 'Referencia inválida' },
-    };
-    const mapped = prismaErrors[err.code];
-    if (mapped) return res.status(mapped.status).json({ error: true, message: mapped.message });
-    return res.status(400).json({ error: true, message: 'Error de base de datos', code: err.code });
+    if (err.code === 'P2002') {
+      return res.status(409).json({ error: true, message: 'Ya existe un registro con ese valor' });
+    }
+    if (err.code === 'P2025') {
+      return res.status(404).json({ error: true, message: 'Registro no encontrado' });
+    }
   }
 
   const isProduction = process.env.NODE_ENV === 'production';
-  const status = err.status || 500;
-  res.status(status).json({
+  res.status(err.status || 500).json({
     error: true,
     message: isProduction ? 'Error interno del servidor' : err.message,
   });

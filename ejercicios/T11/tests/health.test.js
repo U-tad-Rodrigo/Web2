@@ -23,13 +23,13 @@ after(async () => {
 describe('GET /api/health', () => {
   it('responde con shape correcta independientemente del estado de BD', async () => {
     const res = await fetch(`${baseUrl}/api/health`);
-    // 200 si BD conectada, 503 si no — ambos son válidos
     assert.ok([200, 503].includes(res.status), `status inesperado: ${res.status}`);
     const body = await res.json();
     assert.ok(['ok', 'error'].includes(body.status));
-    assert.ok(body.timestamp);
-    assert.ok(typeof body.uptime === 'number');
+    assert.ok(!isNaN(new Date(body.timestamp).getTime()), 'timestamp debe ser ISO válido');
+    assert.ok(typeof body.uptime === 'number' && body.uptime > 0, 'uptime debe ser número positivo');
     assert.ok(['connected', 'disconnected'].includes(body.database));
+    assert.ok(['development', 'production', 'test'].includes(body.environment), 'environment debe ser válido');
   });
 
   it('responde 200 y database:connected con BD real', { skip: !process.env.DATABASE_URL }, async () => {
@@ -38,5 +38,6 @@ describe('GET /api/health', () => {
     const body = await res.json();
     assert.equal(body.status, 'ok');
     assert.equal(body.database, 'connected');
+    assert.equal(body.environment, process.env.NODE_ENV ?? 'development');
   });
 });
