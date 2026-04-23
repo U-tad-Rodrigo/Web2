@@ -9,7 +9,7 @@
   },
   "scripts": {
     "dev": "node --watch --env-file=.env src/index.js",
-    "start": "node_modules/.bin/prisma migrate deploy && node src/index.js",
+    "start": "node_modules/.bin/prisma migrate deploy && node_modules/.bin/pm2-runtime ecosystem.config.cjs",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --forceExit --detectOpenHandles",
     "test:watch": "npm test -- --watch",
     "test:coverage": "npm test -- --coverage",
@@ -25,6 +25,7 @@
     "express-rate-limit": "^8.3.2",
     "helmet": "^8.1.0",
     "pino": "^9.6.0",
+    "pm2": "^5.4.3",
     "prisma": "^6.2.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",

@@ -9,6 +9,9 @@ const options = {
       description: 'API REST para gestión de libros — T11 Deploy & DevOps',
     },
     servers: [
+      ...(process.env.RAILWAY_PUBLIC_DOMAIN
+        ? [{ url: `https://${process.env.RAILWAY_PUBLIC_DOMAIN}`, description: 'Producción' }]
+        : []),
       { url: 'http://localhost:3000', description: 'Desarrollo' },
     ],
     components: {

@@ -65,6 +65,12 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Deploy to Railway
-        run: npx @railway/cli@latest up --service biblioteca-api --detach
+        run: npx @railway/cli@latest up --service biblioteca-api
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        timeout-minutes: 10
+
+      - name: Verify deploy
+        run: |
+          sleep 15
+          curl -f https://biblioteca-api-production-d99b.up.railway.app/api/health
