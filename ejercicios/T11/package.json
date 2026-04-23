@@ -9,7 +9,8 @@
   },
   "scripts": {
     "dev": "node --watch --env-file=.env src/index.js",
-    "start": "node_modules/.bin/prisma migrate deploy && node_modules/.bin/pm2-runtime ecosystem.config.cjs",
+    "start": "node_modules/.bin/prisma migrate deploy && node src/index.js",
+    "start:pm2": "node_modules/.bin/prisma migrate deploy && node_modules/.bin/pm2-runtime ecosystem.config.cjs",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --forceExit --detectOpenHandles",
     "test:watch": "npm test -- --watch",
     "test:coverage": "npm test -- --coverage",
