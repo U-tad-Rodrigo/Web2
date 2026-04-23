@@ -53,6 +53,7 @@ jobs:
         env:
           NODE_ENV: test
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/biblioteca_test
+          JWT_SECRET: test-secret-for-ci-minimum-32-chars!!
 
   deploy:
     needs: test

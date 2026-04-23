@@ -11,7 +11,8 @@ const startServer = async () => {
     logger.info('Conectado a la base de datos');
 
     const server = app.listen(PORT, () => {
-      logger.info({ port: PORT, env: process.env.NODE_ENV }, 'Servidor iniciado');
+      logger.info({ port: PORT, env: env.NODE_ENV }, 'Servidor iniciado');
+      logger.info(`Swagger UI en http://localhost:${PORT}/api-docs`);
     });
 
     const shutdown = async (signal) => {

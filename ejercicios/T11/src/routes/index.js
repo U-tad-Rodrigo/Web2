@@ -1,8 +1,14 @@
 import { Router } from 'express';
-import librosRouter from './libros.routes.js';
+import authRoutes from './auth.routes.js';
+import booksRoutes from './books.routes.js';
+import loansRoutes from './loans.routes.js';
+import reviewsRoutes from './reviews.routes.js';
 
 const router = Router();
 
-router.use('/libros', librosRouter);
+router.use('/auth', authRoutes);
+router.use('/books', booksRoutes);
+router.use('/loans', loansRoutes);
+router.use('/reviews', reviewsRoutes);
 
 export default router;
