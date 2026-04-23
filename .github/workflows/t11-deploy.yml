@@ -5,10 +5,12 @@ on:
     branches: [main]
     paths:
       - 'ejercicios/T11/**'
+      - '.github/workflows/t11-deploy.yml'
   pull_request:
     branches: [main]
     paths:
       - 'ejercicios/T11/**'
+      - '.github/workflows/t11-deploy.yml'
 
 jobs:
   test:
