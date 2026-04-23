@@ -65,6 +65,6 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Deploy to Railway
-        run: npx @railway/cli@latest up --service biblioteca-api-deploy --detach
+        run: npx @railway/cli@latest up --detach
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
