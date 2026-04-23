@@ -20,6 +20,6 @@ export const validateQuery = (schema) => (req, res, next) => {
     }));
     return res.status(400).json({ error: true, message: 'Parámetros inválidos', errors });
   }
-  req.query = result.data;
+  req.validatedQuery = result.data;
   next();
 };

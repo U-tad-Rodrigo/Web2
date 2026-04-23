@@ -9,14 +9,14 @@
   },
   "scripts": {
     "dev": "node --watch --env-file=.env src/index.js",
-    "start": "node_modules/.bin/prisma migrate deploy && node src/index.js",
-    "start:pm2": "node_modules/.bin/prisma migrate deploy && node_modules/.bin/pm2-runtime ecosystem.config.cjs",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --forceExit --detectOpenHandles",
+    "start": "npx prisma migrate deploy && node src/index.js",
+    "start:pm2": "npx prisma migrate deploy && npx pm2-runtime ecosystem.config.cjs",
+    "test": "node --experimental-vm-modules --env-file=.env node_modules/jest/bin/jest.js --forceExit --detectOpenHandles",
     "test:watch": "npm test -- --watch",
     "test:coverage": "npm test -- --coverage",
-    "db:migrate": "node_modules/.bin/prisma migrate deploy",
-    "db:generate": "node_modules/.bin/prisma generate",
-    "db:studio": "node_modules/.bin/prisma studio"
+    "db:migrate": "npx prisma migrate deploy",
+    "db:generate": "npx prisma generate",
+    "db:studio": "npx prisma studio"
   },
   "dependencies": {
     "@prisma/client": "^6.2.1",

@@ -6,12 +6,12 @@ import prisma from '../config/prisma.js';
  */
 export const getBooks = async (req, res, next) => {
   try {
-    const { search, genre, available, page = 1, limit = 10 } = req.query;
+    const { search, genre, available, page = 1, limit = 10 } = req.validatedQuery ?? req.query;
     const skip = (page - 1) * limit;
 
     const where = {
-      ...(available === true && { available: { gt: 0 } }),
-      ...(available === false && { available: 0 }),
+      ...(available === 'true' && { available: { gt: 0 } }),
+      ...(available === 'false' && { available: 0 }),
       ...(genre && { genre: { contains: genre, mode: 'insensitive' } }),
       ...(search && {
         OR: [
