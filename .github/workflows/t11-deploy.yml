@@ -1,0 +1,69 @@
+name: T11 CI/CD Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'ejercicios/T11/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'ejercicios/T11/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ejercicios/T11
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: biblioteca_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: ejercicios/T11/package-lock.json
+
+      - run: npm ci
+
+      - run: node_modules/.bin/prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/biblioteca_test
+
+      - run: npm test
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/biblioteca_test
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    defaults:
+      run:
+        working-directory: ejercicios/T11
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to Railway
+        uses: berviantoleo/railway-deploy@v0.8.0
+        with:
+          railway_token: ${{ secrets.RAILWAY_TOKEN }}
+          service: biblioteca-api-deploy
