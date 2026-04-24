@@ -13,10 +13,10 @@ WORKDIR /app
 
 RUN apk add --no-cache openssl
 
-COPY --from=deps /app/node_modules ./node_modules
-COPY package*.json ./
-COPY prisma ./prisma
-COPY src ./src
+COPY --chown=node:node --from=deps /app/node_modules ./node_modules
+COPY --chown=node:node package*.json ./
+COPY --chown=node:node prisma ./prisma
+COPY --chown=node:node src ./src
 
 ENV NODE_ENV=production
 EXPOSE 3000

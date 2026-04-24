@@ -73,5 +73,10 @@ jobs:
 
       - name: Verify deploy
         run: |
-          sleep 15
-          curl -f https://biblioteca-api-production-d99b.up.railway.app/api/health
+          for i in {1..12}; do
+            curl -sf https://biblioteca-api-production-d99b.up.railway.app/api/health && exit 0
+            echo "Intento $i fallido, esperando 10s..."
+            sleep 10
+          done
+          echo "La API no respondió tras 2 minutos"
+          exit 1

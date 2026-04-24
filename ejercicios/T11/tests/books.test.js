@@ -90,3 +90,30 @@ describe('GET /api/books/:id', () => {
     expect(res.status).toBe(404);
   });
 });
+
+describe('DELETE /api/books/:id', () => {
+  it('elimina un libro con rol ADMIN', async () => {
+    const created = await request(app)
+      .post('/api/books')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ ...validBook, isbn: '978-0000000003' });
+
+    const res = await request(app)
+      .delete(`/api/books/${created.body.data.id}`)
+      .set('Authorization', `Bearer ${adminToken}`);
+
+    expect(res.status).toBe(200);
+  });
+
+  it('devuelve 401 sin token', async () => {
+    const res = await request(app).delete('/api/books/1');
+    expect(res.status).toBe(401);
+  });
+
+  it('devuelve 404 para id inexistente', async () => {
+    const res = await request(app)
+      .delete('/api/books/99999')
+      .set('Authorization', `Bearer ${adminToken}`);
+    expect(res.status).toBe(404);
+  });
+});
