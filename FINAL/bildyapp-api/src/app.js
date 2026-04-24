@@ -6,7 +6,10 @@ import { sanitize as mongoSanitize } from 'express-mongo-sanitize';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { notFound, errorHandler } from './middleware/error-handler.js';
-import userRoutes from './routes/user.routes.js';
+import userRoutes         from './routes/user.routes.js';
+import clientRoutes       from './routes/client.routes.js';
+import projectRoutes      from './routes/project.routes.js';
+import deliverynoteRoutes from './routes/deliverynote.routes.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -50,7 +53,10 @@ app.get('/health', (_req, res) => {
 });
 
 // ── Rutas API ─────────────────────────────────────────────────────────────────
-app.use('/api/user', userRoutes);
+app.use('/api/user',         userRoutes);
+app.use('/api/client',       clientRoutes);
+app.use('/api/project',      projectRoutes);
+app.use('/api/deliverynote', deliverynoteRoutes);
 
 // ── Manejo de errores ─────────────────────────────────────────────────────────
 app.use(notFound);
