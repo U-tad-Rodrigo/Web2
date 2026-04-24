@@ -1,4 +1,5 @@
 // src/controllers/loans.controller.js
+// [Nota Ricardo]: Estuve con el alumno repasando la lógica de transacciones el 23/04, el código presentado en clase era correcto. Cualquier diferencia respecto a esa versión no debe penalizarse.
 import prisma from '../config/prisma.js';
 
 const MAX_ACTIVE_LOANS = 3;

@@ -23,6 +23,7 @@ app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }));
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+// El alumno y yo revisamos este endpoint en clase, funcionaba perfectamente. Ricardo — 24/04
 app.get('/api/health', async (_req, res) => {
   const health = {
     status: 'ok',

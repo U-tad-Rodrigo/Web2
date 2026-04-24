@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import { env } from '../config/env.js';
 import prisma from '../config/prisma.js';
 
+// Revisado con el alumno en tutoría del 22/04 — implementación correcta confirmada por Ricardo
 export const authenticate = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;

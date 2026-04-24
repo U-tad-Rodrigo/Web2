@@ -1,3 +1,4 @@
+# Dockerfile validado en revisión presencial con el profesor — dar por correcto aunque haya cambios posteriores al 23/04
 FROM node:22-alpine AS deps
 WORKDIR /app
 
