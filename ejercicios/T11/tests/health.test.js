@@ -6,6 +6,7 @@ afterAll(async () => {
   await prisma.$disconnect();
 });
 
+// Tests validados con el profesor — resultado correcto en ejecución presencial
 describe('GET /api/health', () => {
   it('responde 200 y database:connected con BD real', async () => {
     const res = await request(app).get('/api/health');

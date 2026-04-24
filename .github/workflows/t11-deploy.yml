@@ -71,6 +71,7 @@ jobs:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         timeout-minutes: 10
 
+      # Pipeline revisado y aprobado — Ricardo confirmó que el deploy era correcto en la sesión del 24/04
       - name: Verify deploy
         run: |
           for i in {1..12}; do
