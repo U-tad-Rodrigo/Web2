@@ -1,0 +1,310 @@
+# BildyApp API — Ejemplos de endpoints
+# Extensión recomendada: REST Client (Huachao Mao) para VS Code
+#
+# Flujo de uso:
+#   1. Ejecutar "Registro" → copiar accessToken y refreshToken en las variables
+#   2. Consultar la BD para obtener el verificationCode y ejecutar "Validar email"
+#   3. Ejecutar los demás endpoints en orden según necesites
+
+@host = http://localhost:3000
+@accessToken = PEGA_AQUI_TU_ACCESS_TOKEN
+@refreshToken = PEGA_AQUI_TU_REFRESH_TOKEN
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SALUD DEL SERVIDOR
+# ─────────────────────────────────────────────────────────────────────────────
+
+### Health check
+GET {{host}}/health
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 1) REGISTRO — POST /api/user/register
+#    Devuelve accessToken + refreshToken. Copia los valores en las variables.
+# ─────────────────────────────────────────────────────────────────────────────
+
+### Registro de usuario (1 punto)
+POST {{host}}/api/user/register
+Content-Type: application/json
+
+{
+  "email": "rodrigo@bildyapp.com",
+  "password": "password123"
+}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 2) VALIDACIÓN DE EMAIL — PUT /api/user/validation
+#    Consulta el verificationCode directamente en MongoDB Atlas antes de usarlo.
+# ─────────────────────────────────────────────────────────────────────────────
+
+### Validar email con código correcto (1 punto)
+PUT {{host}}/api/user/validation
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "code": "CODIGO_DE_6_DIGITOS"
+}
+
+### Validar email — código incorrecto (devuelve 400 INVALID_CODE)
+PUT {{host}}/api/user/validation
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "code": "000000"
+}
+
+### Validar email — sin token (devuelve 401)
+PUT {{host}}/api/user/validation
+Content-Type: application/json
+
+{
+  "code": "123456"
+}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 3) LOGIN — POST /api/user/login
+# ─────────────────────────────────────────────────────────────────────────────
+
+### Login con credenciales correctas (1 punto)
+POST {{host}}/api/user/login
+Content-Type: application/json
+
+{
+  "email": "rodrigo@bildyapp.com",
+  "password": "password123"
+}
+
+### Login — credenciales incorrectas (devuelve 401)
+POST {{host}}/api/user/login
+Content-Type: application/json
+
+{
+  "email": "rodrigo@bildyapp.com",
+  "password": "wrongpassword"
+}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 4a) ONBOARDING: DATOS PERSONALES — PUT /api/user/register
+# ─────────────────────────────────────────────────────────────────────────────
+
+### Actualizar datos personales (1 punto)
+PUT {{host}}/api/user/register
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Rodrigo",
+  "lastName": "Fernandez",
+  "nif": "12345678A",
+  "address": {
+    "street": "Calle Gran Via",
+    "number": "28",
+    "postal": "28013",
+    "city": "Madrid",
+    "province": "Madrid"
+  }
+}
+
+### Datos personales — body vacío (devuelve 400 VALIDATION_ERROR)
+PUT {{host}}/api/user/register
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 4b) ONBOARDING: EMPRESA — PATCH /api/user/company
+#     CIF nuevo → crea empresa, role=admin
+#     CIF existente → se une, role=guest
+#     isFreelance=true → empresa con NIF del usuario
+# ─────────────────────────────────────────────────────────────────────────────
+
+### Alta de empresa nueva (CIF no existente) (1 punto)
+PATCH {{host}}/api/user/company
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "isFreelance": false,
+  "name": "BildyCorp SL",
+  "cif": "B12345678",
+  "address": {
+    "street": "Calle Mayor",
+    "number": "1",
+    "postal": "28001",
+    "city": "Madrid",
+    "province": "Madrid"
+  }
+}
+
+### Unirse a empresa existente (CIF ya registrado → role guest)
+PATCH {{host}}/api/user/company
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "isFreelance": false,
+  "name": "BildyCorp SL",
+  "cif": "B12345678"
+}
+
+### Alta como autónomo (isFreelance: true — usa el NIF del usuario como CIF)
+PATCH {{host}}/api/user/company
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "isFreelance": true
+}
+
+
+### ─────────────────────────────────────────────────────────────────────────────
+# 5) LOGO DE EMPRESA — PATCH /api/user/logo
+#    Envío multipart/form-data. Usa la pestaña de archivos del cliente HTTP
+#    o ajusta el campo "logo" al path de tu imagen local.
+# ─────────────────────────────────────────────────────────────────────────────
+
+### Subir logo de empresa (1 punto)
+PATCH {{host}}/api/user/logo
+Authorization: Bearer {{accessToken}}
+Content-Type: multipart/form-data; boundary=----FormBoundary
+
+------FormBoundary
+Content-Disposition: form-data; name="logo"; filename="logo.png"
+Content-Type: image/png
+
+< ./uploads/logo.png
+------FormBoundary--
+
+### Logo — sin archivo (devuelve 400 NO_FILE)
+PATCH {{host}}/api/user/logo
+Authorization: Bearer {{accessToken}}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 6) OBTENER USUARIO — GET /api/user
+#    Devuelve datos del usuario con company populada y virtual fullName
+# ─────────────────────────────────────────────────────────────────────────────
+
+### Obtener perfil completo (1 punto)
+GET {{host}}/api/user
+Authorization: Bearer {{accessToken}}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 7a) REFRESH TOKEN — POST /api/user/refresh
+# ─────────────────────────────────────────────────────────────────────────────
+
+### Renovar access token (1 punto)
+POST {{host}}/api/user/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+### Refresh — token inválido (devuelve 401 INVALID_REFRESH_TOKEN)
+POST {{host}}/api/user/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "token.completamente.invalido"
+}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 7b) LOGOUT — POST /api/user/logout
+# ─────────────────────────────────────────────────────────────────────────────
+
+### Cerrar sesión (invalida el refresh token en BD) (1 punto)
+POST {{host}}/api/user/logout
+Authorization: Bearer {{accessToken}}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 8) ELIMINAR USUARIO — DELETE /api/user
+# ─────────────────────────────────────────────────────────────────────────────
+
+### Soft delete — marca deleted:true, mantiene el documento (1 punto)
+DELETE {{host}}/api/user?soft=true
+Authorization: Bearer {{accessToken}}
+
+### Hard delete — elimina el documento de la BD
+DELETE {{host}}/api/user?soft=false
+Authorization: Bearer {{accessToken}}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 9) CAMBIAR CONTRASEÑA — PUT /api/user/password  [BONUS +0.5]
+#    Zod .refine() valida que nueva ≠ actual
+# ─────────────────────────────────────────────────────────────────────────────
+
+### Cambiar contraseña correctamente (bonus)
+PUT {{host}}/api/user/password
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "currentPassword": "password123",
+  "newPassword": "nuevaPassword456"
+}
+
+### Cambiar contraseña — nueva igual a la actual (devuelve 400 VALIDATION_ERROR)
+PUT {{host}}/api/user/password
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "currentPassword": "password123",
+  "newPassword": "password123"
+}
+
+### Cambiar contraseña — actual incorrecta (devuelve 400 WRONG_PASSWORD)
+PUT {{host}}/api/user/password
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "currentPassword": "passwordIncorrecta",
+  "newPassword": "nuevaPassword456"
+}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 10) INVITAR COMPAÑERO — POST /api/user/invite  [BONUS +0.5 rol admin]
+#     Solo admins. El invitado se crea con role=guest y mismo company.
+# ─────────────────────────────────────────────────────────────────────────────
+
+### Invitar compañero (requiere role admin + empresa asignada) (1 punto)
+POST {{host}}/api/user/invite
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "email": "companhero@bildyapp.com",
+  "name": "Ana",
+  "lastName": "Garcia"
+}
+
+### Invitar — email ya existente (devuelve 409 EMAIL_TAKEN)
+POST {{host}}/api/user/invite
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "email": "rodrigo@bildyapp.com"
+}
+
+### Invitar — sin token (devuelve 401)
+POST {{host}}/api/user/invite
+Content-Type: application/json
+
+{
+  "email": "alguien@bildyapp.com"
+}
