@@ -6,11 +6,21 @@ Stack: Node.js 22, Express 5, PostgreSQL 16, Prisma 6.
 URL en producción: https://biblioteca-api-production-d99b.up.railway.app
 
 Endpoints:
-  GET    /api/health         estado del servidor y BD
-  GET    /api/libros         lista todos los libros
-  POST   /api/libros         crea un libro (titulo, autor, isbn requeridos)
-  GET    /api/libros/:id     obtiene un libro por id
-  DELETE /api/libros/:id     elimina un libro
+  GET    /api/health              estado del servidor y BD
+  POST   /api/auth/register       registro de usuario
+  POST   /api/auth/login          login, devuelve JWT
+  GET    /api/auth/me             perfil del usuario autenticado
+  GET    /api/books               lista paginada de libros
+  POST   /api/books               crea un libro (LIBRARIAN/ADMIN)
+  GET    /api/books/:id           obtiene un libro con reseñas
+  PUT    /api/books/:id           actualiza un libro (LIBRARIAN/ADMIN)
+  DELETE /api/books/:id           elimina un libro (ADMIN)
+  GET    /api/loans               mis préstamos activos
+  POST   /api/loans               solicitar préstamo (máx. 3 activos, 14 días)
+  PUT    /api/loans/:id/return    devolver un libro
+  GET    /api/books/:id/reviews   reseñas de un libro
+  POST   /api/books/:id/reviews   crear reseña (requiere devolución previa)
+  DELETE /api/reviews/:id         eliminar mi reseña
 
 Arrancar en local:
   cp .env.example .env        (rellenar DATABASE_URL)
