@@ -1,4 +1,5 @@
 import express from 'express';
+import http from 'node:http';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -10,6 +11,7 @@ import userRoutes         from './routes/user.routes.js';
 import clientRoutes       from './routes/client.routes.js';
 import projectRoutes      from './routes/project.routes.js';
 import deliverynoteRoutes from './routes/deliverynote.routes.js';
+import { initSocket } from './services/socket.service.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -61,5 +63,11 @@ app.use('/api/deliverynote', deliverynoteRoutes);
 // ── Manejo de errores ─────────────────────────────────────────────────────────
 app.use(notFound);
 app.use(errorHandler);
+
+export const createHttpServer = () => {
+  const server = http.createServer(app);
+  initSocket(server);
+  return server;
+};
 
 export default app;
