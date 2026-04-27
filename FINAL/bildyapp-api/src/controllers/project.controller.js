@@ -1,6 +1,7 @@
 import Project from '../models/Project.js';
 import Client from '../models/Client.js';
 import { AppError } from '../utils/AppError.js';
+import { emitToCompany } from '../services/socket.service.js';
 
 // POST /api/project
 export const createProject = async (req, res, next) => {
@@ -21,6 +22,7 @@ export const createProject = async (req, res, next) => {
       name, projectCode, address, email, notes,
       active: active !== undefined ? active : true
     });
+    emitToCompany(user.company, 'project:new', { project });
 
     return res.status(201).json({ error: false, data: { project } });
   } catch (err) {

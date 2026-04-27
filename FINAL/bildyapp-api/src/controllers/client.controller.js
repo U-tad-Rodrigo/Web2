@@ -1,5 +1,6 @@
 import Client from '../models/Client.js';
 import { AppError } from '../utils/AppError.js';
+import { emitToCompany } from '../services/socket.service.js';
 
 // POST /api/client
 export const createClient = async (req, res, next) => {
@@ -13,6 +14,7 @@ export const createClient = async (req, res, next) => {
     if (existing) return next(AppError.conflict('Ya existe un cliente con ese CIF en tu empresa', 'CIF_TAKEN'));
 
     const client = await Client.create({ user: user._id, company: user.company, name, cif, email, phone, address });
+    emitToCompany(user.company, 'client:new', { client });
 
     return res.status(201).json({ error: false, data: { client } });
   } catch (err) {

@@ -2,6 +2,7 @@ import DeliveryNote from '../models/DeliveryNote.js';
 import Project from '../models/Project.js';
 import Client from '../models/Client.js';
 import { AppError } from '../utils/AppError.js';
+import { emitToCompany } from '../services/socket.service.js';
 
 // POST /api/deliverynote
 export const createDeliveryNote = async (req, res, next) => {
@@ -26,6 +27,7 @@ export const createDeliveryNote = async (req, res, next) => {
       material, quantity, unit,
       hours, workers
     });
+    emitToCompany(user.company, 'deliverynote:new', { deliveryNote });
 
     return res.status(201).json({ error: false, data: { deliveryNote } });
   } catch (err) {
@@ -155,6 +157,7 @@ export const signDeliveryNote = async (req, res, next) => {
     deliveryNote.signedAt     = new Date();
     deliveryNote.signatureUrl = signatureUrl;
     await deliveryNote.save();
+    emitToCompany(req.user.company, 'deliverynote:signed', { deliveryNote });
 
     return res.json({ error: false, data: { deliveryNote } });
   } catch (err) {
