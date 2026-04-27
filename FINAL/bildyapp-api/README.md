@@ -64,6 +64,21 @@ Servidor arrancado en `http://localhost:3000`.
 | PUT | `/api/user/password` | JWT | Cambiar contraseña |
 | POST | `/api/user/invite` | JWT + admin | Invitar compañero |
 
+## WebSockets
+
+Socket.IO usa el mismo servidor HTTP que Express. La conexion requiere JWT en `auth.token` o en `Authorization: Bearer <token>`.
+
+Cada socket autenticado entra en una room con el id de su `company`, por lo que los eventos solo llegan a usuarios de la misma empresa.
+
+Eventos emitidos:
+
+| Evento | Cuando se emite |
+|--------|-----------------|
+| `client:new` | Al crear un cliente |
+| `project:new` | Al crear un proyecto |
+| `deliverynote:new` | Al crear un albaran |
+| `deliverynote:signed` | Al firmar un albaran |
+
 ## Tests
 
 Los tests usan MongoDB en memoria automáticamente (no necesitas configurar nada adicional):
