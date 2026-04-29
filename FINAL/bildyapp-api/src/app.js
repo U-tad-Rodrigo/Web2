@@ -6,6 +6,9 @@ import rateLimit from 'express-rate-limit';
 import { sanitize as mongoSanitize } from 'express-mongo-sanitize';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import mongoose from 'mongoose';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './config/swagger.js';
 import { notFound, errorHandler } from './middleware/error-handler.js';
 import userRoutes         from './routes/user.routes.js';
 import clientRoutes       from './routes/client.routes.js';
@@ -49,9 +52,16 @@ app.use((req, _res, next) => {
 // ── Archivos estáticos — logos subidos con Multer ─────────────────────────────
 app.use('/uploads', express.static(path.resolve(__dirname, '../uploads')));
 
+// ── Swagger UI ────────────────────────────────────────────────────────────────
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customSiteTitle: 'BildyApp API Docs',
+}));
+
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get('/health', (_req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  const dbState = mongoose.connection.readyState;
+  const db = dbState === 1 ? 'connected' : 'disconnected';
+  res.json({ status: 'ok', db, timestamp: new Date().toISOString() });
 });
 
 // ── Rutas API ─────────────────────────────────────────────────────────────────
