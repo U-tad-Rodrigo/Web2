@@ -5,6 +5,7 @@ import User from '../models/User.js';
 import Company from '../models/Company.js';
 import { AppError } from '../utils/AppError.js';
 import { notificationService } from '../services/notification.service.js';
+import { sendVerificationEmail, sendInviteEmail } from '../services/mail.service.js';
 
 // ── Helpers privados ──────────────────────────────────────────────────────────
 
@@ -59,6 +60,7 @@ export const register = async (req, res, next) => {
     await User.findByIdAndUpdate(user._id, { refreshToken: hashToken(refreshToken) });
 
     notificationService.emit('user:registered', { email });
+    sendVerificationEmail(email, verificationCode).catch(console.error);
 
     return res.status(201).json({
       error: false,
@@ -429,6 +431,11 @@ export const inviteUser = async (req, res, next) => {
       email,
       invitedBy: inviter.email
     });
+    sendInviteEmail(email, {
+      invitedBy: inviter.email,
+      tempPassword,
+      verificationCode,
+    }).catch(console.error);
 
     return res.status(201).json({
       error: false,
