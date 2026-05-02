@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { AppError } from '../utils/AppError.js';
+import { slackError } from '../services/slack.service.js';
 
 // ── 404 ───────────────────────────────────────────────────────────────────────
 export const notFound = (req, res) => {
@@ -56,6 +57,17 @@ export const errorHandler = (err, req, res, _next) => {
 
   // ── Error genérico ────────────────────────────────────────────────────────
   const status = err.status || err.statusCode || 500;
+
+  if (status >= 500) {
+    slackError({
+      method:  req.method,
+      path:    req.originalUrl,
+      status,
+      message: err.message,
+      stack:   err.stack,
+    }).catch(() => {});
+  }
+
   res.status(status).json({
     error:   true,
     code:    'INTERNAL_ERROR',
