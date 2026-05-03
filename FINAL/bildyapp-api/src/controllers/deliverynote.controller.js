@@ -3,6 +3,7 @@ import Project from '../models/Project.js';
 import Client from '../models/Client.js';
 import { AppError } from '../utils/AppError.js';
 import { emitToCompany } from '../services/socket.service.js';
+import { uploadImage } from '../services/cloudinary.service.js';
 
 // POST /api/deliverynote
 export const createDeliveryNote = async (req, res, next) => {
@@ -150,8 +151,8 @@ export const signDeliveryNote = async (req, res, next) => {
     if (!deliveryNote) return next(AppError.notFound('Albarán no encontrado'));
     if (deliveryNote.signed) return next(AppError.badRequest('El albarán ya está firmado', 'ALREADY_SIGNED'));
 
-    // En FASE 3 se sustituirá por Cloudinary + generación de PDF firmado
-    const signatureUrl = `/uploads/${req.file.filename}`;
+    const cloudUrl     = await uploadImage(req.file.path, 'signatures');
+    const signatureUrl = cloudUrl ?? `/uploads/${req.file.filename}`;
 
     deliveryNote.signed       = true;
     deliveryNote.signedAt     = new Date();

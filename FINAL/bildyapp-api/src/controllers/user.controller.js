@@ -6,6 +6,7 @@ import Company from '../models/Company.js';
 import { AppError } from '../utils/AppError.js';
 import { notificationService } from '../services/notification.service.js';
 import { sendVerificationEmail, sendInviteEmail } from '../services/mail.service.js';
+import { uploadImage } from '../services/cloudinary.service.js';
 
 // ── Helpers privados ──────────────────────────────────────────────────────────
 
@@ -269,8 +270,9 @@ export const uploadLogo = async (req, res, next) => {
       return next(AppError.badRequest('El usuario no tiene empresa asignada', 'NO_COMPANY'));
     }
 
-    // URL publica del logo (servida como estatico desde /uploads)
-    const logoUrl = `/uploads/${req.file.filename}`;
+    // Sube a Cloudinary si está configurado, si no usa URL local
+    const cloudUrl = await uploadImage(req.file.path, 'logos');
+    const logoUrl  = cloudUrl ?? `/uploads/${req.file.filename}`;
 
     const company = await Company.findByIdAndUpdate(
       user.company,
