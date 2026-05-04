@@ -45,3 +45,29 @@ export const uploadImage = async (localPath, folder = 'bildyapp') => {
     stream.end(optimized);
   });
 };
+
+/**
+ * Sube un buffer arbitrario (PDF, etc.) a Cloudinary como recurso `raw`.
+ * Devuelve null si Cloudinary no está configurado.
+ *
+ * @param {Buffer} buffer
+ * @param {object} opts
+ * @param {string} opts.folder       Carpeta en Cloudinary
+ * @param {string} opts.publicId     Identificador del recurso (sin extensión)
+ * @param {string} [opts.format]     Extensión final (e.g. 'pdf')
+ * @returns {Promise<string|null>}   secure_url o null
+ */
+export const uploadBuffer = async (buffer, { folder, publicId, format = 'pdf' }) => {
+  if (!isConfigured()) return null;
+
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder, resource_type: 'raw', public_id: publicId, format },
+      (err, result) => {
+        if (err) return reject(err);
+        resolve(result.secure_url);
+      }
+    );
+    stream.end(buffer);
+  });
+};
