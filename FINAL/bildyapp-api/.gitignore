@@ -4,5 +4,3 @@ uploads/*
 !uploads/.gitkeep
 coverage/
 *.log
-
-kirka
