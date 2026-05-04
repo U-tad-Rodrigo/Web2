@@ -12,7 +12,7 @@ const USER_BASE = '/api/user';
 const CLIENT_BASE = '/api/client';
 const PROJECT_BASE = '/api/project';
 const DELIVERYNOTE_BASE = '/api/deliverynote';
-const SIGNATURE_FIXTURE = path.resolve(__dirname, '../uploads/logo-3ab7f027644baced49fb16ecf51b9e3d.png');
+const SIGNATURE_FIXTURE = path.resolve(__dirname, 'fixtures/signature.png');
 
 const registerUser = async (email, password = 'password123') =>
   request(app).post(`${USER_BASE}/register`).send({ email, password });
@@ -404,5 +404,174 @@ describe('BildyApp API - /api/deliverynote', () => {
       expect(res.body.code).toBe('SIGNED_NOTE');
       await expect(DeliveryNote.findById(created.body.data.deliveryNote._id)).resolves.not.toBeNull();
     });
+
+    test('404 rejects deleting a delivery note from another company', async () => {
+      const first = await setupFullContext('admin1@bildyapp.com', 'B11111111', 'B10000001');
+      const second = await setupFullContext('admin2@bildyapp.com', 'B22222222', 'B20000001');
+      const created = await createDeliveryNote(first.accessToken, first.clientId, first.projectId);
+
+      const res = await request(app)
+        .delete(`${DELIVERYNOTE_BASE}/${created.body.data.deliveryNote._id}`)
+        .set('Authorization', `Bearer ${second.accessToken}`);
+
+      expect(res.statusCode).toBe(404);
+    });
+  });
+
+  describe('GET /api/deliverynote — date filter branches', () => {
+    test('200 filters with only "from" date (no "to")', async () => {
+      const { accessToken, clientId, projectId } = await setupFullContext();
+      await createDeliveryNote(accessToken, clientId, projectId, { workDate: '2026-04-20' });
+      await createDeliveryNote(accessToken, clientId, projectId, {
+        material: 'Arena', workDate: '2026-03-01',
+      });
+
+      const res = await request(app)
+        .get(`${DELIVERYNOTE_BASE}?from=2026-04-01`)
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data.deliveryNotes).toHaveLength(1);
+    });
+
+    test('200 filters with only "to" date (no "from")', async () => {
+      const { accessToken, clientId, projectId } = await setupFullContext();
+      await createDeliveryNote(accessToken, clientId, projectId, { workDate: '2026-04-20' });
+      await createDeliveryNote(accessToken, clientId, projectId, {
+        material: 'Arena', workDate: '2026-03-01',
+      });
+
+      const res = await request(app)
+        .get(`${DELIVERYNOTE_BASE}?to=2026-03-31`)
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data.deliveryNotes).toHaveLength(1);
+      expect(res.body.data.deliveryNotes[0].material).toBe('Arena');
+    });
+
+    test('200 lists delivery notes filtered by client', async () => {
+      const { accessToken, clientId, projectId } = await setupFullContext();
+      await createDeliveryNote(accessToken, clientId, projectId);
+
+      const res = await request(app)
+        .get(`${DELIVERYNOTE_BASE}?client=${clientId}`)
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data.deliveryNotes).toHaveLength(1);
+    });
+
+    test('302 redirects to pdfUrl when delivery note is already signed and has pdfUrl', async () => {
+      const { accessToken, clientId, projectId } = await setupFullContext();
+      const created = await createDeliveryNote(accessToken, clientId, projectId);
+      const id = created.body.data.deliveryNote._id;
+
+      // Simula que el PDF ya fue subido a la nube
+      await DeliveryNote.findByIdAndUpdate(id, {
+        signed: true,
+        signedAt: new Date(),
+        signatureUrl: '/uploads/firma.png',
+        pdfUrl: 'https://res.cloudinary.com/test/raw/upload/deliverynotes/albaran-test.pdf',
+      });
+
+      const res = await request(app)
+        .get(`${DELIVERYNOTE_BASE}/pdf/${id}`)
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      expect(res.statusCode).toBe(302);
+      expect(res.headers.location).toContain('cloudinary.com');
+    });
+
+    test('201 creates hours delivery note with simple hours field (no workers)', async () => {
+      const { accessToken, clientId, projectId } = await setupFullContext();
+
+      const res = await createDeliveryNote(accessToken, clientId, projectId, {
+        format: 'hours',
+        material: undefined,
+        quantity: undefined,
+        unit: undefined,
+        hours: 8,
+      });
+
+      expect(res.statusCode).toBe(201);
+      expect(res.body.data.deliveryNote.format).toBe('hours');
+      expect(res.body.data.deliveryNote.hours).toBe(8);
+    });
+
+    test('404 not found when delivery note id does not exist', async () => {
+      const { accessToken } = await setupFullContext();
+
+      const res = await request(app)
+        .get(`${DELIVERYNOTE_BASE}/507f1f77bcf86cd799439999`)
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      expect(res.statusCode).toBe(404);
+    });
+
+    test('200 streams PDF for signed note with non-existent local signature (file-not-found branch)', async () => {
+      const { accessToken, clientId, projectId } = await setupFullContext();
+      const created = await createDeliveryNote(accessToken, clientId, projectId);
+      const id = created.body.data.deliveryNote._id;
+
+      // Firma con ruta local inexistente — cubre el branch fs.existsSync → false
+      await DeliveryNote.findByIdAndUpdate(id, {
+        signed: true,
+        signedAt: new Date(),
+        signatureUrl: '/uploads/nonexistent-file.png',
+      });
+
+      const res = await request(app)
+        .get(`${DELIVERYNOTE_BASE}/pdf/${id}`)
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.headers['content-type']).toContain('application/pdf');
+    });
+
+    test('200 streams PDF for signed hours note with cloudinary URL signature (remote URL branch)', async () => {
+      const { accessToken, clientId, projectId } = await setupFullContext();
+      const created = await createDeliveryNote(accessToken, clientId, projectId, {
+        format: 'hours',
+        material: undefined,
+        quantity: undefined,
+        unit: undefined,
+        hours: 6,
+      });
+      const id = created.body.data.deliveryNote._id;
+
+      // URL de Cloudinary — cubre el branch signatureUrl.startsWith('/uploads/') → false
+      await DeliveryNote.findByIdAndUpdate(id, {
+        signed: true,
+        signedAt: new Date(),
+        signatureUrl: 'https://res.cloudinary.com/test/image/upload/v1/signatures/sig.webp',
+      });
+
+      const res = await request(app)
+        .get(`${DELIVERYNOTE_BASE}/pdf/${id}`)
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.headers['content-type']).toContain('application/pdf');
+    });
+
+    test('200 streams PDF for workers hours note (workers branch in PDF)', async () => {
+      const { accessToken, clientId, projectId } = await setupFullContext();
+      const created = await createDeliveryNote(accessToken, clientId, projectId, {
+        format: 'hours',
+        material: undefined,
+        quantity: undefined,
+        unit: undefined,
+        workers: [{ name: 'Carlos', hours: 4 }, { name: 'Luis', hours: 5 }],
+      });
+
+      const res = await request(app)
+        .get(`${DELIVERYNOTE_BASE}/pdf/${created.body.data.deliveryNote._id}`)
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.headers['content-type']).toContain('application/pdf');
+    });
+
   });
 });

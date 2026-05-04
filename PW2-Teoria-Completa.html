@@ -1,0 +1,2073 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PW2 — Teoría Completa T1→T13</title>
+<style>
+:root{--bg:#080c14;--bg2:#0f1624;--bg3:#17202f;--bg4:#1e2a3d;--border:#243048;--accent:#6366f1;--accent2:#a78bfa;--green:#10b981;--yellow:#f59e0b;--red:#ef4444;--orange:#f97316;--cyan:#06b6d4;--pink:#ec4899;--text:#f0f4f8;--text2:#8899aa;--text3:#4a5a72;--sidebar-w:270px;--tr:0.18s ease}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;display:flex;height:100vh;overflow:hidden}
+#sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.sb-header{padding:16px 14px 10px;border-bottom:1px solid var(--border)}
+.sb-logo{font-size:12px;font-weight:800;color:var(--accent);letter-spacing:1.5px;text-transform:uppercase}
+.sb-sub{font-size:10px;color:var(--text3);margin-top:2px}
+.sb-progress-wrap{margin-top:8px}
+.sb-progress-label{display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:3px}
+.sb-progress-bar{height:3px;background:var(--bg4);border-radius:2px;overflow:hidden}
+.sb-progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width .5s;width:0%}
+.search-wrap{padding:8px 10px;border-bottom:1px solid var(--border)}
+.search-input{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-size:11px;padding:6px 9px;border-radius:5px;outline:none;transition:border-color var(--tr)}
+.search-input:focus{border-color:var(--accent)}
+.search-input::placeholder{color:var(--text3)}
+#sb-nav{flex:1;overflow-y:auto;padding-bottom:12px}
+#sb-nav::-webkit-scrollbar{width:3px}
+#sb-nav::-webkit-scrollbar-thumb{background:var(--bg4)}
+.nav-section{padding:12px 14px 3px;font-size:9px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:1.8px}
+.nav-item{padding:6px 12px;cursor:pointer;font-size:11.5px;color:var(--text2);border-left:3px solid transparent;transition:all var(--tr);display:flex;align-items:center;gap:7px}
+.nav-item:hover{background:var(--bg3);color:var(--text);border-left-color:var(--border)}
+.nav-item.active{background:var(--bg3);color:var(--accent);border-left-color:var(--accent)}
+.nav-item .icon{font-size:13px;width:16px;text-align:center;flex-shrink:0}
+.nav-item .done-dot{width:5px;height:5px;border-radius:50%;background:var(--green);margin-left:auto;opacity:0;transition:opacity var(--tr)}
+.nav-item.done .done-dot{opacity:1}
+.nav-item.hidden-item{display:none}
+#main{flex:1;overflow-y:auto}
+#main::-webkit-scrollbar{width:5px}
+#main::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
+.page{display:none;padding:28px 40px 44px;animation:fadeIn .2s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+h2{font-size:22px;font-weight:800;margin-bottom:5px;background:linear-gradient(135deg,var(--text) 60%,var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+h3{font-size:14px;font-weight:700;margin:20px 0 8px;color:var(--accent)}
+h4{font-size:12.5px;font-weight:600;margin:12px 0 5px;color:var(--text2)}
+p{line-height:1.7;color:var(--text2);margin-bottom:9px;font-size:12.5px}
+.subtitle{color:var(--text3);font-size:12px;margin-bottom:20px}
+.page-actions{display:flex;align-items:center;gap:8px;margin-bottom:16px}
+.btn-done{background:var(--bg3);border:1px solid var(--border);color:var(--text2);font-size:11px;padding:4px 11px;border-radius:5px;cursor:pointer;transition:all var(--tr)}
+.btn-done:hover{border-color:var(--green);color:var(--green)}
+.btn-done.done{background:#0d2e1f;border-color:var(--green);color:var(--green)}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:16px;margin-bottom:12px}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;margin-bottom:16px}
+.card-mini{background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:12px 14px;transition:border-color var(--tr)}
+.card-mini:hover{border-color:var(--accent)}
+.card-mini h4{margin:0 0 4px;color:var(--text);font-size:12.5px}
+.card-mini p{font-size:11.5px;margin:0;color:var(--text2)}
+.badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.4px}
+.badge-get{background:#0d2e1f;color:var(--green)}.badge-post{background:#2a2200;color:var(--yellow)}.badge-put{background:#0d1e2e;color:var(--cyan)}.badge-patch{background:#1e1228;color:var(--accent2)}.badge-delete{background:#2e0d0d;color:var(--red)}.badge-auth{background:#111828;color:var(--accent);border:1px solid #2a3480}
+.tag{display:inline-block;padding:2px 7px;border-radius:20px;font-size:10px;margin:2px}
+.code-wrap{position:relative;margin:8px 0}
+pre{background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:14px;font-size:11px;line-height:1.6;overflow-x:auto;font-family:'Consolas','Fira Code',monospace;tab-size:2}
+code{background:var(--bg3);padding:1px 5px;border-radius:3px;font-size:11px;font-family:'Consolas','Fira Code',monospace;color:var(--cyan)}
+.copy-btn{position:absolute;top:7px;right:7px;background:var(--bg3);border:1px solid var(--border);color:var(--text3);font-size:10px;padding:3px 8px;border-radius:4px;cursor:pointer;transition:all var(--tr)}
+.copy-btn:hover{border-color:var(--accent);color:var(--accent)}
+.copy-btn.copied{border-color:var(--green);color:var(--green)}
+.flow{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:12px 0;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:7px}
+.flow-step{background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:7px 10px;font-size:10.5px;text-align:center;min-width:80px}
+.flow-step.hl{border-color:var(--accent);color:var(--accent)}.flow-step.green{border-color:var(--green);color:var(--green)}.flow-step.red{border-color:var(--red);color:var(--red)}.flow-step.yellow{border-color:var(--yellow);color:var(--yellow)}.flow-step.cyan{border-color:var(--cyan);color:var(--cyan)}.flow-step.pink{border-color:var(--pink);color:var(--pink)}
+.flow-arrow{color:var(--text3);font-size:14px}
+.accordion{border:1px solid var(--border);border-radius:7px;margin-bottom:5px;overflow:hidden}
+.acc-header{padding:11px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;background:var(--bg2);font-size:12.5px;font-weight:600;user-select:none;transition:background var(--tr)}
+.acc-header:hover{background:var(--bg3)}
+.acc-body{padding:14px;background:var(--bg);font-size:12px;display:none;line-height:1.7;color:var(--text2)}
+.acc-body.open{display:block}
+.chevron{transition:transform .2s;font-size:11px;color:var(--text3)}
+.chevron.open{transform:rotate(90deg)}
+table{width:100%;border-collapse:collapse;font-size:11.5px}
+th{background:var(--bg3);padding:8px 11px;text-align:left;font-weight:700;color:var(--text2);border-bottom:1px solid var(--border);font-size:10.5px;text-transform:uppercase;letter-spacing:.5px}
+td{padding:7px 11px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:top}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--bg3)}
+.hb{border-left:3px solid var(--accent);padding:11px 14px;background:var(--bg2);border-radius:0 7px 7px 0;margin:10px 0;font-size:12px;line-height:1.7;color:var(--text2)}
+.hb.green{border-left-color:var(--green)}.hb.yellow{border-left-color:var(--yellow);background:#1a1200}.hb.red{border-left-color:var(--red);background:#1a0800}.hb.purple{border-left-color:var(--accent2)}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:16px;flex-wrap:wrap}
+.tab{padding:8px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--text3);border-bottom:2px solid transparent;transition:all var(--tr)}
+.tab:hover{color:var(--text2)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.schema{background:var(--bg);border:1px solid var(--border);border-radius:7px;overflow:hidden}
+.schema-field{display:flex;align-items:flex-start;gap:10px;padding:7px 12px;border-bottom:1px solid var(--border);font-size:11px}
+.schema-field:last-child{border-bottom:none}
+.f-name{color:var(--cyan);font-family:monospace;min-width:140px;font-weight:700}.f-type{color:var(--accent2);min-width:100px;font-family:monospace}.f-notes{color:var(--text3);flex:1;font-size:10.5px}.f-req{color:var(--red);font-size:10px;font-weight:800;margin-left:auto}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:9px;margin-bottom:18px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:14px;text-align:center}
+.stat-num{font-size:26px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat-label{font-size:10px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:1px}
+.timeline{position:relative;padding-left:24px;margin:14px 0}
+.timeline::before{content:'';position:absolute;left:6px;top:0;bottom:0;width:2px;background:var(--border)}
+.tl-item{position:relative;margin-bottom:16px}
+.tl-dot{position:absolute;left:-22px;top:3px;width:11px;height:11px;border-radius:50%;background:var(--accent);border:2px solid var(--bg2);box-shadow:0 0 7px rgba(99,102,241,.5)}
+.tl-item.green .tl-dot{background:var(--green)}.tl-item.yellow .tl-dot{background:var(--yellow)}.tl-item.cyan .tl-dot{background:var(--cyan)}
+.tl-title{font-size:12.5px;font-weight:700;color:var(--text)}
+.tl-desc{font-size:11px;color:var(--text3);margin-top:2px}
+.fc-container{display:flex;flex-direction:column;align-items:center;gap:18px;padding:16px 0}
+.fc-progress-bar{width:100%;max-width:560px;display:flex;gap:3px}
+.fc-prog-seg{flex:1;height:4px;border-radius:2px;background:var(--bg4);transition:background .3s}
+.fc-prog-seg.known{background:var(--green)}.fc-prog-seg.review{background:var(--yellow)}.fc-prog-seg.current{background:var(--accent)}
+.fc-card-wrap{width:100%;max-width:560px;perspective:1000px}
+.fc-card{width:100%;min-height:190px;position:relative;transform-style:preserve-3d;transition:transform .5s;cursor:pointer}
+.fc-card.flipped{transform:rotateY(180deg)}
+.fc-front,.fc-back{position:absolute;width:100%;min-height:190px;backface-visibility:hidden;border-radius:11px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:24px;text-align:center}
+.fc-front{background:linear-gradient(135deg,var(--bg2),var(--bg3));border:1px solid var(--border)}
+.fc-back{background:linear-gradient(135deg,#0d1e35,#111e30);border:1px solid var(--accent);transform:rotateY(180deg)}
+.fc-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);margin-bottom:10px}
+.fc-question{font-size:15px;font-weight:700;color:var(--text);line-height:1.5}
+.fc-answer{font-size:12px;color:var(--text2);line-height:1.7}
+.fc-hint{font-size:10px;color:var(--text3);margin-top:8px}
+.fc-controls{display:flex;gap:9px;align-items:center;flex-wrap:wrap;justify-content:center}
+.fc-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text2);font-size:12px;padding:7px 16px;border-radius:7px;cursor:pointer;transition:all var(--tr);font-weight:600}
+.fc-btn:hover{background:var(--bg4)}
+.fc-btn.known{border-color:var(--green);color:var(--green)}.fc-btn.review{border-color:var(--yellow);color:var(--yellow)}
+.fc-btn.known:hover{background:#0d2e1f}.fc-btn.review:hover{background:#2a1800}
+.fc-counter{font-size:11px;color:var(--text3);text-align:center}
+.fc-stats{display:flex;gap:18px;font-size:11.5px;color:var(--text3)}
+.quiz-intro{text-align:center;padding:36px 20px}
+.quiz-start-btn{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;border:none;font-size:13px;font-weight:700;padding:12px 32px;border-radius:9px;cursor:pointer;transition:opacity var(--tr)}
+.quiz-start-btn:hover{opacity:.9}
+.quiz-question{background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:18px;margin-bottom:14px}
+.quiz-q-text{font-size:13px;font-weight:600;color:var(--text);margin-bottom:12px;line-height:1.6}
+.quiz-q-num{font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:7px}
+.quiz-options{display:flex;flex-direction:column;gap:7px}
+.quiz-opt{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:9px 13px;cursor:pointer;font-size:12px;color:var(--text2);transition:all var(--tr);text-align:left;width:100%}
+.quiz-opt:hover{border-color:var(--accent);color:var(--text)}
+.quiz-opt.correct{background:#0d2e1f;border-color:var(--green);color:var(--green)}
+.quiz-opt.wrong{background:#2e0d0d;border-color:var(--red);color:var(--red)}
+.quiz-opt.show-correct{background:#0d2e1f;border-color:var(--green);color:var(--green);opacity:.7}
+.quiz-opt[data-disabled]{pointer-events:none}
+.quiz-feedback{font-size:11px;margin-top:7px;padding:7px 11px;border-radius:5px}
+.quiz-feedback.ok{background:#0d2e1f;color:var(--green)}
+.quiz-feedback.bad{background:#2e0d0d;color:var(--red)}
+.quiz-result{text-align:center;padding:28px;background:var(--bg2);border:1px solid var(--border);border-radius:11px}
+.quiz-score{font-size:44px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.quiz-nav{display:flex;justify-content:space-between;margin-top:14px}
+.quiz-nav-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text2);font-size:12px;padding:7px 18px;border-radius:6px;cursor:pointer;transition:all var(--tr);font-weight:600}
+.quiz-nav-btn:hover{border-color:var(--accent);color:var(--accent)}
+.quiz-nav-btn:disabled{opacity:.3;pointer-events:none}
+.exam-tip{border-left:3px solid var(--green);background:#071a10;border-radius:0 7px 7px 0;padding:11px 14px;margin:10px 0;font-size:12px;line-height:1.7;color:#86efac}
+.exam-tip::before{content:'EXAMEN: ';font-weight:800;color:var(--green)}
+.trampa{border-left:3px solid var(--orange);background:#1a0e00;border-radius:0 7px 7px 0;padding:11px 14px;margin:10px 0;font-size:12px;line-height:1.7;color:#fdba74}
+.trampa::before{content:'TRAMPA: ';font-weight:800;color:var(--orange)}
+.defensa{border-left:3px solid var(--cyan);background:#061620;border-radius:0 7px 7px 0;padding:11px 14px;margin:10px 0;font-size:12px;line-height:1.7;color:#67e8f9}
+.defensa::before{content:'DEFENSA: ';font-weight:800;color:var(--cyan)}
+#toast{position:fixed;bottom:20px;right:20px;background:var(--bg3);border:1px solid var(--green);color:var(--green);font-size:12px;padding:9px 16px;border-radius:7px;opacity:0;pointer-events:none;transition:opacity .3s;z-index:9999;font-weight:600}
+#toast.show{opacity:1}
+.chip{display:inline-block;padding:2px 7px;border-radius:20px;font-size:11px;margin:2px}
+.chip-blue{background:#111828;color:var(--accent)}.chip-purple{background:#1e1228;color:var(--accent2)}.chip-green{background:#0d2e1f;color:var(--green)}.chip-orange{background:#2a1200;color:var(--orange)}.chip-cyan{background:#0a1e28;color:var(--cyan)}.chip-pink{background:#280d1e;color:var(--pink)}
+.section-divider{display:flex;align-items:center;gap:10px;margin:24px 0 14px}
+.section-divider h3{margin:0;white-space:nowrap}
+.section-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.compare-left{border:1px solid var(--red);border-radius:7px;padding:12px;background:#1a0800}
+.compare-right{border:1px solid var(--green);border-radius:7px;padding:12px;background:#071a10}
+.compare-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.compare-left .compare-label{color:var(--red)}
+.compare-right .compare-label{color:var(--green)}
+.tok-kw{color:#c792ea}.tok-str{color:#c3e88d}.tok-cmt{color:#546e7a;font-style:italic}.tok-num{color:#f78c6c}.tok-cls{color:#ffcb6b}.tok-fn{color:#82aaff}.tok-builtin{color:#89ddff}.tok-op{color:#89ddff}
+</style>
+</head>
+<body>
+
+<nav id="sidebar">
+  <div class="sb-header">
+    <div class="sb-logo">PW2 · Teoría Completa</div>
+    <div class="sb-sub">T1 → T13 · Examen + Defensa</div>
+    <div class="sb-progress-wrap">
+      <div class="sb-progress-label"><span>Progreso</span><span id="prog-txt">0 / 13</span></div>
+      <div class="sb-progress-bar"><div class="sb-progress-fill" id="prog-fill"></div></div>
+    </div>
+  </div>
+  <div class="search-wrap">
+    <input class="search-input" id="search-input" placeholder="Buscar tema..." oninput="searchNav(this.value)">
+  </div>
+  <div id="sb-nav">
+    <div class="nav-section">Herramientas</div>
+    <div class="nav-item active" onclick="show('home')"><span class="icon">🗺</span> Inicio / Mapa<span class="done-dot"></span></div>
+    <div class="nav-item" onclick="show('flashcards')"><span class="icon">🃏</span> Flashcards (TODO)<span class="done-dot"></span></div>
+    <div class="nav-item" onclick="show('quiz-master')"><span class="icon">🎯</span> Quiz Maestro<span class="done-dot"></span></div>
+    <div class="nav-section">Temas</div>
+    <div class="nav-item" onclick="show('t1')"><span class="icon">⚙️</span> T1 · Node.js<span class="done-dot"></span></div>
+    <div class="nav-item" onclick="show('t2')"><span class="icon">🔄</span> T2 · Asincronía<span class="done-dot"></span></div>
+    <div class="nav-item" onclick="show('t3')"><span class="icon">🌐</span> T3 · HTTP<span class="done-dot"></span></div>
+    <div class="nav-item" onclick="show('t4')"><span class="icon">🚂</span> T4 · Express 5<span class="done-dot"></span></div>
+    <div class="nav-item" onclick="show('t5')"><span class="icon">🍃</span> T5 · MongoDB<span class="done-dot"></span></div>
+    <div class="nav-item" onclick="show('t6')"><span class="icon">🔷</span> T6 · Zod<span class="done-dot"></span></div>
+    <div class="nav-item" onclick="show('t7')"><span class="icon">🔐</span> T7 · JWT / Auth<span class="done-dot"></span></div>
+    <div class="nav-item" onclick="show('t8')"><span class="icon">🧪</span> T8 · Testing/Docs<span class="done-dot"></span></div>
+    <div class="nav-item" onclick="show('t9')"><span class="icon">🐘</span> T9 · Prisma/SQL<span class="done-dot"></span></div>
+    <div class="nav-item" onclick="show('t10')"><span class="icon">⚡</span> T10 · Socket.IO<span class="done-dot"></span></div>
+    <div class="nav-item" onclick="show('t11')"><span class="icon">🐋</span> T11 · Docker/DevOps<span class="done-dot"></span></div>
+    <div class="nav-item" onclick="show('t12')"><span class="icon">🔷</span> T12 · TypeScript<span class="done-dot"></span></div>
+    <div class="nav-item" onclick="show('t13')"><span class="icon">📁</span> T13 · Uploads<span class="done-dot"></span></div>
+  </div>
+</nav>
+
+<div id="main">
+
+<!-- ═══════════════════════ HOME ═══════════════════════ -->
+<div class="page active" id="page-home">
+  <h2>PW2 · Guía de Teoría Completa</h2>
+  <p class="subtitle">Preparación para examen, tipo test y defensa de práctica · T1–T13</p>
+  <div class="page-actions">
+    <button class="btn-done" onclick="markDone('home',this)">Marcar como revisado</button>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-num">13</div><div class="stat-label">Temas</div></div>
+    <div class="stat-card"><div class="stat-num">80+</div><div class="stat-label">Preguntas test</div></div>
+    <div class="stat-card"><div class="stat-num">50+</div><div class="stat-label">Flashcards</div></div>
+    <div class="stat-card"><div class="stat-num">40+</div><div class="stat-label">Preguntas defensa</div></div>
+  </div>
+
+  <div class="section-divider"><h3>Mapa de Temas</h3></div>
+  <div class="card-grid">
+    <div class="card-mini" onclick="show('t1')" style="cursor:pointer"><h4>⚙️ T1 · Node.js Fundamentos</h4><p>Event Loop, ESM, async/await, módulos nativos</p></div>
+    <div class="card-mini" onclick="show('t2')" style="cursor:pointer"><h4>🔄 T2 · Asincronía Avanzada</h4><p>Fases event loop, Promise combinators, EventEmitter</p></div>
+    <div class="card-mini" onclick="show('t3')" style="cursor:pointer"><h4>🌐 T3 · HTTP y Protocolos</h4><p>Verbos, status codes, HTTP/2, CORS, headers</p></div>
+    <div class="card-mini" onclick="show('t4')" style="cursor:pointer"><h4>🚂 T4 · Express 5 + MVC</h4><p>Middleware, routing, error handling, validación</p></div>
+    <div class="card-mini" onclick="show('t5')" style="cursor:pointer"><h4>🍃 T5 · MongoDB + Mongoose</h4><p>Schemas, CRUD, soft delete, population, indexes</p></div>
+    <div class="card-mini" onclick="show('t6')" style="cursor:pointer"><h4>🔷 T6 · Validación Zod</h4><p>Schemas, transformations, refine, composition</p></div>
+    <div class="card-mini" onclick="show('t7')" style="cursor:pointer"><h4>🔐 T7 · JWT y Autenticación</h4><p>JWT estructura, bcrypt, refresh tokens, roles</p></div>
+    <div class="card-mini" onclick="show('t8')" style="cursor:pointer"><h4>🧪 T8 · Testing + Swagger</h4><p>Jest, Supertest, OpenAPI 3.0, GitHub Actions</p></div>
+    <div class="card-mini" onclick="show('t9')" style="cursor:pointer"><h4>🐘 T9 · Prisma + PostgreSQL</h4><p>Schema, migrations, relaciones, tipos generados</p></div>
+    <div class="card-mini" onclick="show('t10')" style="cursor:pointer"><h4>⚡ T10 · Socket.IO</h4><p>WebSockets, rooms, namespaces, auth en tiempo real</p></div>
+    <div class="card-mini" onclick="show('t11')" style="cursor:pointer"><h4>🐋 T11 · Docker + DevOps</h4><p>Dockerfile, docker-compose, CI/CD, deploy</p></div>
+    <div class="card-mini" onclick="show('t12')" style="cursor:pointer"><h4>🔷 T12 · TypeScript</h4><p>Tipos, interfaces, genéricos, Express tipado</p></div>
+    <div class="card-mini" onclick="show('t13')" style="cursor:pointer"><h4>📁 T13 · File Upload</h4><p>Multer, Cloudinary, Sharp, seguridad</p></div>
+  </div>
+
+  <div class="section-divider"><h3>Cómo usar esta guía</h3></div>
+  <div class="card">
+    <div class="timeline">
+      <div class="tl-item green"><div class="tl-dot"></div><div class="tl-title">Lee la teoría de cada tema</div><div class="tl-desc">Conceptos, diagramas, código clave con explicación</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-title">Practica con los Quiz por tema</div><div class="tl-desc">Preguntas tipo test reales que pueden caer en examen</div></div>
+      <div class="tl-item yellow"><div class="tl-dot"></div><div class="tl-title">Repasa las Flashcards maestras</div><div class="tl-desc">Todos los conceptos clave en formato pregunta/respuesta</div></div>
+      <div class="tl-item cyan"><div class="tl-dot"></div><div class="tl-title">Estudia las preguntas de defensa</div><div class="tl-desc">"Cómo cambiarías X para hacer Y" — respuestas preparadas</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ FLASHCARDS ═══════════════════════ -->
+<div class="page" id="page-flashcards">
+  <h2>Flashcards Maestras</h2>
+  <p class="subtitle">Todos los temas · Haz clic para voltear · Marca lo que ya sabes</p>
+  <div class="page-actions">
+    <button class="btn-done" onclick="markDone('flashcards',this)">Marcar como revisado</button>
+    <button class="fc-btn" onclick="shuffleFlashcards()">Barajar</button>
+    <button class="fc-btn" onclick="resetFlashcards()">Reiniciar</button>
+  </div>
+  <div class="fc-container">
+    <div class="fc-stats">
+      <span><span style="color:var(--green)">●</span> <span id="fc-known">0</span> Aprendidas</span>
+      <span><span style="color:var(--yellow)">●</span> <span id="fc-review">0</span> Repasar</span>
+      <span><span style="color:var(--text3)">●</span> <span id="fc-pending">0</span> Pendientes</span>
+    </div>
+    <div class="fc-progress-bar" id="fc-progress-bar"></div>
+    <div class="fc-card-wrap">
+      <div class="fc-card" id="fc-card" onclick="flipCard()">
+        <div class="fc-front">
+          <div class="fc-label" id="fc-label">T1 · Node.js</div>
+          <div class="fc-question" id="fc-question">Cargando...</div>
+          <div class="fc-hint">Haz clic para ver la respuesta</div>
+        </div>
+        <div class="fc-back">
+          <div class="fc-label">Respuesta</div>
+          <div class="fc-answer" id="fc-answer"></div>
+        </div>
+      </div>
+    </div>
+    <div class="fc-counter" id="fc-counter">1 / 1</div>
+    <div class="fc-controls">
+      <button class="fc-btn" onclick="prevCard()">← Anterior</button>
+      <button class="fc-btn review" onclick="markCard('review')">Repasar</button>
+      <button class="fc-btn known" onclick="markCard('known')">Lo sé ✓</button>
+      <button class="fc-btn" onclick="nextCard()">Siguiente →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ QUIZ MAESTRO ═══════════════════════ -->
+<div class="page" id="page-quiz-master">
+  <h2>Quiz Maestro</h2>
+  <p class="subtitle">Preguntas tipo test de todos los temas · Preparación examen</p>
+  <div class="page-actions"><button class="btn-done" onclick="markDone('quiz-master',this)">Marcar como revisado</button></div>
+  <div id="qm-intro" class="quiz-intro">
+    <p style="font-size:14px;margin-bottom:20px">40 preguntas de todos los temas T1–T13. Pon a prueba tu conocimiento completo.</p>
+    <button class="quiz-start-btn" onclick="startQuizMaster()">Empezar Quiz</button>
+  </div>
+  <div id="qm-body" style="display:none"></div>
+</div>
+
+<!-- ═══════════════════════ T1 NODE.JS ═══════════════════════ -->
+<div class="page" id="page-t1">
+  <h2>T1 · Node.js Fundamentos</h2>
+  <p class="subtitle">Event Loop · ESM · Async/Await · Módulos nativos · npm</p>
+  <div class="page-actions">
+    <button class="btn-done" onclick="markDone('t1',this)">Marcar como revisado</button>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(this,'t1-teoria')">Teoría</div>
+    <div class="tab" onclick="switchTab(this,'t1-quiz')">Quiz (8)</div>
+    <div class="tab" onclick="switchTab(this,'t1-defensa')">Defensa</div>
+  </div>
+
+  <div class="tab-content active" id="t1-teoria">
+    <div class="section-divider"><h3>¿Qué es Node.js?</h3></div>
+    <p>Node.js es un <strong>runtime de JavaScript en el servidor</strong> basado en el motor V8 de Chrome + la biblioteca libuv. Lo que lo hace único: es <strong>single-threaded</strong> pero maneja I/O asincrónico de forma no bloqueante gracias al Event Loop.</p>
+
+    <div class="card-grid">
+      <div class="card-mini"><h4>V8 Engine</h4><p>Compila JS a código máquina (JIT). Gestiona el heap de memoria y el call stack.</p></div>
+      <div class="card-mini"><h4>libuv</h4><p>Librería C que implementa el Event Loop y el thread pool para I/O. Abstrae el sistema operativo.</p></div>
+      <div class="card-mini"><h4>Event Loop</h4><p>Bucle infinito que decide qué ejecutar a continuación cuando el call stack está vacío.</p></div>
+      <div class="card-mini"><h4>Thread Pool</h4><p>4 threads por defecto para operaciones costosas (fs, crypto, DNS). No bloquea el event loop.</p></div>
+    </div>
+
+    <div class="section-divider"><h3>Event Loop — 6 Fases</h3></div>
+    <p>El event loop tiene 6 fases que se ejecutan en orden. Entre cada fase se vacía la <strong>microtask queue</strong> (Promise.then, process.nextTick).</p>
+    <div class="flow">
+      <div class="flow-step green">1. timers<br><small>setTimeout/Interval</small></div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">2. pending<br><small>I/O callbacks</small></div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">3. idle/prepare<br><small>interno</small></div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step hl">4. poll<br><small>I/O espera</small></div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step yellow">5. check<br><small>setImmediate</small></div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step red">6. close<br><small>close events</small></div>
+    </div>
+    <div class="hb">Entre <strong>CADA</strong> fase se vacían las microtasks: primero <code>process.nextTick()</code> y luego <code>Promise.then()</code>.</div>
+
+    <div class="section-divider"><h3>Microtasks vs Macrotasks</h3></div>
+    <div class="compare-grid">
+      <div class="compare-left"><div class="compare-label">Macrotasks (más lentas)</div><code>setTimeout</code><br><code>setInterval</code><br><code>setImmediate</code><br><code>I/O callbacks</code></div>
+      <div class="compare-right"><div class="compare-label">Microtasks (más rápidas)</div><code>process.nextTick()</code><br><code>Promise.then/catch</code><br><code>queueMicrotask()</code><br><small>Se vacían entre fases del event loop</small></div>
+    </div>
+
+    <div class="section-divider"><h3>Orden de ejecución — Ejemplo clave</h3></div>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<pre><span class="tok-fn">console</span>.log(<span class="tok-str">'1'</span>);                    <span class="tok-cmt">// síncrono → primero</span>
+<span class="tok-fn">setTimeout</span>(() => <span class="tok-fn">console</span>.log(<span class="tok-str">'2'</span>), 0); <span class="tok-cmt">// macrotask → último</span>
+<span class="tok-cls">Promise</span>.<span class="tok-fn">resolve</span>().<span class="tok-fn">then</span>(() => <span class="tok-fn">console</span>.log(<span class="tok-str">'3'</span>)); <span class="tok-cmt">// microtask</span>
+process.<span class="tok-fn">nextTick</span>(() => <span class="tok-fn">console</span>.log(<span class="tok-str">'4'</span>));  <span class="tok-cmt">// microtask prioritaria</span>
+<span class="tok-fn">console</span>.log(<span class="tok-str">'5'</span>);                    <span class="tok-cmt">// síncrono → segundo</span>
+<span class="tok-cmt">// Resultado: 1, 5, 4, 3, 2</span></pre>
+    </div>
+    <div class="exam-tip">En examen siempre preguntan el orden de ejecución. Regla: síncrono → nextTick → Promise.then → setTimeout/setImmediate.</div>
+
+    <div class="section-divider"><h3>ESM vs CommonJS</h3></div>
+    <div class="compare-grid">
+      <div class="compare-left"><div class="compare-label">CommonJS (viejo)</div><pre style="font-size:10px">const fs = require('fs')
+module.exports = { fn }</pre></div>
+      <div class="compare-right"><div class="compare-label">ESM (moderno)</div><pre style="font-size:10px">import fs from 'node:fs/promises'
+export { fn }
+export default fn</pre></div>
+    </div>
+    <div class="hb yellow">Para usar ESM: añadir <code>"type": "module"</code> en package.json o usar extensión <code>.mjs</code>. ESM soporta <strong>top-level await</strong>.</div>
+
+    <div class="section-divider"><h3>async/await — La forma moderna</h3></div>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<pre><span class="tok-kw">async function</span> <span class="tok-fn">readFile</span>(path) {
+  <span class="tok-kw">try</span> {
+    <span class="tok-kw">const</span> data = <span class="tok-kw">await</span> fs.<span class="tok-fn">readFile</span>(path, <span class="tok-str">'utf-8'</span>);
+    <span class="tok-kw">return</span> data;
+  } <span class="tok-kw">catch</span> (err) {
+    <span class="tok-kw">throw new</span> <span class="tok-cls">Error</span>(<span class="tok-str">`No se pudo leer: <span class="tok-builtin">${err.message}</span>`</span>);
+  }
+}
+<span class="tok-cmt">// await es azúcar sintáctico sobre Promises</span>
+<span class="tok-cmt">// SIEMPRE usa try/catch con await</span></pre>
+    </div>
+    <div class="trampa">async/await NO hace el código síncrono. Sigue siendo asincrónico — solo parece síncrono visualmente. Una función async SIEMPRE devuelve una Promise.</div>
+
+    <div class="section-divider"><h3>Módulos Nativos Clave</h3></div>
+    <div class="card-grid">
+      <div class="card-mini"><h4>node:fs/promises</h4><p>Leer/escribir archivos con await. <code>readFile, writeFile, mkdir, stat</code></p></div>
+      <div class="card-mini"><h4>node:path</h4><p><code>join, resolve, dirname, basename, extname</code>. Usar SIEMPRE para paths cross-platform.</p></div>
+      <div class="card-mini"><h4>node:crypto</h4><p><code>randomUUID(), createHash('sha256'), randomBytes()</code>. Para tokens y hashes.</p></div>
+      <div class="card-mini"><h4>node:http</h4><p><code>createServer((req,res)=>{})</code>. Base de Express. Maneja peticiones HTTP crudas.</p></div>
+      <div class="card-mini"><h4>process</h4><p><code>process.env, process.argv, process.exit(), process.cwd()</code></p></div>
+      <div class="card-mini"><h4>npm semver</h4><p><code>^1.2.3</code> = minor+patch, <code>~1.2.3</code> = solo patch, <code>1.2.3</code> = exacta</p></div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="t1-quiz">
+    <div id="quiz-t1"></div>
+  </div>
+
+  <div class="tab-content" id="t1-defensa">
+    <div class="section-divider"><h3>Preguntas de Defensa — T1</h3></div>
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>¿Por qué Node.js puede manejar miles de conexiones con un solo hilo?</span><span class="chevron">▶</span></div>
+      <div class="acc-body">Porque usa I/O no bloqueante. Cuando Node hace una operación de I/O (leer archivo, consulta BD), en lugar de esperar bloquea el hilo, delega la operación al sistema operativo vía libuv y el hilo queda libre para atender otras peticiones. El Event Loop notifica cuando el I/O completó. Esto funciona perfectamente para I/O-bound workloads (servidores web, APIs).</div>
+    </div>
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>¿Cuándo NO es adecuado Node.js?</span><span class="chevron">▶</span></div>
+      <div class="acc-body">Para tareas CPU-intensivas: compresión de video, cálculos matemáticos pesados, ML inference. Estas bloquean el hilo principal porque no hay I/O — simplemente calculan. Alternativas: usar worker_threads, delegar a microservicios en Python/Rust, o usar worker processes.</div>
+    </div>
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>¿Cómo cambiarías el servidor para procesar CPUs sin bloquear el Event Loop?</span><span class="chevron">▶</span></div>
+      <div class="acc-body">Usaría <code>worker_threads</code> de Node.js para ejecutar la tarea CPU en un hilo separado: <code>const { Worker } = require('worker_threads')</code>. El worker procesa la tarea pesada y envía el resultado de vuelta al hilo principal via messagePassing. El Event Loop nunca se bloquea.</div>
+    </div>
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>¿Qué diferencia hay entre require() e import?</span><span class="chevron">▶</span></div>
+      <div class="acc-body">require() (CommonJS) es síncrono y resuelve módulos en tiempo de ejecución. import (ESM) es asíncrono, se resuelve en tiempo de parsing (estático), lo que permite tree-shaking y análisis estático. ESM soporta top-level await. require() NO soporta await a nivel de módulo. La recomendación actual es ESM para proyectos nuevos.</div>
+    </div>
+    <div class="defensa">Si en la defensa preguntan "¿cómo optimizarías el servidor?", siempre menciona: clustering (usar todos los cores CPU con pm2 cluster mode), caching en memoria (Redis), y connection pooling en la BD.</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ T2 ASINCRONÍA ═══════════════════════ -->
+<div class="page" id="page-t2">
+  <h2>T2 · Asincronía Avanzada</h2>
+  <p class="subtitle">Promise combinators · EventEmitter · Async iterators · Patrones avanzados</p>
+  <div class="page-actions"><button class="btn-done" onclick="markDone('t2',this)">Marcar como revisado</button></div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(this,'t2-teoria')">Teoría</div>
+    <div class="tab" onclick="switchTab(this,'t2-quiz')">Quiz (6)</div>
+    <div class="tab" onclick="switchTab(this,'t2-defensa')">Defensa</div>
+  </div>
+
+  <div class="tab-content active" id="t2-teoria">
+    <div class="section-divider"><h3>Promise Combinators — cuándo usar cada uno</h3></div>
+    <table>
+      <tr><th>Método</th><th>Cuándo usarlo</th><th>Si uno falla...</th></tr>
+      <tr><td><code>Promise.all(arr)</code></td><td>Todas deben cumplirse. Si una falla, cancela todo.</td><td>Rechaza inmediatamente. Las otras siguen ejecutándose pero se ignora resultado.</td></tr>
+      <tr><td><code>Promise.allSettled(arr)</code></td><td>Quieres resultados de TODAS, fallen o no.</td><td>Espera a todas. Retorna array de <code>{status, value/reason}</code>.</td></tr>
+      <tr><td><code>Promise.race(arr)</code></td><td>Quieres la más rápida (timeout pattern).</td><td>Si la primera es rechazo, rechaza.</td></tr>
+      <tr><td><code>Promise.any(arr)</code></td><td>Quieres la primera que se cumpla.</td><td>Solo rechaza si TODAS fallan (AggregateError).</td></tr>
+    </table>
+
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<pre><span class="tok-cmt">// Patrón timeout con Promise.race</span>
+<span class="tok-kw">const</span> <span class="tok-fn">withTimeout</span> = (promise, ms) =>
+  <span class="tok-cls">Promise</span>.<span class="tok-fn">race</span>([
+    promise,
+    <span class="tok-kw">new</span> <span class="tok-cls">Promise</span>((_, reject) =>
+      <span class="tok-fn">setTimeout</span>(() => reject(<span class="tok-kw">new</span> <span class="tok-cls">Error</span>(<span class="tok-str">'Timeout'</span>)), ms)
+    )
+  ]);
+
+<span class="tok-cmt">// Cargar múltiples recursos en paralelo</span>
+<span class="tok-kw">const</span> [user, posts] = <span class="tok-kw">await</span> <span class="tok-cls">Promise</span>.<span class="tok-fn">all</span>([
+  <span class="tok-fn">getUser</span>(id),
+  <span class="tok-fn">getPosts</span>(id)
+]);</pre>
+    </div>
+
+    <div class="section-divider"><h3>EventEmitter</h3></div>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<pre><span class="tok-kw">import</span> { EventEmitter } <span class="tok-kw">from</span> <span class="tok-str">'node:events'</span>;
+
+<span class="tok-kw">class</span> <span class="tok-cls">OrderQueue</span> <span class="tok-kw">extends</span> <span class="tok-cls">EventEmitter</span> {
+  <span class="tok-fn">add</span>(order) {
+    <span class="tok-kw">this</span>.<span class="tok-fn">emit</span>(<span class="tok-str">'order:new'</span>, order);  <span class="tok-cmt">// dispara evento</span>
+  }
+}
+
+<span class="tok-kw">const</span> queue = <span class="tok-kw">new</span> <span class="tok-cls">OrderQueue</span>();
+queue.<span class="tok-fn">on</span>(<span class="tok-str">'order:new'</span>, (order) => { ... });  <span class="tok-cmt">// suscripción permanente</span>
+queue.<span class="tok-fn">once</span>(<span class="tok-str">'order:new'</span>, (order) => { ... }); <span class="tok-cmt">// solo primera vez</span>
+queue.<span class="tok-fn">off</span>(<span class="tok-str">'order:new'</span>, handler);            <span class="tok-cmt">// desuscribir</span></pre>
+    </div>
+    <div class="trampa">Los listeners de EventEmitter son síncronos por defecto. Si el handler lanza un error y no hay listener de 'error', el proceso termina. Siempre añadir: <code>emitter.on('error', handler)</code>.</div>
+
+    <div class="section-divider"><h3>process.nextTick vs setImmediate</h3></div>
+    <div class="hb purple"><strong>process.nextTick()</strong>: se ejecuta al final del código síncrono actual, ANTES de que el event loop continúe. Tiene prioridad sobre Promise.then.<br><br><strong>setImmediate()</strong>: se ejecuta en la fase CHECK del event loop, después de la fase poll. Puede ejecutarse después o antes que setTimeout(fn,0) dependiendo del contexto.</div>
+
+    <div class="section-divider"><h3>Async Iterators</h3></div>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<pre><span class="tok-cmt">// Leer stream línea por línea (Node.js 18+)</span>
+<span class="tok-kw">import</span> { createReadStream } <span class="tok-kw">from</span> <span class="tok-str">'node:fs'</span>;
+<span class="tok-kw">import</span> readline <span class="tok-kw">from</span> <span class="tok-str">'node:readline'</span>;
+
+<span class="tok-kw">const</span> rl = readline.<span class="tok-fn">createInterface</span>({ input: <span class="tok-fn">createReadStream</span>(<span class="tok-str">'file.txt'</span>) });
+<span class="tok-kw">for await</span> (<span class="tok-kw">const</span> line <span class="tok-kw">of</span> rl) {
+  <span class="tok-fn">processLine</span>(line);  <span class="tok-cmt">// procesa cada línea sin cargar todo en memoria</span>
+}</pre>
+    </div>
+    <div class="exam-tip">for await...of es la forma idiomática de consumir streams en Node.js moderno. Úsalo cuando necesites procesar grandes archivos sin cargarlos en memoria.</div>
+  </div>
+
+  <div class="tab-content" id="t2-quiz">
+    <div id="quiz-t2"></div>
+  </div>
+
+  <div class="tab-content" id="t2-defensa">
+    <div class="section-divider"><h3>Preguntas de Defensa — T2</h3></div>
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>¿Cuándo usarías Promise.allSettled en vez de Promise.all?</span><span class="chevron">▶</span></div>
+      <div class="acc-body">Cuando necesitas procesar TODOS los resultados aunque alguno falle. Ejemplo: enviar notificaciones a múltiples emails — si uno falla no quieres cancelar los demás. Con allSettled obtienes array de {status:'fulfilled', value} o {status:'rejected', reason} para cada promesa, puedes procesar errores individualmente.</div>
+    </div>
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>¿Cómo implementarías retry con backoff exponencial?</span><span class="chevron">▶</span></div>
+      <div class="acc-body"><pre style="font-size:11px">async function retry(fn, maxAttempts = 3) {
+  for (let i = 0; i < maxAttempts; i++) {
+    try { return await fn(); }
+    catch (err) {
+      if (i === maxAttempts - 1) throw err;
+      await new Promise(r => setTimeout(r, 2 ** i * 1000)); // 1s, 2s, 4s
+    }
+  }
+}</pre></div>
+    </div>
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>¿Qué es un memory leak con EventEmitter y cómo lo evitas?</span><span class="chevron">▶</span></div>
+      <div class="acc-body">Si añades listeners con .on() dentro de loops o funciones que se llaman repetidamente, acumulas listeners que nunca se limpian. Node.js avisa con "MaxListenersExceededWarning" (límite default: 10). Soluciones: usar .once() si solo necesitas una ejecución, siempre guardar referencia al handler para poder hacer .off(), o aumentar el límite con emitter.setMaxListeners(20).</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ T3 HTTP ═══════════════════════ -->
+<div class="page" id="page-t3">
+  <h2>T3 · HTTP y Protocolos Web</h2>
+  <p class="subtitle">Verbos HTTP · Status codes · HTTP/2 · CORS · Headers de seguridad</p>
+  <div class="page-actions"><button class="btn-done" onclick="markDone('t3',this)">Marcar como revisado</button></div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(this,'t3-teoria')">Teoría</div>
+    <div class="tab" onclick="switchTab(this,'t3-quiz')">Quiz (7)</div>
+    <div class="tab" onclick="switchTab(this,'t3-defensa')">Defensa</div>
+  </div>
+
+  <div class="tab-content active" id="t3-teoria">
+    <div class="section-divider"><h3>Verbos HTTP — Semántica</h3></div>
+    <table>
+      <tr><th>Verbo</th><th>Semántica</th><th>Idempotente</th><th>Body</th></tr>
+      <tr><td><span class="badge badge-get">GET</span></td><td>Leer recurso</td><td>Sí</td><td>No</td></tr>
+      <tr><td><span class="badge badge-post">POST</span></td><td>Crear recurso / acción</td><td>No</td><td>Sí</td></tr>
+      <tr><td><span class="badge badge-put">PUT</span></td><td>Reemplazar recurso completo</td><td>Sí</td><td>Sí</td></tr>
+      <tr><td><span class="badge badge-patch">PATCH</span></td><td>Actualización parcial</td><td>No*</td><td>Sí</td></tr>
+      <tr><td><span class="badge badge-delete">DELETE</span></td><td>Eliminar recurso</td><td>Sí</td><td>No</td></tr>
+      <tr><td><span class="badge" style="background:#0a1e28;color:var(--cyan)">HEAD</span></td><td>Igual que GET pero sin body</td><td>Sí</td><td>No</td></tr>
+      <tr><td><span class="badge" style="background:#1a1200;color:var(--yellow)">OPTIONS</span></td><td>Qué métodos acepta el servidor</td><td>Sí</td><td>No</td></tr>
+    </table>
+    <div class="trampa">PUT es idempotente porque si lo llamas 3 veces con los mismos datos, el resultado es el mismo. PATCH puede no serlo: "incrementar precio en 10" aplicado 3 veces da resultado diferente.</div>
+
+    <div class="section-divider"><h3>Status Codes — Los que necesitas saber</h3></div>
+    <div class="card-grid">
+      <div class="card-mini"><h4>2xx — Éxito</h4><p><strong>200</strong> OK · <strong>201</strong> Created (POST exitoso) · <strong>204</strong> No Content (DELETE exitoso, sin body)</p></div>
+      <div class="card-mini"><h4>3xx — Redirección</h4><p><strong>301</strong> Moved Permanently · <strong>302</strong> Found (temporal) · <strong>304</strong> Not Modified (caché)</p></div>
+      <div class="card-mini"><h4>4xx — Error cliente</h4><p><strong>400</strong> Bad Request · <strong>401</strong> Unauthorized (no autenticado) · <strong>403</strong> Forbidden (autenticado pero sin permisos) · <strong>404</strong> Not Found · <strong>409</strong> Conflict · <strong>422</strong> Unprocessable Entity · <strong>429</strong> Too Many Requests</p></div>
+      <div class="card-mini"><h4>5xx — Error servidor</h4><p><strong>500</strong> Internal Server Error · <strong>502</strong> Bad Gateway · <strong>503</strong> Service Unavailable · <strong>504</strong> Gateway Timeout</p></div>
+    </div>
+    <div class="exam-tip">La diferencia entre 401 y 403: 401 = "no sé quién eres" (no autenticado), 403 = "sé quién eres pero no tienes permiso". Esta distinción siempre cae en examen.</div>
+
+    <div class="section-divider"><h3>HTTP/1.1 vs HTTP/2 vs HTTP/3</h3></div>
+    <table>
+      <tr><th>Feature</th><th>HTTP/1.1</th><th>HTTP/2</th><th>HTTP/3</th></tr>
+      <tr><td>Multiplexing</td><td>No (head-of-line blocking)</td><td>Sí (múltiples streams en 1 TCP)</td><td>Sí (QUIC)</td></tr>
+      <tr><td>Compresión headers</td><td>No</td><td>HPACK</td><td>QPACK</td></tr>
+      <tr><td>Server Push</td><td>No</td><td>Sí</td><td>Sí</td></tr>
+      <tr><td>Transporte</td><td>TCP</td><td>TCP</td><td>UDP/QUIC</td></tr>
+      <tr><td>TLS</td><td>Opcional</td><td>Prácticamente obligatorio</td><td>Obligatorio</td></tr>
+    </table>
+
+    <div class="section-divider"><h3>CORS — Cross-Origin Resource Sharing</h3></div>
+    <p>CORS permite a un navegador hacer peticiones a un dominio diferente al que sirvió la página. El servidor debe incluir headers específicos.</p>
+    <div class="flow">
+      <div class="flow-step">Browser: pide a api.otro.com</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step yellow">OPTIONS preflight<br><small>(si method no es simple)</small></div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step green">Servidor: Access-Control-Allow-Origin</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step hl">Petición real</div>
+    </div>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<pre><span class="tok-cmt">// Headers CORS que devuelve el servidor:</span>
+Access-Control-Allow-Origin: https://mifrontend.com
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE
+Access-Control-Allow-Headers: Content-Type, Authorization
+Access-Control-Allow-Credentials: <span class="tok-builtin">true</span>
+Access-Control-Max-Age: 86400  <span class="tok-cmt">// cache del preflight (1 día)</span></pre>
+    </div>
+    <div class="trampa">Si usas <code>Access-Control-Allow-Origin: *</code> NO puedes usar <code>Allow-Credentials: true</code>. Para peticiones con cookies o Authorization header, debes especificar el origen exacto.</div>
+
+    <div class="section-divider"><h3>Headers de Seguridad</h3></div>
+    <div class="card-grid">
+      <div class="card-mini"><h4>Strict-Transport-Security</h4><p>Fuerza HTTPS. <code>max-age=31536000; includeSubDomains</code></p></div>
+      <div class="card-mini"><h4>Content-Security-Policy</h4><p>Controla qué recursos puede cargar la página. Previene XSS.</p></div>
+      <div class="card-mini"><h4>X-Frame-Options</h4><p><code>DENY</code> previene clickjacking (iframe de otro dominio).</p></div>
+      <div class="card-mini"><h4>X-Content-Type-Options</h4><p><code>nosniff</code> previene MIME type sniffing en navegadores.</p></div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="t3-quiz">
+    <div id="quiz-t3"></div>
+  </div>
+
+  <div class="tab-content" id="t3-defensa">
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>¿Cuándo usarías PUT vs PATCH?</span><span class="chevron">▶</span></div>
+      <div class="acc-body">PUT para reemplazar el recurso completo (debes enviar todos los campos). Si el recurso no existe, lo crea. PATCH para actualizaciones parciales (envías solo los campos que cambian). En la práctica, PATCH es más común en APIs REST modernas porque el cliente no necesita conocer el estado completo del recurso.</div>
+    </div>
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>¿Cómo implementarías rate limiting en tu API?</span><span class="chevron">▶</span></div>
+      <div class="acc-body">Con el middleware express-rate-limit: define un límite (ej: 100 requests por 15 minutos por IP). Para APIs de login, aplico un límite más estricto (5 intentos por 15 min) para prevenir brute-force. Puede usar Redis como store para distribuir el rate limit entre múltiples instancias del servidor. Retorna 429 Too Many Requests cuando se supera el límite.</div>
+    </div>
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>¿Qué es idempotencia y por qué importa en una API REST?</span><span class="chevron">▶</span></div>
+      <div class="acc-body">Una operación es idempotente si ejecutarla N veces tiene el mismo efecto que ejecutarla 1 vez. Importa para la tolerancia a fallos: si un cliente no sabe si su petición llegó, puede reenviarla de forma segura si es idempotente (GET, PUT, DELETE). POST no es idempotente — reenviar podría crear duplicados. Por eso POST de pago debe tener una clave de idempotencia única.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ T4 EXPRESS 5 ═══════════════════════ -->
+<div class="page" id="page-t4">
+  <h2>T4 · Express 5 y Arquitectura MVC</h2>
+  <p class="subtitle">Middleware · Routing · Error handling · Validación · Estructura de proyecto</p>
+  <div class="page-actions"><button class="btn-done" onclick="markDone('t4',this)">Marcar como revisado</button></div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(this,'t4-teoria')">Teoría</div>
+    <div class="tab" onclick="switchTab(this,'t4-quiz')">Quiz (7)</div>
+    <div class="tab" onclick="switchTab(this,'t4-defensa')">Defensa</div>
+  </div>
+
+  <div class="tab-content active" id="t4-teoria">
+    <div class="section-divider"><h3>Express 5 vs Express 4 — Lo nuevo</h3></div>
+    <div class="compare-grid">
+      <div class="compare-left"><div class="compare-label">Express 4</div><pre style="font-size:10px">// Async errors NO capturados
+app.get('/user', async (req, res) => {
+  const user = await getUser(); // Si falla
+  // El error NO llega al error handler
+  // → crash del proceso
+})</pre></div>
+      <div class="compare-right"><div class="compare-label">Express 5 (automático)</div><pre style="font-size:10px">// Async errors SÍ capturados automáticamente
+app.get('/user', async (req, res) => {
+  const user = await getUser(); // Si falla
+  // Express 5 captura y pasa al error handler
+  // → respuesta controlada
+})</pre></div>
+    </div>
+    <div class="exam-tip">La diferencia CLAVE de Express 5: manejo automático de errores en funciones async. En Express 4 tenías que usar try/catch + next(err) manualmente en cada handler.</div>
+
+    <div class="section-divider"><h3>Cadena de Middleware</h3></div>
+    <div class="flow">
+      <div class="flow-step green">Request llega</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">helmet()</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">cors()</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">json parser</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step hl">auth middleware</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">validate</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step yellow">Controller</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step red">Error handler</div>
+    </div>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<pre><span class="tok-cmt">// Middleware típico: 3 parámetros = middleware normal</span>
+<span class="tok-kw">const</span> authMiddleware = <span class="tok-kw">async</span> (req, res, next) => {
+  <span class="tok-kw">const</span> token = req.headers.authorization?.<span class="tok-fn">split</span>(<span class="tok-str">' '</span>)[<span class="tok-num">1</span>];
+  <span class="tok-kw">if</span> (!token) <span class="tok-kw">return</span> res.<span class="tok-fn">status</span>(<span class="tok-num">401</span>).<span class="tok-fn">json</span>({ error: <span class="tok-str">'No token'</span> });
+  req.user = <span class="tok-kw">await</span> <span class="tok-fn">verifyToken</span>(token);
+  <span class="tok-fn">next</span>(); <span class="tok-cmt">// pasa al siguiente middleware</span>
+};
+
+<span class="tok-cmt">// Error handler: 4 parámetros (err, req, res, next) — SIEMPRE al final</span>
+app.<span class="tok-fn">use</span>((err, req, res, next) => {
+  <span class="tok-fn">console</span>.<span class="tok-fn">error</span>(err);
+  res.<span class="tok-fn">status</span>(err.status || <span class="tok-num">500</span>).<span class="tok-fn">json</span>({ error: err.message });
+});</pre>
+    </div>
+    <div class="trampa">El error handler DEBE tener exactamente 4 parámetros (err, req, res, next) aunque no uses next. Si pones 3, Express no lo reconocerá como error handler.</div>
+
+    <div class="section-divider"><h3>Estructura de Proyecto MVC</h3></div>
+    <div class="card">
+<pre style="font-size:11px">src/
+├── app.js              ← setup Express, middlewares globales
+├── config/             ← db.js, swagger.js, env.js
+├── routes/             ← user.routes.js, project.routes.js
+├── controllers/        ← user.controller.js (lógica HTTP)
+├── services/           ← user.service.js (lógica de negocio)
+├── models/             ← user.model.js (schemas Mongoose/Prisma)
+├── middlewares/        ← auth.js, validate.js, upload.js
+└── utils/              ← errors.js, jwt.js, email.js</pre>
+    </div>
+    <div class="hb green"><strong>Regla:</strong> Controllers solo hablan HTTP (req, res). Services son la lógica de negocio, no conocen Express. Esto hace los servicios testables sin HTTP.</div>
+
+    <div class="section-divider"><h3>Express 5 — Sintaxis nueva en rutas</h3></div>
+    <div class="compare-grid">
+      <div class="compare-left"><div class="compare-label">Express 4</div><pre style="font-size:10px">app.get('/:id?', handler)  // param opcional
+app.get('/*', handler)     // wildcard</pre></div>
+      <div class="compare-right"><div class="compare-label">Express 5</div><pre style="font-size:10px">app.get('/{:id}', handler)  // param opcional
+app.get('/*filepath', handler) // wildcard nombrado</pre></div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="t4-quiz">
+    <div id="quiz-t4"></div>
+  </div>
+
+  <div class="tab-content" id="t4-defensa">
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>¿Por qué separar Controller de Service?</span><span class="chevron">▶</span></div>
+      <div class="acc-body">El Controller conoce Express (req, res, next). El Service no conoce HTTP — solo recibe datos y devuelve resultados. Ventajas: (1) Puedes testear el Service sin arrancar un servidor HTTP. (2) Puedes reutilizar el Service desde CLI, jobs, otras rutas. (3) Si migras de Express a Fastify, solo cambias los controllers. El código de negocio no se toca.</div>
+    </div>
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>¿Cómo añadirías logging a todas las peticiones sin modificar cada route?</span><span class="chevron">▶</span></div>
+      <div class="acc-body">Con un middleware global registrado antes que las rutas: <code>app.use((req, res, next) => { console.log(req.method, req.url); next(); })</code>. O usando morgan o pino-http que ya lo hacen bien. Se registra una sola vez y aplica a TODAS las rutas automáticamente.</div>
+    </div>
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>¿Cómo manejarías distintos tipos de errores (validación, auth, bd) en el error handler?</span><span class="chevron">▶</span></div>
+      <div class="acc-body">Creo clases de error personalizadas: <code>class ValidationError extends Error { constructor(msg) { super(msg); this.status = 400; } }</code> y <code>class AuthError extends Error { this.status = 401 }</code>. El error handler central comprueba el tipo: <code>if (err instanceof ValidationError) return res.status(400).json(...)</code>. Así el error handler es genérico y cada error lleva su propio status.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ T5 MONGODB ═══════════════════════ -->
+<div class="page" id="page-t5">
+  <h2>T5 · MongoDB y Mongoose</h2>
+  <p class="subtitle">Schemas · CRUD · Soft Delete · Population · Indexes · Middleware hooks</p>
+  <div class="page-actions"><button class="btn-done" onclick="markDone('t5',this)">Marcar como revisado</button></div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(this,'t5-teoria')">Teoría</div>
+    <div class="tab" onclick="switchTab(this,'t5-quiz')">Quiz (6)</div>
+    <div class="tab" onclick="switchTab(this,'t5-defensa')">Defensa</div>
+  </div>
+
+  <div class="tab-content active" id="t5-teoria">
+    <div class="section-divider"><h3>Schema con tipos y validación</h3></div>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<pre><span class="tok-kw">const</span> userSchema = <span class="tok-kw">new</span> <span class="tok-cls">Schema</span>({
+  name:    { type: <span class="tok-cls">String</span>, required: <span class="tok-builtin">true</span>, trim: <span class="tok-builtin">true</span>, minlength: <span class="tok-num">2</span> },
+  email:   { type: <span class="tok-cls">String</span>, required: <span class="tok-builtin">true</span>, unique: <span class="tok-builtin">true</span>, lowercase: <span class="tok-builtin">true</span> },
+  role:    { type: <span class="tok-cls">String</span>, enum: [<span class="tok-str">'ADMIN'</span>, <span class="tok-str">'USER'</span>], default: <span class="tok-str">'USER'</span> },
+  company: { type: <span class="tok-cls">Schema</span>.Types.ObjectId, ref: <span class="tok-str">'Company'</span> }, <span class="tok-cmt">// referencia</span>
+  deleted:    { type: <span class="tok-cls">Boolean</span>, default: <span class="tok-builtin">false</span> },           <span class="tok-cmt">// soft delete</span>
+  deletedAt:  { type: <span class="tok-cls">Date</span> },
+}, { timestamps: <span class="tok-builtin">true</span> });  <span class="tok-cmt">// añade createdAt y updatedAt</span></pre>
+    </div>
+
+    <div class="section-divider"><h3>Soft Delete Pattern — MUY IMPORTANTE</h3></div>
+    <p>En lugar de borrar físicamente los documentos, los marcamos como eliminados. Esto permite auditoría, recuperación, y evita referencias rotas.</p>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<pre><span class="tok-cmt">// DELETE → marcar como deleted, no borrar físicamente</span>
+<span class="tok-kw">async</span> <span class="tok-fn">deleteUser</span>(id, deletedBy) {
+  <span class="tok-kw">return</span> User.<span class="tok-fn">findByIdAndUpdate</span>(id, {
+    deleted: <span class="tok-builtin">true</span>,
+    deletedAt: <span class="tok-kw">new</span> <span class="tok-cls">Date</span>(),
+    deletedBy
+  });
+}
+
+<span class="tok-cmt">// SIEMPRE filtrar deleted:false en queries</span>
+<span class="tok-kw">const</span> users = <span class="tok-kw">await</span> User.<span class="tok-fn">find</span>({ deleted: <span class="tok-builtin">false</span> });
+
+<span class="tok-cmt">// Con plugin (mejor): automático en todos los modelos</span>
+userSchema.<span class="tok-fn">plugin</span>(softDeletePlugin);</pre>
+    </div>
+    <div class="exam-tip">El soft delete es un patrón fundamental. En BildyApp TODOS los modelos lo implementan. Siempre añadir deleted:false a los queries para no mostrar datos borrados.</div>
+
+    <div class="section-divider"><h3>Population — Relaciones entre documentos</h3></div>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<pre><span class="tok-cmt">// populate() reemplaza el ObjectId con el documento completo</span>
+<span class="tok-kw">const</span> projects = <span class="tok-kw">await</span> Project
+  .<span class="tok-fn">find</span>({ deleted: <span class="tok-builtin">false</span> })
+  .<span class="tok-fn">populate</span>(<span class="tok-str">'client'</span>, <span class="tok-str">'name email'</span>)  <span class="tok-cmt">// solo name y email del cliente</span>
+  .<span class="tok-fn">lean</span>();  <span class="tok-cmt">// retorna POJOs (más rápido, no tiene métodos Mongoose)</span>
+
+<span class="tok-cmt">// Embedded vs References:
+// Embedded: datos dentro del documento (rápido, pero duplica datos)
+// References: ObjectId → necesita populate (más flexible)</span></pre>
+    </div>
+
+    <div class="section-divider"><h3>Middleware Hooks pre/post</h3></div>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<pre><span class="tok-cmt">// pre-save: hashear password antes de guardar</span>
+userSchema.pre(<span class="tok-str">'save'</span>, <span class="tok-kw">async function</span>() {
+  <span class="tok-kw">if</span> (!<span class="tok-kw">this</span>.isModified(<span class="tok-str">'password'</span>)) <span class="tok-kw">return</span>;
+  <span class="tok-kw">this</span>.password = <span class="tok-kw">await</span> bcrypt.<span class="tok-fn">hash</span>(<span class="tok-kw">this</span>.password, <span class="tok-num">12</span>);
+});
+
+<span class="tok-cmt">// post-save: enviar email de bienvenida</span>
+userSchema.post(<span class="tok-str">'save'</span>, <span class="tok-kw">async function</span>(doc) {
+  <span class="tok-kw">await</span> <span class="tok-fn">sendWelcomeEmail</span>(doc.email);
+});</pre>
+    </div>
+    <div class="trampa">Dentro de un hook pre('save'), usa <code>this</code> para acceder al documento. Pero si usas findByIdAndUpdate en lugar de save, los hooks de 'save' NO se disparan. Usa hooks de 'findOneAndUpdate' si quieres interceptar updates.</div>
+
+    <div class="section-divider"><h3>Indexes para Performance</h3></div>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<pre><span class="tok-cmt">// Índice único (email no puede repetirse)</span>
+email: { type: String, unique: true }
+
+<span class="tok-cmt">// Índice compuesto (queries que filtran por company Y deleted)</span>
+schema.index({ company: 1, deleted: 1 });
+
+<span class="tok-cmt">// Índice de texto para búsqueda full-text</span>
+schema.index({ name: 'text', description: 'text' });</pre>
+    </div>
+  </div>
+
+  <div class="tab-content" id="t5-quiz">
+    <div id="quiz-t5"></div>
+  </div>
+
+  <div class="tab-content" id="t5-defensa">
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>¿Cuándo usarías embedded documents vs references en MongoDB?</span><span class="chevron">▶</span></div>
+      <div class="acc-body">Embedded (datos dentro del documento): cuando los datos siempre se acceden juntos, no van a crecer indefinidamente, y son propios del documento. Ej: array de tags, dirección de un usuario. References (ObjectId): cuando los datos se comparten entre múltiples documentos, crecen independientemente o se consultan por separado. Ej: user → company, project → client. MongoDB no tiene JOINs nativos, pero populate() simula el comportamiento.</div>
+    </div>
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>¿Cómo harías el borrado en cascada? Si elimino una Company, se eliminan sus Projects.</span><span class="chevron">▶</span></div>
+      <div class="acc-body">Con un hook post('save') o pre('findOneAndUpdate') en el modelo Company que detecte cuando deleted cambia a true, y marque todos los proyectos relacionados como deleted también. También se puede hacer en el service con una transacción de MongoDB (session.withTransaction). El soft delete en cascada es más seguro porque todo queda auditado.</div>
+    </div>
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>¿Qué es lean() y cuándo usarlo?</span><span class="chevron">▶</span></div>
+      <div class="acc-body">.lean() hace que Mongoose devuelva objetos JavaScript planos (POJO) en lugar de instancias de Mongoose con todos sus métodos (.save(), .populate(), etc). Ventajas: más rápido y menos memoria. Usarlo cuando solo necesitas leer datos y no necesitas guardar cambios ni usar métodos de Mongoose en los documentos. NO usar lean() si vas a modificar y guardar el documento.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ T6 ZOD ═══════════════════════ -->
+<div class="page" id="page-t6">
+  <h2>T6 · Validación con Zod</h2>
+  <p class="subtitle">Schemas · Transformations · Refine · Composition · File validation</p>
+  <div class="page-actions"><button class="btn-done" onclick="markDone('t6',this)">Marcar como revisado</button></div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(this,'t6-teoria')">Teoría</div>
+    <div class="tab" onclick="switchTab(this,'t6-quiz')">Quiz (5)</div>
+    <div class="tab" onclick="switchTab(this,'t6-defensa')">Defensa</div>
+  </div>
+
+  <div class="tab-content active" id="t6-teoria">
+    <div class="section-divider"><h3>¿Por qué Zod?</h3></div>
+    <p>Zod valida en tiempo de ejecución y genera tipos TypeScript automáticamente. Es declarativo, composable, y permite transformaciones.</p>
+
+    <div class="section-divider"><h3>Schemas básicos</h3></div>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<pre><span class="tok-kw">import</span> { z } <span class="tok-kw">from</span> <span class="tok-str">'zod'</span>;
+
+<span class="tok-kw">const</span> CreateUserSchema = z.<span class="tok-fn">object</span>({
+  name:     z.<span class="tok-fn">string</span>().<span class="tok-fn">min</span>(<span class="tok-num">2</span>).<span class="tok-fn">max</span>(<span class="tok-num">100</span>).<span class="tok-fn">trim</span>(),
+  email:    z.<span class="tok-fn">string</span>().<span class="tok-fn">email</span>().<span class="tok-fn">toLowerCase</span>(),
+  password: z.<span class="tok-fn">string</span>().<span class="tok-fn">min</span>(<span class="tok-num">8</span>).<span class="tok-fn">regex</span>(<span class="tok-str">/[A-Z]/</span>, <span class="tok-str">'Necesita mayúscula'</span>),
+  age:      z.<span class="tok-fn">number</span>().<span class="tok-fn">int</span>().<span class="tok-fn">min</span>(<span class="tok-num">18</span>).<span class="tok-fn">max</span>(<span class="tok-num">120</span>).<span class="tok-fn">optional</span>(),
+  role:     z.<span class="tok-fn">enum</span>([<span class="tok-str">'ADMIN'</span>, <span class="tok-str">'USER'</span>]).<span class="tok-fn">default</span>(<span class="tok-str">'USER'</span>),
+});
+
+<span class="tok-cmt">// Inferir tipo TypeScript automáticamente</span>
+<span class="tok-kw">type</span> <span class="tok-cls">CreateUser</span> = z.<span class="tok-fn">infer</span>&lt;<span class="tok-kw">typeof</span> CreateUserSchema&gt;;</pre>
+    </div>
+
+    <div class="section-divider"><h3>Refine y SuperRefine — Validación custom</h3></div>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<pre><span class="tok-cmt">// .refine() para 1 sola validación custom</span>
+<span class="tok-kw">const</span> PasswordSchema = z.<span class="tok-fn">object</span>({
+  password: z.<span class="tok-fn">string</span>().<span class="tok-fn">min</span>(<span class="tok-num">8</span>),
+  confirm:  z.<span class="tok-fn">string</span>(),
+}).<span class="tok-fn">refine</span>((data) => data.password === data.confirm, {
+  message: <span class="tok-str">'Las contraseñas no coinciden'</span>,
+  path: [<span class="tok-str">'confirm'</span>],  <span class="tok-cmt">// en qué campo aparece el error</span>
+});
+
+<span class="tok-cmt">// .superRefine() para múltiples errores custom</span>
+.<span class="tok-fn">superRefine</span>((data, ctx) => {
+  <span class="tok-kw">if</span> (!/[0-9]/.test(data.password))
+    ctx.<span class="tok-fn">addIssue</span>({ code: z.ZodIssueCode.custom, message: <span class="tok-str">'Necesita número'</span>, path: [<span class="tok-str">'password'</span>] });
+  <span class="tok-kw">if</span> (!/[!@#$]/.test(data.password))
+    ctx.<span class="tok-fn">addIssue</span>({ code: z.ZodIssueCode.custom, message: <span class="tok-str">'Necesita símbolo'</span>, path: [<span class="tok-str">'password'</span>] });
+});</pre>
+    </div>
+    <div class="exam-tip">refine = 1 error, superRefine = múltiples errores. En superRefine usas ctx.addIssue() para añadir cada error individualmente.</div>
+
+    <div class="section-divider"><h3>Composition de Schemas</h3></div>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<pre><span class="tok-kw">const</span> BaseSchema = z.<span class="tok-fn">object</span>({ name: z.<span class="tok-fn">string</span>(), email: z.<span class="tok-fn">string</span>().<span class="tok-fn">email</span>() });
+
+<span class="tok-kw">const</span> CreateSchema = BaseSchema.<span class="tok-fn">extend</span>({ password: z.<span class="tok-fn">string</span>().<span class="tok-fn">min</span>(<span class="tok-num">8</span>) });
+<span class="tok-kw">const</span> UpdateSchema = BaseSchema.<span class="tok-fn">partial</span>();  <span class="tok-cmt">// todos opcionales</span>
+<span class="tok-kw">const</span> PublicSchema = BaseSchema.<span class="tok-fn">pick</span>({ name: <span class="tok-builtin">true</span> });  <span class="tok-cmt">// solo name</span>
+<span class="tok-kw">const</span> NoEmailSchema = BaseSchema.<span class="tok-fn">omit</span>({ email: <span class="tok-builtin">true</span> });  <span class="tok-cmt">// sin email</span></pre>
+    </div>
+
+    <div class="section-divider"><h3>Middleware de validación en Express</h3></div>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<pre><span class="tok-kw">const</span> validate = (schema) => (req, res, next) => {
+  <span class="tok-kw">const</span> result = schema.<span class="tok-fn">safeParse</span>(req.body);
+  <span class="tok-kw">if</span> (!result.success) {
+    <span class="tok-kw">return</span> res.<span class="tok-fn">status</span>(<span class="tok-num">400</span>).<span class="tok-fn">json</span>({ errors: result.error.<span class="tok-fn">flatten</span>().fieldErrors });
+  }
+  req.body = result.data;  <span class="tok-cmt">// datos ya validados Y transformados</span>
+  <span class="tok-fn">next</span>();
+};
+
+<span class="tok-cmt">// Uso en ruta:</span>
+router.<span class="tok-fn">post</span>(<span class="tok-str">'/users'</span>, <span class="tok-fn">validate</span>(CreateUserSchema), userController.<span class="tok-fn">create</span>);</pre>
+    </div>
+  </div>
+
+  <div class="tab-content" id="t6-quiz">
+    <div id="quiz-t6"></div>
+  </div>
+
+  <div class="tab-content" id="t6-defensa">
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>¿Por qué validar datos aunque la BD también tenga validaciones?</span><span class="chevron">▶</span></div>
+      <div class="acc-body">Defense in depth. La validación en la BD es la última línea de defensa, pero es mejor fallar rápido en la capa de aplicación (Zod) antes de hacer un round-trip a la BD. Además, Zod puede dar mensajes de error más descriptivos y específicos para el usuario. También, Zod puede transformar datos (trim, toLowerCase) antes de guardarlos, lo que la BD no hace automáticamente.</div>
+    </div>
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>¿Cómo validarías que dos fechas son coherentes (startDate < endDate)?</span><span class="chevron">▶</span></div>
+      <div class="acc-body">Con .refine() en el objeto completo (no en un campo individual): <code>z.object({startDate: z.date(), endDate: z.date()}).refine(d => d.startDate < d.endDate, {message: 'endDate debe ser posterior a startDate', path: ['endDate']})</code>. El path indica en qué campo aparece el error en el cliente.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ T7 JWT ═══════════════════════ -->
+<div class="page" id="page-t7">
+  <h2>T7 · JWT y Autenticación</h2>
+  <p class="subtitle">JWT estructura · bcrypt · Refresh tokens · HttpOnly cookies · Roles</p>
+  <div class="page-actions"><button class="btn-done" onclick="markDone('t7',this)">Marcar como revisado</button></div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(this,'t7-teoria')">Teoría</div>
+    <div class="tab" onclick="switchTab(this,'t7-quiz')">Quiz (7)</div>
+    <div class="tab" onclick="switchTab(this,'t7-defensa')">Defensa</div>
+  </div>
+
+  <div class="tab-content active" id="t7-teoria">
+    <div class="section-divider"><h3>JWT — Estructura</h3></div>
+    <p>Un JWT tiene 3 partes separadas por puntos, codificadas en Base64URL (no encriptadas, solo firmadas):</p>
+    <div class="flow">
+      <div class="flow-step yellow">HEADER<br><small>alg: HS256, typ: JWT</small></div>
+      <span class="flow-arrow">.</span>
+      <div class="flow-step hl">PAYLOAD<br><small>userId, role, exp</small></div>
+      <span class="flow-arrow">.</span>
+      <div class="flow-step green">SIGNATURE<br><small>HMAC(header+payload, secret)</small></div>
+    </div>
+    <div class="trampa">El payload de un JWT es visible por cualquiera (solo está en Base64, no encriptado). NUNCA pongas información sensible (password, datos bancarios) en el payload. La firma garantiza integridad, no privacidad.</div>
+
+    <div class="section-divider"><h3>bcrypt — Hash de passwords</h3></div>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<pre><span class="tok-kw">import</span> bcrypt <span class="tok-kw">from</span> <span class="tok-str">'bcryptjs'</span>;
+
+<span class="tok-cmt">// Hash (registro): bcrypt genera salt automáticamente</span>
+<span class="tok-kw">const</span> hashed = <span class="tok-kw">await</span> bcrypt.<span class="tok-fn">hash</span>(password, <span class="tok-num">12</span>); <span class="tok-cmt">// 12 salt rounds</span>
+
+<span class="tok-cmt">// Verificar (login): NO son iguales, bcrypt compara internamente</span>
+<span class="tok-kw">const</span> match = <span class="tok-kw">await</span> bcrypt.<span class="tok-fn">compare</span>(plaintext, hashed); <span class="tok-cmt">// true/false</span>
+
+<span class="tok-cmt">// NUNCA: hashed === hashed2  (mismo password → hashes DISTINTOS por el salt)</span></pre>
+    </div>
+    <div class="hb">Salt rounds: cada incremento de 1 duplica el tiempo de cómputo. 10 rounds = ~100ms, 12 rounds = ~300ms. Recomendado: 10-12. Más rounds = más seguro pero más lento el login.</div>
+
+    <div class="section-divider"><h3>Flujo completo: Access + Refresh Tokens</h3></div>
+    <div class="flow">
+      <div class="flow-step green">Login →<br>access(15m) + refresh(7d)</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step hl">Peticiones con<br>Authorization: Bearer access</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step yellow">access expira<br>→ 401</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step cyan">POST /auth/refresh<br>con refresh token</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step green">Nuevo access<br>+ nuevo refresh</div>
+    </div>
+
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<pre><span class="tok-cmt">// Generar tokens</span>
+<span class="tok-kw">const</span> accessToken  = jwt.<span class="tok-fn">sign</span>({ userId: user._id, role: user.role }, ACCESS_SECRET,  { expiresIn: <span class="tok-str">'15m'</span> });
+<span class="tok-kw">const</span> refreshToken = jwt.<span class="tok-fn">sign</span>({ userId: user._id },              REFRESH_SECRET, { expiresIn: <span class="tok-str">'7d'</span> });
+
+<span class="tok-cmt">// Verificar (en middleware)</span>
+<span class="tok-kw">try</span> {
+  <span class="tok-kw">const</span> payload = jwt.<span class="tok-fn">verify</span>(token, ACCESS_SECRET);
+  req.user = payload;
+  <span class="tok-fn">next</span>();
+} <span class="tok-kw">catch</span> (err) {
+  <span class="tok-kw">return</span> res.<span class="tok-fn">status</span>(<span class="tok-num">401</span>).<span class="tok-fn">json</span>({ error: <span class="tok-str">'Token inválido'</span> });
+}</pre>
+    </div>
+
+    <div class="section-divider"><h3>Refresh Token Rotation</h3></div>
+    <div class="hb green">Cada vez que usas el refresh token, recibes un NUEVO refresh token (además del nuevo access token). El anterior queda invalidado. Si alguien roba el refresh token y lo usa, el usuario original detectará que el suyo ya no funciona.</div>
+
+    <div class="section-divider"><h3>HttpOnly Cookies vs localStorage</h3></div>
+    <div class="compare-grid">
+      <div class="compare-left"><div class="compare-label">localStorage (peligroso)</div><ul style="font-size:11px;padding-left:16px;color:#fca5a5"><li>Accesible por JavaScript</li><li>Vulnerable a XSS</li><li>No se envía automáticamente</li></ul></div>
+      <div class="compare-right"><div class="compare-label">HttpOnly Cookie (seguro)</div><ul style="font-size:11px;padding-left:16px;color:#86efac"><li>NO accesible por JavaScript</li><li>Inmune a XSS</li><li>Se envía automáticamente</li><li>Proteger con SameSite=Strict/Lax</li></ul></div>
+    </div>
+
+    <div class="section-divider"><h3>Middleware de Autorización por Roles</h3></div>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<pre><span class="tok-cmt">// Factory de middleware: genera verificador de rol dinámico</span>
+<span class="tok-kw">const</span> requireRole = (...roles) => (req, res, next) => {
+  <span class="tok-kw">if</span> (!roles.<span class="tok-fn">includes</span>(req.user.role))
+    <span class="tok-kw">return</span> res.<span class="tok-fn">status</span>(<span class="tok-num">403</span>).<span class="tok-fn">json</span>({ error: <span class="tok-str">'Forbidden'</span> });
+  <span class="tok-fn">next</span>();
+};
+
+<span class="tok-cmt">// Uso:</span>
+router.<span class="tok-fn">delete</span>(<span class="tok-str">'/users/:id'</span>, authenticate, <span class="tok-fn">requireRole</span>(<span class="tok-str">'ADMIN'</span>), controller);</pre>
+    </div>
+  </div>
+
+  <div class="tab-content" id="t7-quiz">
+    <div id="quiz-t7"></div>
+  </div>
+
+  <div class="tab-content" id="t7-defensa">
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>¿Cómo invalidarías todos los tokens de un usuario tras cambiar su contraseña?</span><span class="chevron">▶</span></div>
+      <div class="acc-body">Los JWT stateless no se pueden invalidar individualmente una vez emitidos. Opciones: (1) Guardar un campo tokenVersion en el usuario e incluirlo en el JWT. Al cambiar password, incrementar tokenVersion. El middleware verifica que la versión del token coincide. (2) Usar una blacklist en Redis con los tokens revocados. (3) Guardar los refresh tokens en BD y marcarlos como revocados. BildyApp usa el refresh token en BD para esto.</div>
+    </div>
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>¿Por qué usar dos secrets distintos para access y refresh tokens?</span><span class="chevron">▶</span></div>
+      <div class="acc-body">Por seguridad. Si se compromete el secret del access token (más expuesto en producción), el atacante no puede generar refresh tokens. Además, permite rotar el secret del access token sin invalidar todos los refresh tokens. Son tokens con propósitos distintos: uno para autenticar peticiones (corta vida) y otro para renovar acceso (larga vida).</div>
+    </div>
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>¿Cómo cambiarías el sistema para implementar login con Google OAuth?</span><span class="chevron">▶</span></div>
+      <div class="acc-body">Usaría passport.js con passport-google-oauth20. El flujo: (1) Usuario hace clic en "Login con Google", redirige a Google. (2) Google autentica y redirige a /auth/google/callback con un code. (3) El servidor intercambia el code por un token de Google, obtiene el perfil. (4) Busca o crea el usuario en BD. (5) Genera los JWT propios de la app y devuelve al frontend. El usuario no necesita password.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ T8 TESTING ═══════════════════════ -->
+<div class="page" id="page-t8">
+  <h2>T8 · Testing, Swagger y CI/CD</h2>
+  <p class="subtitle">Jest · Supertest · OpenAPI 3.0 · GitHub Actions · Monitorización</p>
+  <div class="page-actions"><button class="btn-done" onclick="markDone('t8',this)">Marcar como revisado</button></div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(this,'t8-teoria')">Teoría</div>
+    <div class="tab" onclick="switchTab(this,'t8-quiz')">Quiz (5)</div>
+    <div class="tab" onclick="switchTab(this,'t8-defensa')">Defensa</div>
+  </div>
+
+  <div class="tab-content active" id="t8-teoria">
+    <div class="section-divider"><h3>Jest + Supertest — Test de Endpoints</h3></div>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<pre><span class="tok-kw">import</span> request <span class="tok-kw">from</span> <span class="tok-str">'supertest'</span>;
+<span class="tok-kw">import</span> app <span class="tok-kw">from</span> <span class="tok-str">'../src/app.js'</span>;
+
+<span class="tok-fn">describe</span>(<span class="tok-str">'POST /api/auth/register'</span>, () => {
+  <span class="tok-fn">it</span>(<span class="tok-str">'should create a user and return 201'</span>, <span class="tok-kw">async</span> () => {
+    <span class="tok-kw">const</span> res = <span class="tok-kw">await</span> <span class="tok-fn">request</span>(app)
+      .<span class="tok-fn">post</span>(<span class="tok-str">'/api/auth/register'</span>)
+      .<span class="tok-fn">send</span>({ name: <span class="tok-str">'Test User'</span>, email: <span class="tok-str">'test@test.com'</span>, password: <span class="tok-str">'Test1234!'</span> });
+    <span class="tok-fn">expect</span>(res.statusCode).<span class="tok-fn">toBe</span>(<span class="tok-num">201</span>);
+    <span class="tok-fn">expect</span>(res.body).<span class="tok-fn">toHaveProperty</span>(<span class="tok-str">'token'</span>);
+  });
+
+  <span class="tok-fn">it</span>(<span class="tok-str">'should return 400 for invalid email'</span>, <span class="tok-kw">async</span> () => {
+    <span class="tok-kw">const</span> res = <span class="tok-kw">await</span> <span class="tok-fn">request</span>(app)
+      .<span class="tok-fn">post</span>(<span class="tok-str">'/api/auth/register'</span>)
+      .<span class="tok-fn">send</span>({ email: <span class="tok-str">'not-an-email'</span>, password: <span class="tok-str">'Test1234!'</span> });
+    <span class="tok-fn">expect</span>(res.statusCode).<span class="tok-fn">toBe</span>(<span class="tok-num">400</span>);
+  });
+});</pre>
+    </div>
+
+    <div class="section-divider"><h3>Tipos de Tests</h3></div>
+    <div class="card-grid">
+      <div class="card-mini"><h4>Unit Tests</h4><p>Prueban una función/clase aislada. Mocks para dependencias externas. Rápidos. Ej: testear la lógica del servicio sin BD.</p></div>
+      <div class="card-mini"><h4>Integration Tests</h4><p>Prueban varios módulos juntos. Con Supertest: HTTP → Middleware → Controller → BD real. Más lentos pero más realistas.</p></div>
+      <div class="card-mini"><h4>E2E Tests</h4><p>Prueban el sistema completo desde el frontend al backend. Playwright, Cypress. Los más lentos.</p></div>
+      <div class="card-mini"><h4>Test Coverage</h4><p>% de líneas cubiertas. Mínimo recomendado: 80%. Con Jest: --coverage. Istanbul genera el reporte.</p></div>
+    </div>
+    <div class="exam-tip">La diferencia entre mocks e integration tests: mocks son más rápidos pero pueden pasar aunque el código real falle (mock/prod divergence). Integration tests con BD real detectan este problema.</div>
+
+    <div class="section-divider"><h3>Swagger / OpenAPI 3.0</h3></div>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<pre><span class="tok-cmt">/**
+ * @swagger
+ * /api/users:
+ *   post:
+ *     summary: Crear usuario
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateUser'
+ *     responses:
+ *       201:
+ *         description: Usuario creado
+ *       400:
+ *         description: Datos inválidos
+ */</span>
+router.<span class="tok-fn">post</span>(<span class="tok-str">'/'</span>, validate(CreateUserSchema), controller.<span class="tok-fn">create</span>);</pre>
+    </div>
+
+    <div class="section-divider"><h3>GitHub Actions — CI/CD Pipeline</h3></div>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<pre><span class="tok-cmt"># .github/workflows/ci.yml</span>
+<span class="tok-str">on</span>: [push, pull_request]
+<span class="tok-str">jobs</span>:
+  <span class="tok-str">test</span>:
+    <span class="tok-str">runs-on</span>: ubuntu-latest
+    <span class="tok-str">steps</span>:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - run: npm ci
+      - run: npm test -- --coverage
+      - run: npm run lint</pre>
+    </div>
+    <div class="flow">
+      <div class="flow-step">git push</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step hl">GitHub Actions: Install</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step hl">Tests + Coverage</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step hl">Lint</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step green">Build Docker image</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step green">Deploy</div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="t8-quiz">
+    <div id="quiz-t8"></div>
+  </div>
+
+  <div class="tab-content" id="t8-defensa">
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>¿Cómo testearías un endpoint que requiere autenticación?</span><span class="chevron">▶</span></div>
+      <div class="acc-body">Primero hago login con el usuario de test para obtener el token, luego lo añado al header: <code>request(app).get('/api/users').set('Authorization', `Bearer ${token}`)</code>. En el setup del test (beforeAll), registro un usuario, hago login, guardo el token y lo reutilizo en todos los tests que necesitan auth.</div>
+    </div>
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>¿Cómo evitarías que los tests contaminen la BD de producción?</span><span class="chevron">▶</span></div>
+      <div class="acc-body">Usando variables de entorno distintas: en tests, NODE_ENV=test apunta a una BD diferente (mongodb://localhost/testdb). Con MongoDB Memory Server (mongodb-memory-server) puedo ejecutar una BD en memoria que se crea y destruye con cada test suite. Así los tests son completamente aislados y no necesitan BD externa.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ T9 PRISMA ═══════════════════════ -->
+<div class="page" id="page-t9">
+  <h2>T9 · Prisma y PostgreSQL</h2>
+  <p class="subtitle">Schema · Migrations · Relaciones · Tipos generados · Transactions</p>
+  <div class="page-actions"><button class="btn-done" onclick="markDone('t9',this)">Marcar como revisado</button></div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(this,'t9-teoria')">Teoría</div>
+    <div class="tab" onclick="switchTab(this,'t9-quiz')">Quiz (5)</div>
+    <div class="tab" onclick="switchTab(this,'t9-defensa')">Defensa</div>
+  </div>
+
+  <div class="tab-content active" id="t9-teoria">
+    <div class="section-divider"><h3>Prisma Schema</h3></div>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<pre><span class="tok-cmt">// prisma/schema.prisma</span>
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  role      Role     @default(USER)
+  posts     Post[]              <span class="tok-cmt">// relación 1:N (back-relation)</span>
+  createdAt DateTime @default(now())
+  @@index([email])              <span class="tok-cmt">// índice manual</span>
+}
+
+model Post {
+  id       String @id @default(cuid())
+  title    String
+  author   User   @relation(fields: [authorId], references: [id])
+  authorId String                          <span class="tok-cmt">// FK</span>
+}
+
+enum Role { USER ADMIN MODERATOR }</pre>
+    </div>
+
+    <div class="section-divider"><h3>Mongoose vs Prisma</h3></div>
+    <table>
+      <tr><th>Aspecto</th><th>Mongoose (MongoDB)</th><th>Prisma (PostgreSQL/MySQL)</th></tr>
+      <tr><td>Schema</td><td>Flexible, en JS</td><td>Estricto, en prisma.schema</td></tr>
+      <tr><td>Tipos</td><td>Manuales con TypeScript</td><td>Generados automáticamente</td></tr>
+      <tr><td>Migrations</td><td>Manual</td><td>Automáticas con prisma migrate</td></tr>
+      <tr><td>Relaciones</td><td>References + populate</td><td>JOINs reales, include/select</td></tr>
+      <tr><td>Transactions</td><td>Soportadas (MongoDB 4+)</td><td>ACID nativo</td></tr>
+      <tr><td>Rendimiento</td><td>Flexible para documentos</td><td>Mejor para datos relacionales</td></tr>
+    </table>
+
+    <div class="section-divider"><h3>CRUD con Prisma Client</h3></div>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<pre><span class="tok-kw">import</span> { PrismaClient } <span class="tok-kw">from</span> <span class="tok-str">'@prisma/client'</span>;
+<span class="tok-kw">const</span> prisma = <span class="tok-kw">new</span> <span class="tok-cls">PrismaClient</span>();
+
+<span class="tok-cmt">// Create</span>
+<span class="tok-kw">const</span> user = <span class="tok-kw">await</span> prisma.user.<span class="tok-fn">create</span>({ data: { name, email } });
+
+<span class="tok-cmt">// Read con relación</span>
+<span class="tok-kw">const</span> users = <span class="tok-kw">await</span> prisma.user.<span class="tok-fn">findMany</span>({
+  where: { role: <span class="tok-str">'ADMIN'</span> },
+  include: { posts: { where: { published: <span class="tok-builtin">true</span> } } },  <span class="tok-cmt">// JOIN</span>
+  select: { id: <span class="tok-builtin">true</span>, name: <span class="tok-builtin">true</span> },  <span class="tok-cmt">// solo estos campos</span>
+  orderBy: { createdAt: <span class="tok-str">'desc'</span> },
+  take: <span class="tok-num">10</span>, skip: <span class="tok-num">0</span>,  <span class="tok-cmt">// paginación</span>
+});
+
+<span class="tok-cmt">// Transaction (atómica)</span>
+<span class="tok-kw">await</span> prisma.<span class="tok-fn">$transaction</span>([
+  prisma.account.<span class="tok-fn">update</span>({ where: { id: from }, data: { balance: { decrement: amount } } }),
+  prisma.account.<span class="tok-fn">update</span>({ where: { id: to },   data: { balance: { increment: amount } } }),
+]);</pre>
+    </div>
+    <div class="exam-tip">Prisma genera tipos TypeScript automáticamente de tu schema. Esto significa que si cambias el schema, TypeScript te avisa en TODAS las partes que usas ese modelo — refactoring seguro.</div>
+
+    <div class="section-divider"><h3>Migrations</h3></div>
+    <div class="card">
+      <div class="timeline">
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-title"><code>npx prisma migrate dev --name add_users</code></div><div class="tl-desc">Desarrollo: genera SQL migration y la aplica en la BD local</div></div>
+        <div class="tl-item green"><div class="tl-dot"></div><div class="tl-title"><code>npx prisma migrate deploy</code></div><div class="tl-desc">Producción: aplica todas las migrations pendientes. Se ejecuta en el startup del contenedor.</div></div>
+        <div class="tl-item yellow"><div class="tl-dot"></div><div class="tl-title"><code>npx prisma studio</code></div><div class="tl-desc">UI visual para explorar y editar datos en la BD</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="t9-quiz">
+    <div id="quiz-t9"></div>
+  </div>
+
+  <div class="tab-content" id="t9-defensa">
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>¿Cuándo usarías Prisma (SQL) en lugar de Mongoose (MongoDB)?</span><span class="chevron">▶</span></div>
+      <div class="acc-body">Prisma+PostgreSQL cuando: los datos son altamente relacionales (muchas relaciones entre entidades), necesitas ACID transactions fuertes (pagos, inventario), o el esquema es muy estable y predecible. Mongoose+MongoDB cuando: los datos son documentos flexibles con estructura variable, necesitas escalar horizontalmente con facilidad, o los datos son jerárquicos y raramente necesitas JOINs.</div>
+    </div>
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>¿Qué pasaría si haces prisma migrate en producción con una migration que añade NOT NULL sin default?</span><span class="chevron">▶</span></div>
+      <div class="acc-body">Error de migración. Si tienes datos existentes y añades una columna NOT NULL sin valor default, PostgreSQL rechaza la migration porque las filas existentes no tendrían valor para esa columna. Solución: (1) Añadir primero la columna como nullable, (2) hacer un backfill (UPDATE) para rellenar los datos existentes, (3) luego cambiar a NOT NULL. Prisma migrate detecta esto y genera la migration en 3 pasos automáticamente.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ T10 SOCKET.IO ═══════════════════════ -->
+<div class="page" id="page-t10">
+  <h2>T10 · Socket.IO y Tiempo Real</h2>
+  <p class="subtitle">WebSockets · Rooms · Namespaces · Autenticación · Broadcast patterns</p>
+  <div class="page-actions"><button class="btn-done" onclick="markDone('t10',this)">Marcar como revisado</button></div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(this,'t10-teoria')">Teoría</div>
+    <div class="tab" onclick="switchTab(this,'t10-quiz')">Quiz (5)</div>
+    <div class="tab" onclick="switchTab(this,'t10-defensa')">Defensa</div>
+  </div>
+
+  <div class="tab-content active" id="t10-teoria">
+    <div class="section-divider"><h3>WebSocket vs HTTP Polling</h3></div>
+    <div class="compare-grid">
+      <div class="compare-left"><div class="compare-label">HTTP Polling (lento)</div><ul style="font-size:11px;padding-left:16px;color:#fca5a5"><li>Cliente pregunta cada N segundos</li><li>Alta latencia</li><li>Muchas peticiones innecesarias</li><li>Overhead de headers HTTP</li></ul></div>
+      <div class="compare-right"><div class="compare-label">WebSocket (tiempo real)</div><ul style="font-size:11px;padding-left:16px;color:#86efac"><li>Conexión persistente bidireccional</li><li>Latencia mínima (~1ms)</li><li>Servidor PUSH datos cuando hay novedad</li><li>Sin overhead HTTP por mensaje</li></ul></div>
+    </div>
+
+    <div class="section-divider"><h3>Socket.IO — Broadcast Patterns</h3></div>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<pre><span class="tok-cmt">// Servidor</span>
+io.<span class="tok-fn">on</span>(<span class="tok-str">'connection'</span>, (socket) => {
+  <span class="tok-cmt">// Solo al socket que se conectó</span>
+  socket.<span class="tok-fn">emit</span>(<span class="tok-str">'welcome'</span>, { msg: <span class="tok-str">'Bienvenido'</span> });
+
+  <span class="tok-cmt">// A todos excepto el emisor</span>
+  socket.broadcast.<span class="tok-fn">emit</span>(<span class="tok-str">'user:joined'</span>, socket.id);
+
+  <span class="tok-cmt">// A todos (incluyendo el emisor)</span>
+  io.<span class="tok-fn">emit</span>(<span class="tok-str">'notification'</span>, data);
+
+  <span class="tok-cmt">// Solo a una sala específica</span>
+  io.<span class="tok-fn">to</span>(roomId).<span class="tok-fn">emit</span>(<span class="tok-str">'message'</span>, data);
+
+  <span class="tok-cmt">// Unirse/salir de sala</span>
+  socket.<span class="tok-fn">join</span>(roomId);
+  socket.<span class="tok-fn">leave</span>(roomId);
+
+  <span class="tok-cmt">// Escuchar evento del cliente</span>
+  socket.<span class="tok-fn">on</span>(<span class="tok-str">'message:send'</span>, async (data) => {
+    <span class="tok-kw">const</span> msg = <span class="tok-kw">await</span> <span class="tok-fn">saveMessage</span>(data);
+    io.<span class="tok-fn">to</span>(data.roomId).<span class="tok-fn">emit</span>(<span class="tok-str">'message:new'</span>, msg);
+  });
+});</pre>
+    </div>
+
+    <div class="section-divider"><h3>Autenticación en Socket.IO</h3></div>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<pre><span class="tok-cmt">// Middleware en el handshake (antes de conectar)</span>
+io.<span class="tok-fn">use</span>(<span class="tok-kw">async</span> (socket, next) => {
+  <span class="tok-kw">try</span> {
+    <span class="tok-kw">const</span> token = socket.handshake.auth.token;
+    socket.user = jwt.<span class="tok-fn">verify</span>(token, ACCESS_SECRET);
+    <span class="tok-fn">next</span>();
+  } <span class="tok-kw">catch</span> {
+    <span class="tok-fn">next</span>(<span class="tok-kw">new</span> <span class="tok-cls">Error</span>(<span class="tok-str">'Unauthorized'</span>));
+  }
+});
+
+<span class="tok-cmt">// Cliente: envía el token en el handshake</span>
+<span class="tok-kw">const</span> socket = <span class="tok-fn">io</span>(<span class="tok-str">'http://localhost:3000'</span>, {
+  auth: { token: localStorage.<span class="tok-fn">getItem</span>(<span class="tok-str">'token'</span>) }
+});</pre>
+    </div>
+
+    <div class="section-divider"><h3>Namespaces vs Rooms</h3></div>
+    <div class="card-grid">
+      <div class="card-mini"><h4>Namespaces</h4><p>Endpoints separados: <code>/chat</code>, <code>/admin</code>, <code>/notifications</code>. Separan funcionalidades a nivel de conexión. <code>io.of('/chat')</code></p></div>
+      <div class="card-mini"><h4>Rooms</h4><p>Grupos dentro de un namespace. Un socket puede estar en múltiples rooms. <code>socket.join('room:123')</code>. Ideal para chats de grupo, notificaciones por empresa.</p></div>
+    </div>
+    <div class="hb green">En BildyApp: cada empresa tiene su propia room. Cuando hay un cambio en un proyecto, se emite a <code>company:{companyId}</code> — todos los usuarios de esa empresa reciben la notificación en tiempo real.</div>
+  </div>
+
+  <div class="tab-content" id="t10-quiz">
+    <div id="quiz-t10"></div>
+  </div>
+
+  <div class="tab-content" id="t10-defensa">
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>¿Cómo escalarías Socket.IO a múltiples servidores?</span><span class="chevron">▶</span></div>
+      <div class="acc-body">Con @socket.io/redis-adapter. El problema: si tienes 3 servidores y un cliente se conecta al servidor 1, pero el evento debe llegar a clientes en el servidor 2 y 3. Redis actúa como bus de mensajes: cuando el servidor 1 hace io.emit(), Redis lo publica y los servidores 2 y 3 lo reciben y lo envían a sus clientes conectados. Sin este adapter, socket.broadcast.emit() solo llegaría a clientes del mismo servidor.</div>
+    </div>
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>¿Cómo manejarías la persistencia de mensajes si el usuario estaba offline?</span><span class="chevron">▶</span></div>
+      <div class="acc-body">Guardar todos los mensajes en MongoDB con campos roomId, senderId, content, timestamp, readBy[]. Cuando el usuario se conecta (connection event), consulta los mensajes no leídos desde su último visto. El cliente actualiza readBy[] cuando los muestra. Esta es la misma estrategia que WhatsApp: mensajes siempre persistidos, Socket.IO solo es el canal de entrega en tiempo real.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ T11 DOCKER ═══════════════════════ -->
+<div class="page" id="page-t11">
+  <h2>T11 · Docker y DevOps</h2>
+  <p class="subtitle">Dockerfile · docker-compose · CI/CD · Deploy · Variables de entorno</p>
+  <div class="page-actions"><button class="btn-done" onclick="markDone('t11',this)">Marcar como revisado</button></div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(this,'t11-teoria')">Teoría</div>
+    <div class="tab" onclick="switchTab(this,'t11-quiz')">Quiz (5)</div>
+    <div class="tab" onclick="switchTab(this,'t11-defensa')">Defensa</div>
+  </div>
+
+  <div class="tab-content active" id="t11-teoria">
+    <div class="section-divider"><h3>Dockerfile — Best Practices</h3></div>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<pre><span class="tok-cmt"># Multi-stage build: imagen de producción más pequeña</span>
+FROM node:22-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production  <span class="tok-cmt"># solo deps de producción</span>
+
+FROM node:22-alpine
+WORKDIR /app
+COPY --from=builder /app/node_modules ./node_modules
+COPY . .
+
+<span class="tok-cmt"># Seguridad: no ejecutar como root</span>
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+USER appuser
+
+EXPOSE 3000
+CMD ["node", "src/app.js"]</pre>
+    </div>
+    <div class="hb">Layer caching: Docker cachea cada instrucción. <code>COPY package*.json && npm ci</code> antes que <code>COPY . .</code> significa que si solo cambias código fuente (no package.json), Docker reutiliza la capa de node_modules — builds mucho más rápidos.</div>
+
+    <div class="section-divider"><h3>docker-compose — Multi-container</h3></div>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<pre><span class="tok-cmt"># docker-compose.yml</span>
+services:
+  api:
+    build: .
+    ports: ["3000:3000"]
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/mydb
+      - JWT_SECRET=${JWT_SECRET}        <span class="tok-cmt"># desde .env</span>
+    depends_on: [mongo]
+    volumes:
+      - ./logs:/app/logs               <span class="tok-cmt"># persistir logs</span>
+
+  mongo:
+    image: mongo:7
+    volumes:
+      - mongo_data:/data/db            <span class="tok-cmt"># persistir datos BD</span>
+
+volumes:
+  mongo_data:                          <span class="tok-cmt"># named volume</span></pre>
+    </div>
+    <div class="trampa">depends_on NO espera a que el servicio esté listo, solo a que el contenedor arranque. Si la BD tarda en inicializarse, la app falla al conectar. Solución: usar wait-for-it.sh o lógica de retry al conectar.</div>
+
+    <div class="section-divider"><h3>Variables de entorno — Por stage</h3></div>
+    <table>
+      <tr><th>Stage</th><th>Cómo pasar variables</th></tr>
+      <tr><td>Desarrollo</td><td>Archivo <code>.env</code> + dotenv. NUNCA commitear .env</td></tr>
+      <tr><td>CI/CD</td><td>GitHub Actions Secrets → <code>$&#123;&#123; secrets.JWT_SECRET &#125;&#125;</code></td></tr>
+      <tr><td>Producción</td><td>Variables de entorno del PaaS (Railway, Render, Heroku) o Docker secrets</td></tr>
+    </table>
+
+    <div class="section-divider"><h3>CI/CD Pipeline completo</h3></div>
+    <div class="flow">
+      <div class="flow-step">git push → PR</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step hl">npm test</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step hl">npm run lint</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step green">docker build</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step green">docker push registry</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step green">Deploy producción</div>
+    </div>
+    <div class="exam-tip">En BildyApp, el startup del contenedor ejecuta <code>npx prisma migrate deploy</code> antes de arrancar la API. Esto asegura que las migrations estén siempre aplicadas en producción.</div>
+  </div>
+
+  <div class="tab-content" id="t11-quiz">
+    <div id="quiz-t11"></div>
+  </div>
+
+  <div class="tab-content" id="t11-defensa">
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>¿Cuál es la diferencia entre una imagen Docker y un contenedor?</span><span class="chevron">▶</span></div>
+      <div class="acc-body">Una imagen es una plantilla inmutable (como una clase en OOP). Un contenedor es una instancia en ejecución de esa imagen (como un objeto). Puedes tener múltiples contenedores ejecutándose de la misma imagen. La imagen se construye con docker build, el contenedor se crea con docker run.</div>
+    </div>
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>¿Por qué usar named volumes en docker-compose y no bind mounts?</span><span class="chevron">▶</span></div>
+      <div class="acc-body">Named volumes (mongo_data:/data/db) son gestionados por Docker y persisten entre docker-compose down y docker-compose up. Bind mounts (./data:/data/db) montan un directorio del host — útil en desarrollo para hot-reload. Para bases de datos en producción, named volumes son mejores porque Docker los gestiona y tienen mejor rendimiento en Windows/Mac.</div>
+    </div>
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>¿Cómo añadirías un health check al contenedor?</span><span class="chevron">▶</span></div>
+      <div class="acc-body">En el Dockerfile: <code>HEALTHCHECK --interval=30s --timeout=3s CMD curl -f http://localhost:3000/api/health || exit 1</code>. El endpoint /api/health devuelve 200 si la app y la BD están OK. Docker/Kubernetes usan el health check para saber si el contenedor está listo para recibir tráfico y para auto-reiniciarlo si falla.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ T12 TYPESCRIPT ═══════════════════════ -->
+<div class="page" id="page-t12">
+  <h2>T12 · TypeScript con Node.js</h2>
+  <p class="subtitle">Tipos · Interfaces · Genéricos · Express tipado · DTO pattern</p>
+  <div class="page-actions"><button class="btn-done" onclick="markDone('t12',this)">Marcar como revisado</button></div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(this,'t12-teoria')">Teoría</div>
+    <div class="tab" onclick="switchTab(this,'t12-quiz')">Quiz (5)</div>
+    <div class="tab" onclick="switchTab(this,'t12-defensa')">Defensa</div>
+  </div>
+
+  <div class="tab-content active" id="t12-teoria">
+    <div class="section-divider"><h3>Interface vs Type</h3></div>
+    <div class="compare-grid">
+      <div class="compare-left" style="border-color:var(--accent);background:#0d1228"><div class="compare-label" style="color:var(--accent)">interface (para objetos)</div><pre style="font-size:10px">interface User {
+  id: string;
+  name: string;
+}
+// Puede extenderse
+interface Admin extends User {
+  permissions: string[];
+}</pre></div>
+      <div class="compare-right" style="border-color:var(--accent2);background:#1a0d28"><div class="compare-label" style="color:var(--accent2)">type (para todo lo demás)</div><pre style="font-size:10px">type Status = 'active' | 'inactive'
+type UserOrAdmin = User | Admin
+type Callback = (err: Error | null) => void
+// NO puede extenderse (usa &)
+type AdminUser = User & { perms: string[] }</pre></div>
+    </div>
+    <div class="exam-tip">Regla práctica: interface para shapes de objetos (modelos, DTOs, API responses). type para union types, primitivos, funciones, y aliases.</div>
+
+    <div class="section-divider"><h3>Genéricos — Código reutilizable con type-safety</h3></div>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<pre><span class="tok-cmt">// Respuesta API genérica — un solo tipo para todas las respuestas</span>
+<span class="tok-kw">interface</span> <span class="tok-cls">ApiResponse</span>&lt;T&gt; {
+  data: T;
+  message: <span class="tok-cls">string</span>;
+  success: <span class="tok-builtin">boolean</span>;
+}
+
+<span class="tok-cmt">// Uso: TypeScript infiere T automáticamente</span>
+<span class="tok-kw">const</span> response: <span class="tok-cls">ApiResponse</span>&lt;<span class="tok-cls">User</span>&gt; = { data: user, message: <span class="tok-str">'OK'</span>, success: <span class="tok-builtin">true</span> };
+
+<span class="tok-cmt">// Constraint: T debe extender BaseModel (tener id)</span>
+<span class="tok-kw">function</span> <span class="tok-fn">findById</span>&lt;T <span class="tok-kw">extends</span> { id: <span class="tok-cls">string</span> }&gt;(items: T[], id: <span class="tok-cls">string</span>): T | undefined {
+  <span class="tok-kw">return</span> items.<span class="tok-fn">find</span>(item => item.id === id);
+}</pre>
+    </div>
+
+    <div class="section-divider"><h3>Express Tipado — Extender Request</h3></div>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<pre><span class="tok-cmt">// types/express.d.ts — extender el tipo Request global</span>
+<span class="tok-kw">declare global</span> {
+  <span class="tok-kw">namespace</span> Express {
+    <span class="tok-kw">interface</span> <span class="tok-cls">Request</span> {
+      user?: { id: <span class="tok-cls">string</span>; role: <span class="tok-cls">string</span>; company: <span class="tok-cls">string</span> };
+    }
+  }
+}
+
+<span class="tok-cmt">// Ahora req.user está tipado en todos los controllers</span>
+<span class="tok-kw">const</span> myController = (req: Request, res: Response) => {
+  <span class="tok-kw">const</span> userId = req.user?.id;  <span class="tok-cmt">// TypeScript sabe que puede ser undefined</span>
+};</pre>
+    </div>
+
+    <div class="section-divider"><h3>DTO Pattern — Separar request de modelo interno</h3></div>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<pre><span class="tok-cmt">// DTOs separan lo que llega/sale del modelo interno</span>
+<span class="tok-kw">interface</span> <span class="tok-cls">CreateUserDTO</span> { name: <span class="tok-cls">string</span>; email: <span class="tok-cls">string</span>; password: <span class="tok-cls">string</span> }
+<span class="tok-kw">interface</span> <span class="tok-cls">UpdateUserDTO</span> { name?: <span class="tok-cls">string</span>; email?: <span class="tok-cls">string</span> }
+<span class="tok-kw">interface</span> <span class="tok-cls">UserResponseDTO</span> { id: <span class="tok-cls">string</span>; name: <span class="tok-cls">string</span>; email: <span class="tok-cls">string</span> }
+<span class="tok-cmt">// NUNCA devolver el campo 'password' en la respuesta
+// Con Prisma: select: { password: false } garantiza esto en tiempo de compilación</span></pre>
+    </div>
+
+    <div class="section-divider"><h3>tsconfig.json — Opciones clave</h3></div>
+    <div class="card">
+<pre style="font-size:11px">{
+  "compilerOptions": {
+    "strict": true,              // activa noImplicitAny + strictNullChecks
+    "target": "ES2022",
+    "module": "NodeNext",        // ESM nativo en Node.js
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  }
+}</pre>
+    </div>
+  </div>
+
+  <div class="tab-content" id="t12-quiz">
+    <div id="quiz-t12"></div>
+  </div>
+
+  <div class="tab-content" id="t12-defensa">
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>¿Qué ventajas concretas da TypeScript sobre JavaScript plano?</span><span class="chevron">▶</span></div>
+      <div class="acc-body">(1) Errores en tiempo de compilación en lugar de en producción. (2) Autocompletado e IntelliSense en el IDE — sabes qué campos y métodos existen. (3) Refactoring seguro — si renombras un campo, TypeScript te indica todos los lugares que debes actualizar. (4) Documentación viva — los tipos explican la forma de los datos sin necesidad de comentarios. (5) Con Prisma, los tipos se generan automáticamente del schema, garantizando sincronía entre BD y código.</div>
+    </div>
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>¿Cuándo usarías any y cuándo unknown?</span><span class="chevron">▶</span></div>
+      <div class="acc-body">any desactiva el type-checking completamente — es un escape hatch que debes evitar. unknown es el tipo "seguro" para valores de tipo desconocido: no puedes usarlo directamente sin hacer type narrowing (typeof, instanceof, o type guards). Usa unknown para: datos de APIs externas, JSON.parse(), datos del usuario. Usa any solo como último recurso en migración gradual desde JS.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ T13 UPLOADS ═══════════════════════ -->
+<div class="page" id="page-t13">
+  <h2>T13 · File Upload y Storage</h2>
+  <p class="subtitle">Multer · Cloudinary · Sharp · Seguridad · Storage options</p>
+  <div class="page-actions"><button class="btn-done" onclick="markDone('t13',this)">Marcar como revisado</button></div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(this,'t13-teoria')">Teoría</div>
+    <div class="tab" onclick="switchTab(this,'t13-quiz')">Quiz (5)</div>
+    <div class="tab" onclick="switchTab(this,'t13-defensa')">Defensa</div>
+  </div>
+
+  <div class="tab-content active" id="t13-teoria">
+    <div class="section-divider"><h3>Multer — Configuración</h3></div>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<pre><span class="tok-kw">import</span> multer <span class="tok-kw">from</span> <span class="tok-str">'multer'</span>;
+
+<span class="tok-kw">const</span> upload = <span class="tok-fn">multer</span>({
+  storage: multer.<span class="tok-fn">memoryStorage</span>(), <span class="tok-cmt">// buffer en memoria (para procesar con Sharp)</span>
+  limits: {
+    fileSize: <span class="tok-num">5</span> * <span class="tok-num">1024</span> * <span class="tok-num">1024</span>,  <span class="tok-cmt">// 5 MB máximo</span>
+    files: <span class="tok-num">1</span>,                      <span class="tok-cmt">// máximo 1 archivo</span>
+  },
+  fileFilter: (req, file, cb) => {
+    <span class="tok-kw">const</span> allowed = [<span class="tok-str">'image/jpeg'</span>, <span class="tok-str">'image/png'</span>, <span class="tok-str">'image/webp'</span>];
+    <span class="tok-kw">if</span> (!allowed.<span class="tok-fn">includes</span>(file.mimetype))
+      <span class="tok-kw">return</span> <span class="tok-fn">cb</span>(<span class="tok-kw">new</span> <span class="tok-cls">Error</span>(<span class="tok-str">'Solo se permiten imágenes'</span>));
+    <span class="tok-fn">cb</span>(<span class="tok-builtin">null</span>, <span class="tok-builtin">true</span>);
+  },
+});
+
+<span class="tok-cmt">// Uso en ruta:</span>
+router.<span class="tok-fn">post</span>(<span class="tok-str">'/avatar'</span>, upload.<span class="tok-fn">single</span>(<span class="tok-str">'avatar'</span>), controller.<span class="tok-fn">upload</span>);</pre>
+    </div>
+    <div class="trampa">El MIME type que Multer comprueba viene del Content-Type del cliente, que puede ser falsificado. Para seguridad real, usar el paquete <code>file-type</code> que detecta el tipo real leyendo los magic bytes del archivo.</div>
+
+    <div class="section-divider"><h3>Sharp — Procesamiento de imágenes</h3></div>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<pre><span class="tok-kw">import</span> sharp <span class="tok-kw">from</span> <span class="tok-str">'sharp'</span>;
+
+<span class="tok-kw">const</span> processImage = <span class="tok-kw">async</span> (buffer) => {
+  <span class="tok-kw">return</span> <span class="tok-kw">await</span> <span class="tok-fn">sharp</span>(buffer)
+    .<span class="tok-fn">resize</span>(<span class="tok-num">800</span>, <span class="tok-num">600</span>, { fit: <span class="tok-str">'cover'</span> }) <span class="tok-cmt">// crop centrado</span>
+    .<span class="tok-fn">webp</span>({ quality: <span class="tok-num">80</span> })              <span class="tok-cmt">// convertir a WebP (30% más pequeño)</span>
+    .<span class="tok-fn">toBuffer</span>();
+};
+<span class="tok-cmt">// Sharp trabaja en streams → eficiente en memoria</span>
+<span class="tok-cmt">// fit:'cover' = crop, fit:'contain' = letterbox, fit:'inside' = escalar sin crop</span></pre>
+    </div>
+
+    <div class="section-divider"><h3>Cloudinary — Upload y CDN</h3></div>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+<pre><span class="tok-kw">import</span> { v2 <span class="tok-kw">as</span> cloudinary } <span class="tok-kw">from</span> <span class="tok-str">'cloudinary'</span>;
+
+<span class="tok-kw">const</span> uploadToCloudinary = <span class="tok-kw">async</span> (buffer, folder) => {
+  <span class="tok-kw">return new</span> <span class="tok-cls">Promise</span>((resolve, reject) => {
+    <span class="tok-kw">const</span> stream = cloudinary.uploader.<span class="tok-fn">upload_stream</span>(
+      { folder, resource_type: <span class="tok-str">'image'</span>, transformation: [{ quality: <span class="tok-str">'auto'</span> }] },
+      (err, result) => err ? <span class="tok-fn">reject</span>(err) : <span class="tok-fn">resolve</span>(result)
+    );
+    stream.<span class="tok-fn">end</span>(buffer);
+  });
+};
+<span class="tok-cmt">// result.secure_url = URL pública en CDN
+// result.public_id = ID para borrar/transformar después</span></pre>
+    </div>
+
+    <div class="section-divider"><h3>Opciones de Storage — Comparativa</h3></div>
+    <table>
+      <tr><th>Opción</th><th>Pros</th><th>Contras</th><th>Usar cuando</th></tr>
+      <tr><td>Local (disco)</td><td>Gratis, simple</td><td>No escala, se pierde con deploy</td><td>Solo desarrollo</td></tr>
+      <tr><td>Cloudinary</td><td>CDN global, transformaciones on-the-fly, free tier</td><td>Coste a escala, vendor lock-in</td><td>Imágenes, videos pequeños</td></tr>
+      <tr><td>AWS S3</td><td>Barato, escalable, presigned URLs</td><td>Costes de egress (salida de datos)</td><td>Archivos grandes, documentos</td></tr>
+      <tr><td>Cloudflare R2</td><td>S3-compatible, sin costes de egress</td><td>Relativamente nuevo</td><td>Alternativa barata a S3</td></tr>
+    </table>
+    <div class="exam-tip">En BildyApp: los uploads van a Cloudinary porque ofrece CDN global + transformaciones automáticas (resize, webp). Sharp procesa la imagen antes del upload para reducir tamaño.</div>
+  </div>
+
+  <div class="tab-content" id="t13-quiz">
+    <div id="quiz-t13"></div>
+  </div>
+
+  <div class="tab-content" id="t13-defensa">
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>¿Cómo cambiarías el upload para que el usuario suba directamente a S3 sin pasar por tu servidor?</span><span class="chevron">▶</span></div>
+      <div class="acc-body">Con presigned URLs. El flujo: (1) Cliente pide un presigned URL a tu API (POST /uploads/presigned). (2) Tu servidor genera el URL con AWS SDK: <code>const url = await getSignedUrl(s3, new PutObjectCommand({Bucket, Key}), {expiresIn: 300})</code>. (3) El cliente usa ese URL temporal para subir el archivo directamente a S3 con PUT. (4) S3 guarda el archivo. (5) El cliente notifica a tu API que el upload completó. Ventaja: el archivo nunca pasa por tu servidor — ahorro de ancho de banda y CPU.</div>
+    </div>
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>¿Cómo prevendrías la subida de archivos maliciosos?</span><span class="chevron">▶</span></div>
+      <div class="acc-body">(1) Validar MIME type real con magic bytes (paquete file-type), no solo la extensión. (2) Renombrar el archivo con un UUID para evitar path traversal. (3) Límites de tamaño estrictos con Multer. (4) Almacenamiento fuera del servidor web (Cloudinary/S3) — el archivo no es ejecutable. (5) Si son documentos, scan de virus con ClamAV o una API de escaneo. (6) Para imágenes: procesarlas con Sharp (la imagen se re-renderiza, elimina metadatos y posibles exploits EXIF).</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end #main -->
+
+<div id="toast">Copiado!</div>
+
+<script>
+// ── DATA ────────────────────────────────────────────────────────
+const FLASHCARDS = [
+  {tema:'T1 · Node.js', q:'¿Cuál es el orden de ejecución? console.log(1) → setTimeout(fn,0) → Promise.then(fn) → process.nextTick(fn) → console.log(5)', a:'1, 5, nextTick (4), Promise.then (3), setTimeout (2). Síncrono primero → microtasks (nextTick antes que Promise) → macrotasks.'},
+  {tema:'T1 · Node.js', q:'¿Qué hace libuv en Node.js?', a:'Es la librería C que implementa el Event Loop y gestiona el thread pool (4 threads por defecto) para operaciones I/O asíncronas. Abstrae el sistema operativo.'},
+  {tema:'T1 · Node.js', q:'¿Diferencia entre ESM y CommonJS?', a:'CJS: require() síncrono, module.exports. ESM: import estático (tree-shaking), soporta top-level await. Para ESM: "type":"module" en package.json o usar .mjs'},
+  {tema:'T1 · Node.js', q:'¿Qué significa que Node.js es single-threaded?', a:'Todo JavaScript corre en un solo hilo. Pero I/O asíncrono se delega a libuv/OS, que puede usar múltiples hilos en el thread pool. El Event Loop coordina cuándo los callbacks de I/O vuelven al hilo principal.'},
+  {tema:'T2 · Asincronía', q:'¿Cuándo usar Promise.all vs Promise.allSettled?', a:'Promise.all: cuando TODAS deben cumplirse — falla si una falla. Promise.allSettled: cuando quieres resultado de todas sin importar fallos — espera a todas y devuelve {status, value/reason} para cada una.'},
+  {tema:'T2 · Asincronía', q:'¿Qué hace process.nextTick()?', a:'Encola un callback que se ejecuta al final del código síncrono actual, ANTES de que el event loop continúe a la siguiente fase. Tiene prioridad sobre Promise.then. Usar con cuidado: si usas nextTick recursivo, bloqueas el event loop.'},
+  {tema:'T2 · Asincronía', q:'¿Para qué sirve Promise.race?', a:'Retorna la primera promesa que se complete (fulfilled o rejected). Útil para patrones timeout: race([fetchData(), waitTimeout(5000)]). Si el fetch tarda más de 5s, gana el timeout.'},
+  {tema:'T3 · HTTP', q:'¿Diferencia entre 401 y 403?', a:'401 Unauthorized: no estás autenticado (el servidor no sabe quién eres). 403 Forbidden: estás autenticado pero no tienes permisos para ese recurso.'},
+  {tema:'T3 · HTTP', q:'¿Qué ventajas tiene HTTP/2 sobre HTTP/1.1?', a:'Multiplexing (múltiples requests en una conexión TCP, sin head-of-line blocking), compresión de headers con HPACK, Server Push (servidor envía recursos sin que el cliente los pida).'},
+  {tema:'T3 · HTTP', q:'¿Qué es CORS y cuándo se necesita un preflight?', a:'CORS: mecanismo que permite peticiones cross-origin. Preflight (OPTIONS): cuando el método no es GET/HEAD/POST simple, o hay headers personalizados (como Authorization). El servidor responde con Access-Control-Allow-* headers.'},
+  {tema:'T3 · HTTP', q:'¿Cuándo devolver 204 vs 200?', a:'200 OK: petición exitosa con body en respuesta. 204 No Content: petición exitosa sin body (típico en DELETE exitoso o PUT que no devuelve el recurso actualizado).'},
+  {tema:'T4 · Express 5', q:'¿La diferencia clave entre Express 4 y Express 5?', a:'Express 5 captura automáticamente errores de funciones async/await. En Express 4 había que usar try/catch + next(err) manualmente en cada handler async.'},
+  {tema:'T4 · Express 5', q:'¿Cuántos parámetros debe tener un error handler en Express?', a:'Exactamente 4: (err, req, res, next). Si pones 3, Express no lo reconoce como error handler. Debe registrarse DESPUÉS de todas las rutas.'},
+  {tema:'T4 · Express 5', q:'¿Para qué sirve next() en un middleware?', a:'Pasa el control al siguiente middleware en la cadena. Sin next(), la petición queda colgada. next(err) salta directamente al error handler. Si llamas next() sin argumentos, el middleware ha finalizado normalmente.'},
+  {tema:'T4 · Express 5', q:'¿Diferencia entre req.params y req.query?', a:'req.params: parámetros de ruta (/users/:id → req.params.id). req.query: parámetros de query string (/users?page=2 → req.query.page). req.body: datos del body en POST/PUT/PATCH.'},
+  {tema:'T5 · MongoDB', q:'¿Qué es soft delete y por qué usarlo?', a:'En lugar de borrar físicamente, añadir campos deleted:true, deletedAt, deletedBy. Permite auditoría, recuperación de datos, evitar referencias rotas. Los queries SIEMPRE deben filtrar {deleted:false}.'},
+  {tema:'T5 · MongoDB', q:'¿Qué hace .lean() en Mongoose?', a:'Devuelve POJOs (plain JS objects) en lugar de documentos Mongoose con métodos. Más rápido y menos memoria. Usar cuando solo lees datos y no necesitas guardar cambios.'},
+  {tema:'T5 · MongoDB', q:'¿Cuándo NO se disparan los hooks pre("save")?', a:'Cuando usas findByIdAndUpdate, findOneAndUpdate, updateOne, updateMany — estos bypasean los hooks de save. Para interceptarlos, usar hooks de "findOneAndUpdate".'},
+  {tema:'T5 · MongoDB', q:'¿Cuándo usar embedded vs references en MongoDB?', a:'Embedded: datos siempre accedidos juntos, no crecen indefinidamente (tags, dirección). References: datos compartidos, crecen independientemente, o se consultan por separado (user → company).'},
+  {tema:'T6 · Zod', q:'¿Diferencia entre .refine() y .superRefine()?', a:'.refine(): 1 sola validación custom, 1 mensaje de error. .superRefine(): múltiples validaciones, cada una llama ctx.addIssue(). Usar superRefine cuando el campo puede tener varios errores de validación simultáneos.'},
+  {tema:'T6 · Zod', q:'¿Qué hace .partial() en un schema Zod?', a:'Hace todos los campos opcionales (como Partial<T> en TypeScript). Útil para schemas de UPDATE donde el cliente solo envía los campos que quiere cambiar.'},
+  {tema:'T6 · Zod', q:'¿Qué es .safeParse() y cuándo usarlo?', a:'.parse() lanza excepción si falla. .safeParse() retorna {success: true, data} o {success: false, error}. Usar safeParse en middlewares HTTP para devolver 400 en lugar de 500 cuando la validación falla.'},
+  {tema:'T7 · JWT', q:'¿Qué partes tiene un JWT y están encriptadas?', a:'3 partes: Header (alg+typ) . Payload (claims: userId, role, exp) . Signature (HMAC del header+payload con el secret). Solo codificadas en Base64URL, NO encriptadas. La firma garantiza integridad pero el contenido es legible.'},
+  {tema:'T7 · JWT', q:'¿Por qué usar refresh tokens además de access tokens?', a:'Access tokens tienen corta vida (15m) para seguridad. Refresh tokens (7d) permiten obtener nuevos access tokens sin re-login. Si un access token se roba, expira pronto. El refresh token se guarda en HttpOnly cookie para mayor seguridad.'},
+  {tema:'T7 · JWT', q:'¿Qué es refresh token rotation?', a:'Cada vez que usas el refresh token, recibes un NUEVO refresh token y el anterior se invalida. Si alguien roba el refresh token y lo usa, el usuario original detecta que el suyo ya no funciona → alerta de seguridad.'},
+  {tema:'T7 · JWT', q:'¿Por qué HttpOnly cookies son más seguras que localStorage para tokens?', a:'Las HttpOnly cookies NO son accesibles por JavaScript → inmunes a ataques XSS. localStorage sí es accesible por JS, cualquier script inyectado puede robar el token.'},
+  {tema:'T8 · Testing', q:'¿Diferencia entre unit tests e integration tests?', a:'Unit: función aislada con mocks. Rápidos pero pueden pasar aunque el sistema real falle (mock/prod divergence). Integration: múltiples módulos juntos, con BD real. Más lentos pero más realistas.'},
+  {tema:'T8 · Testing', q:'¿Qué es supertest?', a:'Librería que permite hacer peticiones HTTP a la app Express en tests sin levantar un servidor real. request(app).get("/api/users").expect(200). Se integra con Jest.'},
+  {tema:'T8 · Testing', q:'¿Qué es OpenAPI 3.0?', a:'Especificación estándar para documentar APIs REST. Swagger UI lee el spec y genera documentación interactiva. En Express se puede generar automáticamente con anotaciones JSDoc con swagger-jsdoc.'},
+  {tema:'T9 · Prisma', q:'¿Cuál es la ventaja de los tipos generados por Prisma?', a:'Prisma genera tipos TypeScript automáticamente del schema.prisma. Si cambias el schema, TypeScript avisa en TODOS los lugares que usan ese tipo. Refactoring seguro y sin sorpresas en producción.'},
+  {tema:'T9 · Prisma', q:'¿Diferencia entre include y select en Prisma?', a:'include: trae el modelo completo + los modelos relacionados especificados. select: solo los campos especificados (como un SELECT SQL). Usar select cuando no necesitas todos los campos → menos datos transferidos.'},
+  {tema:'T9 · Prisma', q:'¿Qué es prisma migrate deploy?', a:'Aplica todas las migrations pendientes en producción sin generar nuevas. Usar en CI/CD y startup de contenedores. prisma migrate dev es para desarrollo (genera + aplica migrations).'},
+  {tema:'T10 · Socket.IO', q:'¿Diferencia entre socket.emit, socket.broadcast.emit e io.emit?', a:'socket.emit: solo al socket que lo llama. socket.broadcast.emit: a todos EXCEPTO al que lo llama. io.emit: a TODOS los conectados. io.to(room).emit: a todos en una sala específica.'},
+  {tema:'T10 · Socket.IO', q:'¿Cómo autenticar en Socket.IO?', a:'Usando el middleware de io: io.use((socket, next) => { const token = socket.handshake.auth.token; ... next() o next(new Error) }). El cliente envía el token en socket.handshake.auth.'},
+  {tema:'T10 · Socket.IO', q:'¿Diferencia entre Rooms y Namespaces en Socket.IO?', a:'Namespaces: endpoints separados (/chat, /admin). Cada uno tiene su propio estado de conexión. Rooms: grupos dentro de un namespace. Un socket puede unirse a múltiples rooms con socket.join(). Rooms son más ligeras.'},
+  {tema:'T11 · Docker', q:'¿Qué es layer caching en Docker?', a:'Docker cachea cada instrucción del Dockerfile. Si COPY package*.json && npm ci está antes que COPY . ., Docker reutiliza la capa de node_modules si package.json no cambió. Los builds son mucho más rápidos.'},
+  {tema:'T11 · Docker', q:'¿Diferencia entre named volumes y bind mounts?', a:'Named volumes: gestionados por Docker, persisten entre reinicios, mejor rendimiento. Bind mounts: directorio del host mapeado en el contenedor. Usar bind mounts en dev (hot-reload), named volumes en producción (BD).'},
+  {tema:'T12 · TypeScript', q:'¿Cuándo usar interface vs type?', a:'interface: shapes de objetos, modelos, DTOs — puede extenderse con extends. type: union types (A|B), aliases de primitivos, funciones, tipos complejos con intersección (&). En la práctica, interface para objetos, type para el resto.'},
+  {tema:'T12 · TypeScript', q:'¿Para qué sirven los genéricos en TypeScript?', a:'Código reutilizable con type-safety. Ejemplo: ApiResponse<T> funciona para User, Post, cualquier tipo. TypeScript infiere T automáticamente del argumento. Con constraints (<T extends {id: string}>) puedes exigir que T tenga ciertas propiedades.'},
+  {tema:'T13 · Uploads', q:'¿Por qué usar memoryStorage en Multer en lugar de diskStorage?', a:'memoryStorage guarda el archivo en un Buffer en memoria → puedes procesarlo con Sharp antes de subirlo a Cloudinary/S3. diskStorage guarda en disco del servidor, menos útil si luego vas a subirlo a la nube.'},
+  {tema:'T13 · Uploads', q:'¿Por qué Sharp convierte imágenes a WebP?', a:'WebP es 25-35% más pequeño que JPEG con calidad similar. Reduce el ancho de banda y mejora el tiempo de carga. Sharp permite convertir + redimensionar + comprimir en un pipeline de streaming eficiente.'},
+];
+
+const QUIZ_DATA = {
+  t1: [
+    {q:'¿Cuál es el orden correcto de salida?<br><code>setTimeout(()=>console.log("A"),0); Promise.resolve().then(()=>console.log("B")); console.log("C"); process.nextTick(()=>console.log("D"))</code>',opts:['C, A, B, D','C, D, B, A','A, B, C, D','C, B, D, A'],ans:1,exp:'Síncrono primero (C), luego microtasks en orden: nextTick (D) antes que Promise.then (B), y por último macrotask setTimeout (A).'},
+    {q:'¿Qué característica de ESM NO tiene CommonJS?',opts:['Exportar múltiples valores','Top-level await','Caching de módulos','Módulos condicionales con if'],ans:1,exp:'ESM soporta top-level await (await sin async function). CommonJS no lo soporta porque require() es síncrono.'},
+    {q:'¿Qué librería gestiona el Event Loop en Node.js?',opts:['V8','OpenSSL','libuv','cluster'],ans:2,exp:'libuv es la librería C++ que implementa el Event Loop y el thread pool para I/O asíncrono. V8 es el motor JavaScript.'},
+    {q:'Una función async SIEMPRE devuelve:',opts:['undefined si no tiene return','Un objeto de tipo AsyncFunction','Una Promise','El valor retornado directamente'],ans:2,exp:'Cualquier función declarada con async automáticamente envuelve su valor de retorno en una Promise.'},
+    {q:'¿Qué pasa si una excepción ocurre dentro de un handler async en Express 4 sin try/catch?',opts:['Se captura automáticamente','El proceso Node.js termina/cuelga','Express devuelve 500','Se ignora la excepción'],ans:1,exp:'En Express 4, los errores en async sin try/catch+next(err) no se capturan. Express 5 soluciona esto automáticamente.'},
+    {q:'¿Qué hace npm ci en lugar de npm install?',opts:['Instala también devDependencies','Instala exactamente las versiones del package-lock.json, sin modificarlo','Actualiza todas las dependencias a la última versión','Solo instala dependencias de producción'],ans:1,exp:'npm ci es determinístico: instala las versiones exactas del lockfile. Ideal para CI/CD. npm install puede actualizar el lockfile.'},
+    {q:'¿En qué fase del Event Loop se ejecutan los callbacks de setImmediate?',opts:['timers','poll','check','close callbacks'],ans:2,exp:'setImmediate se ejecuta en la fase CHECK, que viene después de la fase poll.'},
+    {q:'¿Qué módulo de Node.js deberías usar para leer archivos de forma asíncrona en código moderno?',opts:['require("fs")','import fs from "fs"','import { readFile } from "node:fs/promises"','const fs = require("fs/promises")'],ans:2,exp:'node:fs/promises proporciona la API con Promises nativa. El prefijo node: es la forma recomendada para importar módulos nativos en ESM.'},
+  ],
+  t2: [
+    {q:'¿Qué método de Promise usarías para ejecutar múltiples peticiones en paralelo donde una falla NO debe cancelar las demás?',opts:['Promise.all','Promise.race','Promise.allSettled','Promise.any'],ans:2,exp:'Promise.allSettled espera a todas las promesas independientemente de si fallan. Devuelve array de {status:"fulfilled"|"rejected", value/reason}.'},
+    {q:'¿Qué hace EventEmitter.once() en comparación con .on()?',opts:['Ejecuta el listener una sola vez y luego lo elimina','Solo funciona con eventos síncronos','Emite el evento una sola vez','Añade múltiples listeners al mismo evento'],ans:0,exp:'.once() registra un listener que se ejecuta una sola vez y luego se elimina automáticamente. .on() mantiene el listener activo permanentemente.'},
+    {q:'¿Qué ocurre si se lanza un error en un listener de EventEmitter y no hay listener de "error"?',opts:['Se ignora silenciosamente','El error se propaga como Promise rejection','El proceso Node.js termina con un unhandled exception','Se llama automáticamente al siguiente listener'],ans:2,exp:'Sin handler de "error", un error emitido en un EventEmitter causa un unhandledException y el proceso termina.'},
+    {q:'¿Qué retorna Promise.any si TODAS las promesas son rechazadas?',opts:['undefined','null','AggregateError con todos los rechazos','El primer rechazo'],ans:2,exp:'Promise.any lanza un AggregateError que contiene todos los errores de las promesas rechazadas.'},
+    {q:'¿Cuál es el comportamiento de for await...of con un stream de Node.js?',opts:['Lee todo el stream en memoria','Procesa chunk por chunk sin bloquear','No funciona con streams nativos de Node.js','Solo funciona con arrays de promesas'],ans:1,exp:'for await...of consume el async iterator del stream, procesando cada chunk cuando llega sin necesidad de cargar todo en memoria.'},
+    {q:'¿En qué se diferencia process.nextTick de queueMicrotask?',opts:['nextTick tiene mayor prioridad que queueMicrotask','Son exactamente iguales','queueMicrotask tiene mayor prioridad','nextTick es síncrono, queueMicrotask es asíncrono'],ans:0,exp:'process.nextTick tiene mayor prioridad: se ejecuta antes de que las promesas (microtasks de Promise.then/queueMicrotask) se procesen.'},
+  ],
+  t3: [
+    {q:'¿Qué status code devuelves después de crear un recurso con POST?',opts:['200 OK','201 Created','204 No Content','202 Accepted'],ans:1,exp:'201 Created indica que el recurso fue creado exitosamente. El body suele incluir el recurso creado y Location header con la URL del nuevo recurso.'},
+    {q:'¿Cuál es la diferencia entre PUT y PATCH?',opts:['PUT es más seguro que PATCH','PUT reemplaza el recurso completo, PATCH hace actualizaciones parciales','PATCH crea el recurso si no existe, PUT no','No hay diferencia práctica'],ans:1,exp:'PUT envía el recurso completo (si omites un campo, se borra). PATCH envía solo los campos a cambiar. PUT es idempotente; PATCH puede no serlo.'},
+    {q:'¿Qué header CORS permite enviar cookies cross-origin?',opts:['Access-Control-Allow-Credentials: true','Access-Control-Allow-Origin: *','Access-Control-Allow-Headers: Cookie','Credentials: include'],ans:0,exp:'Access-Control-Allow-Credentials: true. IMPORTANTE: no se puede combinar con Allow-Origin: * — debes especificar el origen exacto.'},
+    {q:'¿Qué status code indica demasiadas peticiones (rate limiting)?',opts:['400','403','409','429'],ans:3,exp:'429 Too Many Requests. Se suele acompañar con Retry-After header indicando cuándo puede reintentar.'},
+    {q:'HTTP/2 soluciona el problema de "head-of-line blocking" de HTTP/1.1 mediante:',opts:['Compresión gzip del body','Multiplexing: múltiples streams en una sola conexión TCP','Server-Sent Events','Long polling'],ans:1,exp:'En HTTP/1.1 las peticiones se procesan en orden en cada conexión (una a la vez). HTTP/2 permite multiplexar múltiples peticiones/respuestas en una sola conexión TCP simultáneamente.'},
+    {q:'¿Qué header HSTS hace?',opts:['Habilita CORS','Fuerza al navegador a usar HTTPS siempre','Protege contra clickjacking','Previene MIME sniffing'],ans:1,exp:'Strict-Transport-Security (HSTS) indica al navegador que solo acceda al dominio via HTTPS durante el período max-age. Previene ataques de downgrade.'},
+    {q:'¿Qué método HTTP se usa en el preflight de CORS?',opts:['GET','HEAD','OPTIONS','CONNECT'],ans:2,exp:'El preflight request usa el método OPTIONS para preguntar al servidor qué métodos y headers permite para una petición cross-origin.'},
+  ],
+  t4: [
+    {q:'¿Cuántos parámetros debe tener un error handler de Express?',opts:['2 (req, res)','3 (req, res, next)','4 (err, req, res, next)','5 (err, req, res, next, done)'],ans:2,exp:'Exactamente 4 parámetros. Si pones 3, Express no lo reconoce como error handler. Debe estar registrado DESPUÉS de todas las rutas.'},
+    {q:'¿Dónde se debe registrar el middleware de error handler?',opts:['Al inicio de app.js, antes de las rutas','Después de que se definen todas las rutas','Puede ir en cualquier posición','Solo en las rutas que pueden tener error'],ans:1,exp:'El error handler siempre al final, después de todas las rutas. Express llega a él solo cuando se llama next(err) o cuando un async handler lanza una excepción.'},
+    {q:'En Express 5, ¿qué pasa si un handler async lanza una excepción sin try/catch?',opts:['El proceso Node.js termina','Se envía una respuesta 500 automática','Se ignora el error','Express reinicia la petición'],ans:1,exp:'Express 5 captura automáticamente los errores en handlers async y los pasa al error handler. En Express 4 esto causaba un crash.'},
+    {q:'¿Para qué sirve next() sin argumentos en un middleware?',opts:['Finaliza la petición con 200','Salta al error handler','Pasa el control al siguiente middleware','Reinicia el procesamiento de la petición'],ans:2,exp:'next() sin argumentos pasa el control al siguiente middleware en la cadena. next(err) con un error salta directamente al error handler.'},
+    {q:'En una arquitectura MVC con Express, ¿qué capa conoce req y res?',opts:['Model','View','Controller','Service'],ans:2,exp:'Solo el Controller. El Service no debería conocer Express (req/res) — solo recibe datos y devuelve resultados. Esto hace los Services testables sin HTTP.'},
+    {q:'¿Qué diferencia a los middlewares "application-level" de los "route-level"?',opts:['Los application-level no tienen next()','Los route-level se aplican solo a rutas específicas; los application-level a todas','Los application-level son más lentos','No hay diferencia funcional'],ans:1,exp:'app.use(middleware) aplica a todas las rutas. router.use(middleware) o route.get(path, middleware) aplica solo a esa ruta o router específico.'},
+    {q:'En Express 5, ¿cuál es la nueva sintaxis para parámetros opcionales?',opts:['/users/:id?','/users/{:id}','/users/[id]','/users/(:id)?'],ans:1,exp:'Express 5 usa /users/{:id} para parámetros opcionales en lugar de /users/:id? de Express 4.'},
+  ],
+  t5: [
+    {q:'¿Qué comando de Mongoose devuelves objetos JavaScript planos sin métodos de Mongoose?',opts:['.exec()','`.plain()`','.lean()','`.raw()`'],ans:2,exp:'.lean() retorna POJOs (Plain Old JavaScript Objects) en lugar de documentos Mongoose. Más rápido y menos memoria. No usar si necesitas llamar .save() después.'},
+    {q:'¿Por qué se usan indexes en MongoDB?',opts:['Para encriptar los datos','Para acelerar queries evitando full collection scans','Para comprimir documentos grandes','Para replicar datos automáticamente'],ans:1,exp:'Sin índice, MongoDB hace un full scan de todos los documentos (O(n)). Con índice, la búsqueda es O(log n). Crucial para campos que se usan frecuentemente en queries (company, email, deleted).'},
+    {q:'¿Qué ocurre con los hooks pre("save") cuando usas findByIdAndUpdate?',opts:['Se ejecutan normalmente','No se ejecutan','Se ejecutan pero con un delay','Solo se ejecutan si el campo cambia'],ans:1,exp:'Los hooks de "save" NO se ejecutan con findByIdAndUpdate, updateOne, etc. Para interceptar updates, hay que usar hooks de "findOneAndUpdate".'},
+    {q:'En el patrón soft delete, ¿qué campo SIEMPRE debes incluir en tus queries de listado?',opts:['deleted: true','deleted: false','deletedAt: null','deletedBy: undefined'],ans:1,exp:'Siempre filtrar {deleted: false} para excluir documentos borrados lógicamente. Sin este filtro, devolverías datos "borrados" a los usuarios.'},
+    {q:'¿Qué hace .populate("client") en una query de Mongoose?',opts:['Crea un índice en el campo client','Sustituye el ObjectId de client por el documento completo del modelo Client','Valida que el ObjectId existe','Cachea el documento referenciado'],ans:1,exp:'.populate() hace un segundo query a la colección referenciada y sustituye el ObjectId por el documento completo (como un JOIN). Puede especificarse qué campos traer: .populate("client", "name email")'},
+    {q:'¿Cuándo usarías embedded documents en lugar de references?',opts:['Cuando los datos se comparten entre muchos documentos','Cuando los datos siempre se acceden junto al documento padre y no crecen indefinidamente','Cuando necesitas hacer queries independientes a esos datos','Cuando los datos son muy grandes'],ans:1,exp:'Embedded: datos que son "propios" del documento, siempre se leen juntos, y no van a ser miles de entradas (array ilimitado es un anti-pattern). References: datos compartidos, independientes, o consultables por separado.'},
+  ],
+  t6: [
+    {q:'¿Cuál es la diferencia entre z.parse() y z.safeParse()?',opts:['parse() es más rápido','safeParse() lanza excepción, parse() no','parse() lanza excepción si falla; safeParse() devuelve {success, data/error}','No hay diferencia funcional'],ans:2,exp:'parse() lanza ZodError si la validación falla. safeParse() devuelve siempre un objeto: {success: true, data} o {success: false, error}. Usar safeParse en HTTP para devolver 400 en lugar de 500.'},
+    {q:'¿Para qué sirve .refine() en un schema Zod?',opts:['Para transformar el valor','Para añadir una validación personalizada que Zod no tiene built-in','Para hacer un campo opcional','Para extender otro schema'],ans:1,exp:'.refine(fn, {message}) permite validación custom. La función recibe el valor y devuelve true/false. Para múltiples errores en un mismo campo, usar .superRefine().'},
+    {q:'¿Qué hace z.object({name: z.string()}).partial()?',opts:['Hace que el objeto pueda ser null','Hace que todos los campos sean opcionales','Añade un campo _partial al schema','Solo valida si el campo existe'],ans:1,exp:'.partial() convierte todos los campos a opcionales. Equivalente a Partial<T> en TypeScript. Útil para schemas de UPDATE/PATCH.'},
+    {q:'¿Qué hace z.string().email().toLowerCase()?',opts:['Solo valida el formato email','Valida el formato Y transforma el valor a minúsculas antes de guardarlo','Solo transforma, no valida','Falla si el email tiene mayúsculas'],ans:1,exp:'Zod permite encadenar transformaciones. .toLowerCase() es una transformación que se aplica DESPUÉS de la validación. req.body tendrá el email en minúsculas automáticamente.'},
+    {q:'¿Cómo obtienes el tipo TypeScript de un schema Zod?',opts:['schema.getType()','typeof schema','z.infer<typeof schema>','schema.TypeScript'],ans:2,exp:'z.infer<typeof MySchema> extrae el tipo TypeScript del schema. Esto evita duplicar la definición: el schema Zod es la fuente de verdad tanto para validación en runtime como para tipos estáticos.'},
+  ],
+  t7: [
+    {q:'¿Qué contiene la parte Payload de un JWT?',opts:['La contraseña del usuario encriptada','Los claims: userId, role, exp — en Base64, no encriptado','La firma criptográfica','El algoritmo de encriptación'],ans:1,exp:'El payload contiene los claims (datos) en Base64URL — NO está encriptado, solo codificado. Cualquiera puede decodificarlo. La firma solo garantiza que no fue modificado.'},
+    {q:'¿Cuántos salt rounds se recomiendan para bcrypt en producción?',opts:['4-6 (rápido)','10-12 (balance seguridad/velocidad)','20+ (máxima seguridad)','1 (más eficiente)'],ans:1,exp:'10-12 rounds son el estándar. Cada incremento duplica el tiempo. 12 rounds ≈ 300ms en hardware moderno — suficientemente lento para ataques brute-force, suficientemente rápido para usuarios.'},
+    {q:'¿Cuál es la duración recomendada para un access token?',opts:['30 días','1 año','15 minutos a 2 horas','No expirar nunca'],ans:2,exp:'Access tokens cortos (15m-2h) limitan la ventana de exposición si son robados. Si expiran, el atacante necesita el refresh token para obtener uno nuevo.'},
+    {q:'¿Por qué NO guardar tokens JWT en localStorage?',opts:['localStorage tiene límite de tamaño','El token es accesible por cualquier script JavaScript — vulnerable a XSS','localStorage no persiste entre tabs','localStorage es síncrono y bloquea'],ans:1,exp:'localStorage es accesible por JavaScript. Un ataque XSS (script inyectado) puede robar el token fácilmente. HttpOnly cookies no son accesibles por JavaScript.'},
+    {q:'¿Qué devuelve jwt.verify() si el token ha expirado?',opts:['null','Un objeto con expired:true','Lanza un error TokenExpiredError','El payload sin el campo exp'],ans:2,exp:'jwt.verify() lanza una excepción (JsonWebTokenError o TokenExpiredError) si el token es inválido o expirado. SIEMPRE envolver en try/catch.'},
+    {q:'En el patrón de roles, si requireRole("ADMIN") devuelve 403, ¿qué significa?',opts:['El usuario no está autenticado','El token ha expirado','El usuario está autenticado pero no tiene el rol necesario','La ruta no existe'],ans:2,exp:'403 Forbidden: el usuario está identificado (pasó el middleware de autenticación) pero su rol no tiene permiso para esa operación. 401 sería si no está autenticado.'},
+    {q:'¿Qué es refresh token rotation?',opts:['Cambiar el secret del refresh token periódicamente','Cada uso del refresh token genera uno nuevo e invalida el anterior','Rotar entre múltiples refresh tokens activos','Comprimir el refresh token para reducir su tamaño'],ans:1,exp:'Con rotation: cada vez que refrescas, obtienes un nuevo refresh token. El anterior se invalida. Si alguien roba y usa el refresh token, el usuario legítimo detecta que el suyo ya no funciona.'},
+  ],
+  t8: [
+    {q:'¿Qué librería de Node.js permite hacer peticiones HTTP a la app en tests?',opts:['axios-test','jest-http','supertest','http-testing'],ans:2,exp:'Supertest: request(app).get("/api/users").expect(200). No necesita servidor escuchando en un puerto real.'},
+    {q:'¿Cuántos parámetros tiene un error handler de Express para ser reconocido como tal?',opts:['2','3','4','5'],ans:2,exp:'Exactamente 4: (err, req, res, next). Si tiene 3, Express lo trata como middleware normal, no como error handler.'},
+    {q:'En OpenAPI 3.0, ¿dónde se definen los schemas reutilizables?',opts:['En definitions (como OpenAPI 2.0)','En components/schemas','En models/','En schemas/'],ans:1,exp:'OpenAPI 3.0 usa components/schemas para schemas reutilizables. Se referencian con $ref: "#/components/schemas/User".'},
+    {q:'¿Qué mide el "code coverage" en testing?',opts:['El número de tests escritos','El porcentaje de líneas/ramas del código ejecutadas durante los tests','La velocidad de ejecución de los tests','El número de bugs encontrados'],ans:1,exp:'Coverage mide qué porcentaje del código fuente es ejecutado por los tests. 80%+ es el estándar mínimo. Istanbul/nyc generan el reporte.'},
+    {q:'¿Qué evento de GitHub Actions trigger se usa para ejecutar tests en cada PR?',opts:['on: [merge]','on: [pr]','on: [push, pull_request]','on: [commit]'],ans:2,exp:'on: [push, pull_request] ejecuta el workflow en cada push y en cada PR. También puede ser más específico: on: pull_request: branches: [main].'},
+  ],
+  t9: [
+    {q:'En Prisma, ¿qué comando genera los tipos TypeScript del schema?',opts:['npx prisma types','npx prisma generate','npx prisma build','npx prisma compile'],ans:1,exp:'npx prisma generate lee el schema.prisma y genera los tipos TypeScript en node_modules/@prisma/client. Se ejecuta automáticamente en npm install si está configurado.'},
+    {q:'¿Qué diferencia hay entre prisma migrate dev y prisma migrate deploy?',opts:['migrate dev solo funciona en producción','migrate dev genera + aplica migrations; migrate deploy solo aplica las existentes','migrate deploy genera nuevas migrations','Son equivalentes'],ans:1,exp:'migrate dev: para desarrollo, genera archivos SQL de migration y los aplica. migrate deploy: para producción, solo aplica migrations pendientes existentes — NO genera nuevas.'},
+    {q:'¿Qué hace include en una query Prisma?',opts:['Incluye solo los campos especificados del modelo','Añade modelos relacionados a la respuesta (como JOIN/populate)','Filtra resultados por condición','Ordena los resultados'],ans:1,exp:'include trae los modelos relacionados completos. include: {posts: true} añade el array de posts al usuario. Puede ser anidado y filtrado: include: {posts: {where: {published: true}}}'},
+    {q:'¿Qué garantiza una transacción en Prisma ($transaction)?',opts:['Mayor velocidad de queries','Atomicidad: todas las operaciones se completan o ninguna','Acceso concurrente a la BD','Cache automático de resultados'],ans:1,exp:'$transaction garantiza ACID. Si cualquier operación dentro falla, todas se revierten (rollback). Crucial para operaciones que deben ser atómicas: transferencias, creación de usuario+empresa, etc.'},
+    {q:'¿Cómo se definen relaciones en Prisma schema?',opts:['Con @join','Con @relation y back-relation obligatoria','Con @foreignKey','Con @connect'],ans:1,exp:'@relation(fields: [authorId], references: [id]) en el lado que tiene la FK. El otro modelo debe tener el campo inverso (back-relation). Prisma valida que las relaciones sean correctas en migrate.'},
+  ],
+  t10: [
+    {q:'¿Cómo se une un socket a una sala en Socket.IO?',opts:['socket.subscribe(roomId)','socket.addRoom(roomId)','socket.join(roomId)','io.rooms.add(socket.id, roomId)'],ans:2,exp:'socket.join(roomId). Después puedes emitir a todos en esa sala: io.to(roomId).emit("event", data).'},
+    {q:'¿Cuál de estas formas envía un evento a TODOS los sockets conectados incluyendo al emisor?',opts:['socket.emit()','socket.broadcast.emit()','io.emit()','io.to(socket.id).emit()'],ans:2,exp:'io.emit() envía a todos los conectados. socket.emit() solo al socket actual. socket.broadcast.emit() a todos excepto al emisor.'},
+    {q:'¿Dónde se autentica el socket en Socket.IO (el lugar correcto)?',opts:['En el evento "message" antes de procesar','En el middleware io.use() antes del evento "connection"','En el evento "connect" del cliente','En el evento "connection" del servidor'],ans:1,exp:'io.use() es el middleware de Socket.IO que se ejecuta en el handshake, antes de que la conexión se establezca. Es el lugar correcto para verificar el JWT y rechazar conexiones no autorizadas.'},
+    {q:'¿Qué problema resuelve el @socket.io/redis-adapter?',opts:['Persistencia de mensajes en MongoDB','Sincronización de eventos entre múltiples instancias del servidor','Autenticación de sockets','Compresión de mensajes WebSocket'],ans:1,exp:'En múltiples instancias (horizontal scaling), io.emit() solo llegaría a los clientes conectados a esa instancia. Redis adapter usa Redis como bus de mensajes para que el evento llegue a todos los clientes en todas las instancias.'},
+    {q:'¿Cuál es la ventaja de WebSockets sobre HTTP polling?',opts:['WebSockets usan menos CPU','Conexión persistente bidireccional con latencia mínima y sin overhead HTTP por mensaje','WebSockets son más seguros por defecto','WebSockets funcionan sin internet'],ans:1,exp:'WebSocket establece una conexión TCP persistente. El servidor puede PUSH datos en cualquier momento. Sin el overhead de headers HTTP en cada mensaje. Latencia típica < 1ms vs polling que espera al siguiente intervalo.'},
+  ],
+  t11: [
+    {q:'¿Cuál es el beneficio de multi-stage builds en Docker?',opts:['Permiten ejecutar múltiples servicios en un contenedor','Reducen el tamaño de la imagen final separando build y runtime','Son más rápidos de construir','Permiten herencia entre Dockerfiles'],ans:1,exp:'Multi-stage: primera etapa instala todas las deps (incluido build tools), segunda etapa solo copia lo necesario para runtime. La imagen final es más pequeña y segura (no incluye devDependencies ni build tools).'},
+    {q:'¿Qué problema tiene depends_on en docker-compose?',opts:['No funciona con más de 2 servicios','Solo espera a que el contenedor inicie, no a que esté LISTO','Causa conflictos de red','No soporta variables de entorno'],ans:1,exp:'depends_on asegura que el contenedor se inicie antes, pero NO espera a que el servicio esté listo para aceptar conexiones. Si MongoDB tarda 5s en inicializarse, tu app puede fallar al conectar.'},
+    {q:'¿Dónde deberían vivir los secretos (JWT_SECRET, API keys) en producción?',opts:['En el Dockerfile','En variables de entorno del servidor/PaaS o Docker secrets, NUNCA en el código o imagen','En un archivo config.json en el repositorio','En comentarios del código solo para referencia'],ans:1,exp:'Nunca en el código (ni en commits). En producción: variables de entorno del PaaS (Railway/Heroku/Render) o Docker secrets. En CI/CD: GitHub Actions Secrets.'},
+    {q:'¿Qué comando se ejecuta para aplicar migrations de Prisma en producción (startup del contenedor)?',opts:['npx prisma migrate dev','npx prisma studio','npx prisma migrate deploy','npx prisma db push'],ans:2,exp:'prisma migrate deploy aplica las migrations pendientes sin generar nuevas. Se ejecuta en el CMD o entrypoint del contenedor antes de arrancar la app.'},
+    {q:'¿Qué ventaja tienen los named volumes sobre los bind mounts para bases de datos en producción?',opts:['Los named volumes son más rápidos en Linux','Son gestionados por Docker, persisten entre docker-compose down/up, y tienen mejor rendimiento en Windows/Mac','Los named volumes se pueden versionar con git','Los bind mounts no persisten entre reinicios'],ans:1,exp:'Named volumes viven en el filesystem de Docker, gestionados por él. Mejor rendimiento especialmente en Windows/Mac donde los bind mounts usan virtualización. También más portable entre máquinas.'},
+  ],
+  t12: [
+    {q:'¿Cuándo usar interface en lugar de type en TypeScript?',opts:['Siempre que el tipo sea primitivo','Para shapes de objetos que pueden necesitar ser extendidos','Solo en archivos .d.ts','Cuando el tipo tiene más de 3 campos'],ans:1,exp:'interface es ideal para objetos que pueden ser extendidos con extends. type es más flexible para unions, intersecciones, y aliases. En práctica: interface para modelos/DTOs, type para todo lo demás.'},
+    {q:'¿Qué hace strict: true en tsconfig.json?',opts:['Prohíbe el uso de any','Activa noImplicitAny + strictNullChecks + otras verificaciones estrictas','Solo activa strictNullChecks','Hace que todos los errores sean fatales'],ans:1,exp:'strict: true activa: noImplicitAny, strictNullChecks, strictFunctionTypes, strictPropertyInitialization, y otros. Hace el código más seguro pero requiere más anotaciones de tipos.'},
+    {q:'¿Cómo extiendes el tipo Request de Express para añadir req.user?',opts:['Modificando el archivo de Express directamente','Usando declare global con namespace Express e interface Request','Creando una nueva clase que extiende Request','Usando type casting en cada uso'],ans:1,exp:'Augmentation de módulo: crear types/express.d.ts con declare global { namespace Express { interface Request { user?: UserPayload } } }. TypeScript lo fusiona automáticamente con el tipo Request de Express.'},
+    {q:'¿Para qué sirven los genéricos en TypeScript?',opts:['Para definir tipos en tiempo de ejecución','Para código reutilizable con type-safety — el tipo se parametriza','Para hacer tipos opcionales','Solo para arrays y colecciones'],ans:1,exp:'Genéricos permiten funciones/interfaces/clases que funcionan con múltiples tipos manteniendo type-safety. ApiResponse<User>, ApiResponse<Post> — un solo tipo para todos. TypeScript infiere T del contexto.'},
+    {q:'¿Qué es el DTO pattern?',opts:['Database Table Object — mapea tablas a clases','Data Transfer Object — define la forma de los datos en la frontera de la API','Dependency Tracking Object — registra dependencias','Dynamic Type Optimization — optimiza tipos en runtime'],ans:1,exp:'DTOs separan la forma de los datos que entran/salen de la API del modelo interno de la BD. CreateUserDTO, UpdateUserDTO, UserResponseDTO. Permite evolucionar el modelo interno sin romper la API.'},
+  ],
+  t13: [
+    {q:'¿Qué almacenamiento usa Multer para procesar imágenes con Sharp antes de subirlas?',opts:['diskStorage','cloudStorage','memoryStorage','bufferStorage'],ans:2,exp:'memoryStorage guarda el archivo como un Buffer en req.file.buffer. Esto permite pasarlo directamente a Sharp para procesarlo antes de subir a Cloudinary/S3. diskStorage guarda en disco del servidor.'},
+    {q:'¿Por qué es inseguro validar archivos SOLO por su extensión?',opts:['Las extensiones pueden ser muy largas','Un atacante puede cambiar la extensión del archivo para bypassear la validación','Las extensiones son case-sensitive','Las extensiones no identifican el formato'],ans:1,exp:'Cambiar la extensión de un archivo no cambia su contenido. Un archivo .exe renombrado a .jpg pasa la validación de extensión. La validación segura lee los "magic bytes" al inicio del archivo (paquete file-type).'},
+    {q:'¿Cuál es la ventaja de WebP sobre JPEG para imágenes web?',opts:['WebP soporta animaciones','WebP es 25-35% más pequeño que JPEG con calidad similar','WebP tiene mayor profundidad de color','WebP carga más rápido por su algoritmo de transferencia'],ans:1,exp:'WebP ofrece mejor compresión con igual o mayor calidad visual. 25-35% más pequeño reduce ancho de banda y mejora LCP (Largest Contentful Paint) — métrica importante de rendimiento web.'},
+    {q:'¿Qué son las presigned URLs de S3?',opts:['URLs permanentes para archivos públicos','URLs temporales que permiten subir/descargar directamente a S3 sin pasar por tu servidor','URLs firmadas para proteger contra hotlinking','URLs que incluyen credenciales AWS en el path'],ans:1,exp:'Presigned URLs son URLs temporales con credenciales firmadas. El cliente sube directamente a S3 sin pasar por tu servidor. Reduce carga en tu API, elimina cuellos de botella de ancho de banda.'},
+    {q:'¿Qué ventaja tiene Cloudflare R2 sobre AWS S3?',opts:['Mayor velocidad de carga','Sin costes de egress (salida de datos), compatible con la API de S3','Mayor capacidad de almacenamiento','Mejores herramientas de transformación de imagen'],ans:1,exp:'R2 es S3-compatible (mismo SDK) pero sin costes de egress. En S3, transferir datos hacia internet tiene coste. En R2 es gratuito. Especialmente relevante para CDN y assets muy descargados.'},
+  ],
+};
+
+const ALL_QUIZ = Object.values(QUIZ_DATA).flat();
+
+// ── STATE ────────────────────────────────────────────────────────
+let fcIndex = 0;
+let fcCards = [...FLASHCARDS];
+let fcStatus = new Array(FLASHCARDS.length).fill('pending');
+
+let currentPage = 'home';
+const donePages = new Set(JSON.parse(localStorage.getItem('pw2_done') || '[]'));
+
+// ── NAVIGATION ──────────────────────────────────────────────────
+function show(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick') === `show('${id}')`) n.classList.add('active');
+  });
+  currentPage = id;
+  if (id === 'flashcards') initFlashcards();
+  if (id === 'quiz-master') initQuizMaster();
+  if (QUIZ_DATA[id]) initQuiz(id);
+  document.getElementById('main').scrollTo(0, 0);
+}
+
+function searchNav(val) {
+  val = val.toLowerCase();
+  document.querySelectorAll('.nav-item').forEach(n => {
+    n.classList.toggle('hidden-item', val && !n.textContent.toLowerCase().includes(val));
+  });
+}
+
+function markDone(id, btn) {
+  btn.classList.toggle('done');
+  btn.textContent = btn.classList.contains('done') ? 'Revisado ✓' : 'Marcar como revisado';
+  if (btn.classList.contains('done')) donePages.add(id); else donePages.delete(id);
+  localStorage.setItem('pw2_done', JSON.stringify([...donePages]));
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick') === `show('${id}')`) n.classList.toggle('done', donePages.has(id));
+  });
+  updateProgress();
+}
+
+function updateProgress() {
+  const topics = ['t1','t2','t3','t4','t5','t6','t7','t8','t9','t10','t11','t12','t13'];
+  const done = topics.filter(t => donePages.has(t)).length;
+  document.getElementById('prog-txt').textContent = `${done} / 13`;
+  document.getElementById('prog-fill').style.width = `${(done/13)*100}%`;
+}
+
+// ── TABS ────────────────────────────────────────────────────────
+function switchTab(tabEl, contentId) {
+  const parent = tabEl.closest('.page');
+  parent.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  parent.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  tabEl.classList.add('active');
+  document.getElementById(contentId).classList.add('active');
+  const tema = contentId.split('-')[0];
+  if (contentId.endsWith('-quiz') && QUIZ_DATA[tema]) initQuiz(tema);
+}
+
+// ── ACCORDION ───────────────────────────────────────────────────
+function toggleAcc(header) {
+  const body = header.nextElementSibling;
+  const chevron = header.querySelector('.chevron');
+  body.classList.toggle('open');
+  chevron.classList.toggle('open');
+}
+
+// ── CODE COPY ───────────────────────────────────────────────────
+function copyCode(btn) {
+  const text = btn.closest('.code-wrap').querySelector('pre').innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copiado!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// ── FLASHCARDS ───────────────────────────────────────────────────
+function initFlashcards() {
+  updateFCDisplay();
+  updateFCProgress();
+}
+
+function updateFCDisplay() {
+  const card = fcCards[fcIndex];
+  if (!card) return;
+  document.getElementById('fc-label').textContent = card.tema;
+  document.getElementById('fc-question').textContent = card.q;
+  document.getElementById('fc-answer').textContent = card.a;
+  document.getElementById('fc-counter').textContent = `${fcIndex + 1} / ${fcCards.length}`;
+  document.getElementById('fc-card').classList.remove('flipped');
+}
+
+function updateFCProgress() {
+  const bar = document.getElementById('fc-progress-bar');
+  bar.innerHTML = '';
+  fcStatus.forEach((s, i) => {
+    const seg = document.createElement('div');
+    seg.className = `fc-prog-seg ${s === 'known' ? 'known' : s === 'review' ? 'review' : i === fcIndex ? 'current' : ''}`;
+    bar.appendChild(seg);
+  });
+  const known = fcStatus.filter(s => s === 'known').length;
+  const review = fcStatus.filter(s => s === 'review').length;
+  const pending = fcStatus.filter(s => s === 'pending').length;
+  document.getElementById('fc-known').textContent = known;
+  document.getElementById('fc-review').textContent = review;
+  document.getElementById('fc-pending').textContent = pending;
+}
+
+function flipCard() { document.getElementById('fc-card').classList.toggle('flipped'); }
+function nextCard() { if (fcIndex < fcCards.length - 1) { fcIndex++; updateFCDisplay(); updateFCProgress(); } }
+function prevCard() { if (fcIndex > 0) { fcIndex--; updateFCDisplay(); updateFCProgress(); } }
+function markCard(status) {
+  const originalIdx = FLASHCARDS.indexOf(fcCards[fcIndex]);
+  if (originalIdx >= 0) fcStatus[originalIdx] = status;
+  updateFCProgress();
+  nextCard();
+}
+function shuffleFlashcards() {
+  fcCards = [...FLASHCARDS].sort(() => Math.random() - .5);
+  fcIndex = 0;
+  updateFCDisplay();
+  updateFCProgress();
+}
+function resetFlashcards() {
+  fcCards = [...FLASHCARDS];
+  fcStatus = new Array(FLASHCARDS.length).fill('pending');
+  fcIndex = 0;
+  updateFCDisplay();
+  updateFCProgress();
+}
+
+// ── QUIZ ENGINE ──────────────────────────────────────────────────
+function initQuiz(tema) {
+  const containerId = `quiz-${tema}`;
+  const container = document.getElementById(containerId);
+  if (!container || container.dataset.initialized) return;
+  container.dataset.initialized = 'true';
+  renderQuiz(container, QUIZ_DATA[tema], `quiz_${tema}`);
+}
+
+function renderQuiz(container, questions, storageKey) {
+  let score = 0, answered = 0;
+  const state = {};
+  container.innerHTML = questions.map((q, qi) => `
+    <div class="quiz-question" id="${storageKey}_q${qi}">
+      <div class="quiz-q-num">Pregunta ${qi+1} de ${questions.length}</div>
+      <div class="quiz-q-text">${q.q}</div>
+      <div class="quiz-options">${q.opts.map((opt, oi) =>
+        `<button class="quiz-opt" onclick="selectOpt('${storageKey}',${qi},${oi},${q.ans},'${escapeStr(q.exp)}')" id="${storageKey}_q${qi}_o${oi}">${opt}</button>`
+      ).join('')}</div>
+      <div id="${storageKey}_fb${qi}"></div>
+    </div>
+  `).join('') + `<div class="quiz-result" id="${storageKey}_result" style="display:none">
+    <div class="quiz-score" id="${storageKey}_score">0/${questions.length}</div>
+    <p style="margin-top:10px;color:var(--text2)">Revisa las preguntas falladas arriba</p>
+    <button class="quiz-start-btn" style="margin-top:16px" onclick="resetQuiz('${storageKey}',${questions.length})">Reintentar</button>
+  </div>`;
+  container._q = questions;
+  container._answered = 0;
+  container._score = 0;
+}
+
+function escapeStr(s) { return s.replace(/'/g,"&#39;").replace(/"/g,'&quot;'); }
+
+function selectOpt(storageKey, qi, oi, correct, exp) {
+  const q = document.getElementById(`${storageKey}_q${qi}`);
+  if (q.dataset.done) return;
+  q.dataset.done = '1';
+  const opts = q.querySelectorAll('.quiz-opt');
+  opts.forEach((o, i) => {
+    o.dataset.disabled = '1';
+    if (i === oi) o.classList.add(oi === correct ? 'correct' : 'wrong');
+    if (i === correct && oi !== correct) o.classList.add('show-correct');
+  });
+  const fb = document.getElementById(`${storageKey}_fb${qi}`);
+  const ok = oi === correct;
+  fb.className = 'quiz-feedback ' + (ok ? 'ok' : 'bad');
+  fb.textContent = (ok ? '✓ Correcto! ' : '✗ Incorrecto. ') + exp;
+  // count
+  const allQs = document.querySelectorAll(`[id^="${storageKey}_q"]`);
+  const done = [...allQs].filter(el => el.dataset.done).length;
+  if (ok) { /* track */ }
+  if (done === allQs.length) {
+    const correctCount = [...allQs].filter(el => {
+      const picked = el.querySelector('.correct');
+      return picked !== null;
+    }).length;
+    const res = document.getElementById(`${storageKey}_result`);
+    const scr = document.getElementById(`${storageKey}_score`);
+    if (res) { res.style.display = 'block'; scr.textContent = `${correctCount}/${allQs.length}`; }
+  }
+}
+
+function resetQuiz(storageKey, len) {
+  const container = document.getElementById(`quiz-${storageKey.replace('quiz_','')}`);
+  if (!container) return;
+  delete container.dataset.initialized;
+  container.innerHTML = '';
+  const tema = storageKey.replace('quiz_','');
+  initQuiz(tema);
+}
+
+// ── QUIZ MASTER ──────────────────────────────────────────────────
+function initQuizMaster() {
+  const container = document.getElementById('qm-body');
+  if (container.dataset.initialized) return;
+  container.dataset.initialized = 'true';
+}
+
+function startQuizMaster() {
+  document.getElementById('qm-intro').style.display = 'none';
+  const container = document.getElementById('qm-body');
+  container.style.display = 'block';
+  const shuffled = [...ALL_QUIZ].sort(() => Math.random() - .5).slice(0, 40);
+  renderQuiz(container, shuffled, 'quiz_master');
+}
+
+// ── INIT ─────────────────────────────────────────────────────────
+window.onload = () => {
+  donePages.forEach(id => {
+    document.querySelectorAll('.nav-item').forEach(n => {
+      if (n.getAttribute('onclick') === `show('${id}')`) n.classList.add('done');
+    });
+  });
+  updateProgress();
+  // init first visible quiz tabs
+  Object.keys(QUIZ_DATA).forEach(tema => {
+    const el = document.getElementById(`quiz-${tema}`);
+    if (el) el.dataset.initialized = '';
+  });
+};
+</script>
+</body>
+</html>
