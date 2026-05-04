@@ -146,6 +146,7 @@ const options = {
       { name: 'Clients',      description: 'Gestión de clientes de obra' },
       { name: 'Projects',     description: 'Gestión de proyectos' },
       { name: 'DeliveryNotes',description: 'Albaranes — creación, firma y PDF' },
+      { name: 'Dashboard',    description: 'Estadísticas (aggregation pipeline)' },
     ],
     paths: {
       // ── AUTH ──────────────────────────────────────────────────────────────────
@@ -666,6 +667,78 @@ const options = {
         },
       },
 
+      // ── DASHBOARD ────────────────────────────────────────────────────────────
+      '/api/dashboard': {
+        get: {
+          tags: ['Dashboard'],
+          summary: 'Estadísticas agregadas de la compañía',
+          description: 'Calcula totales, agrupaciones por mes/formato/firma, horas por proyecto, materiales por cliente y top-5 clientes mediante `aggregation pipeline` de MongoDB.',
+          responses: {
+            200: {
+              description: 'Estadísticas',
+              content: { 'application/json': { schema: {
+                type: 'object',
+                properties: {
+                  totals: {
+                    type: 'object',
+                    properties: {
+                      deliveryNotes: { type: 'integer' },
+                      clients:       { type: 'integer' },
+                      projects:      { type: 'integer' },
+                    },
+                  },
+                  deliveryNotesByFormat: {
+                    type: 'object',
+                    properties: { material: { type: 'integer' }, hours: { type: 'integer' } },
+                  },
+                  deliveryNotesBySigned: {
+                    type: 'object',
+                    properties: { signed: { type: 'integer' }, unsigned: { type: 'integer' } },
+                  },
+                  deliveryNotesPerMonth: {
+                    type: 'array',
+                    items: { type: 'object', properties: {
+                      year:  { type: 'integer' },
+                      month: { type: 'integer' },
+                      count: { type: 'integer' },
+                      hours: { type: 'number' },
+                    } },
+                  },
+                  hoursPerProject: {
+                    type: 'array',
+                    items: { type: 'object', properties: {
+                      projectId:   { type: 'string' },
+                      name:        { type: 'string' },
+                      projectCode: { type: 'string' },
+                      totalHours:  { type: 'number' },
+                    } },
+                  },
+                  materialPerClient: {
+                    type: 'array',
+                    items: { type: 'object', properties: {
+                      clientId:   { type: 'string' },
+                      clientName: { type: 'string' },
+                      material:   { type: 'string' },
+                      unit:       { type: 'string' },
+                      quantity:   { type: 'number' },
+                    } },
+                  },
+                  topClients: {
+                    type: 'array',
+                    items: { type: 'object', properties: {
+                      clientId: { type: 'string' },
+                      name:     { type: 'string' },
+                      count:    { type: 'integer' },
+                    } },
+                  },
+                },
+              } } },
+            },
+            401: { description: 'No autenticado', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          },
+        },
+      },
+
       // ── HEALTH ───────────────────────────────────────────────────────────────
       '/health': {
         get: {
@@ -680,6 +753,7 @@ const options = {
                 properties: {
                   status:    { type: 'string', example: 'ok' },
                   db:        { type: 'string', enum: ['connected', 'disconnected'], example: 'connected' },
+                  uptime:    { type: 'number', example: 123.456, description: 'Segundos desde el arranque (process.uptime())' },
                   timestamp: { type: 'string', format: 'date-time' },
                 },
               } } },
