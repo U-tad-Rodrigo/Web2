@@ -324,5 +324,75 @@ describe('BildyApp API - /api/project', () => {
       await expect(Project.findById(projectId)).resolves.toBeNull();
       await expect(Client.findById(clientId)).resolves.not.toBeNull();
     });
+
+    test('404 rejects restoring a non-archived project', async () => {
+      const { accessToken, projectId } = await setupUserClientAndProject();
+
+      const res = await request(app)
+        .patch(`${PROJECT_BASE}/${projectId}/restore`)
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      expect(res.statusCode).toBe(404);
+    });
+  });
+
+  describe('GET /api/project — filter branches', () => {
+    test('200 filters projects by name (regex)', async () => {
+      const { accessToken, clientId } = await setupUserClientAndProject();
+      await createProject(accessToken, clientId, { name: 'Obra Norte', projectCode: 'OBR-N' });
+
+      const res = await request(app)
+        .get(`${PROJECT_BASE}?name=norte`)
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data.projects).toHaveLength(1);
+      expect(res.body.data.projects[0].name).toBe('Obra Norte');
+    });
+
+    test('200 filters projects by active=false', async () => {
+      const { accessToken, projectId, clientId } = await setupUserClientAndProject();
+      await request(app)
+        .put(`${PROJECT_BASE}/${projectId}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ active: false });
+      await createProject(accessToken, clientId, { name: 'Proyecto Activo', projectCode: 'ACT-001' });
+
+      const res = await request(app)
+        .get(`${PROJECT_BASE}?active=false`)
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data.projects).toHaveLength(1);
+      expect(res.body.data.projects[0].active).toBe(false);
+    });
+
+    test('200 filters projects by client', async () => {
+      const { accessToken, clientId, projectId } = await setupUserClientAndProject();
+      const secondClient = await createClient(accessToken, { name: 'Otro Cliente', cif: 'B99999999' });
+      await createProject(accessToken, secondClient.body.data.client._id, {
+        name: 'Proyecto Otro', projectCode: 'OTR-001',
+      });
+
+      const res = await request(app)
+        .get(`${PROJECT_BASE}?client=${clientId}`)
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data.projects).toHaveLength(1);
+      expect(res.body.data.projects[0]._id).toBe(projectId);
+    });
+
+    test('200 updates project keeping same code (no duplicate check)', async () => {
+      const { accessToken, projectId } = await setupUserClientAndProject();
+
+      const res = await request(app)
+        .put(`${PROJECT_BASE}/${projectId}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ notes: 'Notas actualizadas' });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data.project.notes).toBe('Notas actualizadas');
+    });
   });
 });
