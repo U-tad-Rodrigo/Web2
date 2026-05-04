@@ -3,7 +3,8 @@ import Project from '../models/Project.js';
 import Client from '../models/Client.js';
 import { AppError } from '../utils/AppError.js';
 import { emitToCompany } from '../services/socket.service.js';
-import { uploadImage } from '../services/cloudinary.service.js';
+import { uploadImage, uploadBuffer } from '../services/cloudinary.service.js';
+import { streamDeliveryNotePdf, buildDeliveryNotePdfBuffer } from '../services/pdf.service.js';
 
 // POST /api/deliverynote
 export const createDeliveryNote = async (req, res, next) => {
@@ -84,7 +85,7 @@ export const getDeliveryNote = async (req, res, next) => {
   }
 };
 
-// GET /api/deliverynote/pdf/:id  — implementación completa en FASE 3
+// GET /api/deliverynote/pdf/:id
 export const downloadPdf = async (req, res, next) => {
   try {
     const deliveryNote = await DeliveryNote.findOne({ _id: req.params.id, company: req.user.company, deleted: false })
@@ -99,50 +100,13 @@ export const downloadPdf = async (req, res, next) => {
       return res.redirect(deliveryNote.pdfUrl);
     }
 
-    // Generación PDF básica con pdfkit (se enriquece en FASE 3)
-    const { default: PDFDocument } = await import('pdfkit');
-    const doc = new PDFDocument({ margin: 50 });
-
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `inline; filename="albaran-${deliveryNote._id}.pdf"`);
-    doc.pipe(res);
-
-    doc.fontSize(20).text('Albarán', { align: 'center' });
-    doc.moveDown();
-    doc.fontSize(12).text(`ID: ${deliveryNote._id}`);
-    doc.text(`Fecha: ${deliveryNote.workDate?.toLocaleDateString('es-ES') ?? '-'}`);
-    doc.text(`Tipo: ${deliveryNote.format}`);
-    doc.text(`Descripción: ${deliveryNote.description ?? '-'}`);
-    doc.moveDown();
-    doc.text(`Cliente: ${deliveryNote.client?.name ?? '-'}`);
-    doc.text(`Proyecto: ${deliveryNote.project?.name ?? '-'} (${deliveryNote.project?.projectCode ?? '-'})`);
-
-    if (deliveryNote.format === 'material') {
-      doc.moveDown();
-      doc.text(`Material: ${deliveryNote.material ?? '-'}`);
-      doc.text(`Cantidad: ${deliveryNote.quantity ?? '-'} ${deliveryNote.unit ?? ''}`);
-    } else {
-      doc.moveDown();
-      if (deliveryNote.workers?.length > 0) {
-        doc.text('Trabajadores:');
-        deliveryNote.workers.forEach(w => doc.text(`  - ${w.name}: ${w.hours}h`));
-      } else {
-        doc.text(`Horas: ${deliveryNote.hours ?? '-'}`);
-      }
-    }
-
-    if (deliveryNote.signed) {
-      doc.moveDown();
-      doc.text(`Firmado el: ${deliveryNote.signedAt?.toLocaleDateString('es-ES') ?? '-'}`);
-    }
-
-    doc.end();
+    streamDeliveryNotePdf(deliveryNote, res);
   } catch (err) {
     next(err);
   }
 };
 
-// PATCH /api/deliverynote/:id/sign  — implementación completa (Cloudinary + Sharp) en FASE 3
+// PATCH /api/deliverynote/:id/sign
 export const signDeliveryNote = async (req, res, next) => {
   try {
     if (!req.file) return next(AppError.badRequest('No se ha subido ningún archivo de firma', 'NO_FILE'));
@@ -151,16 +115,41 @@ export const signDeliveryNote = async (req, res, next) => {
     if (!deliveryNote) return next(AppError.notFound('Albarán no encontrado'));
     if (deliveryNote.signed) return next(AppError.badRequest('El albarán ya está firmado', 'ALREADY_SIGNED'));
 
-    const cloudUrl     = await uploadImage(req.file.path, 'signatures');
-    const signatureUrl = cloudUrl ?? `/uploads/${req.file.filename}`;
+    // 1) Sube la imagen de la firma (Sharp + Cloudinary)
+    const cloudSignatureUrl = await uploadImage(req.file.path, 'signatures');
+    const signatureUrl      = cloudSignatureUrl ?? `/uploads/${req.file.filename}`;
 
     deliveryNote.signed       = true;
     deliveryNote.signedAt     = new Date();
     deliveryNote.signatureUrl = signatureUrl;
     await deliveryNote.save();
-    emitToCompany(req.user.company, 'deliverynote:signed', { deliveryNote });
 
-    return res.json({ error: false, data: { deliveryNote } });
+    // 2) Genera el PDF firmado y lo sube a la nube. El populate es necesario
+    //    para que el PDF muestre cliente/proyecto/usuario por nombre.
+    const populated = await DeliveryNote.findById(deliveryNote._id)
+      .populate('user',    'name lastName email')
+      .populate('client',  'name cif email')
+      .populate('project', 'name projectCode');
+
+    try {
+      const pdfBuffer = await buildDeliveryNotePdfBuffer(populated);
+      const pdfUrl    = await uploadBuffer(pdfBuffer, {
+        folder:   'deliverynotes',
+        publicId: `albaran-${populated._id}`,
+        format:   'pdf',
+      });
+      if (pdfUrl) {
+        populated.pdfUrl = pdfUrl;
+        await populated.save();
+      }
+    } catch (pdfErr) {
+      // No bloqueamos la firma si el PDF falla — se puede regenerar bajo demanda
+      console.error('[deliverynote.sign] error generando/subiendo PDF:', pdfErr.message);
+    }
+
+    emitToCompany(req.user.company, 'deliverynote:signed', { deliveryNote: populated });
+
+    return res.json({ error: false, data: { deliveryNote: populated } });
   } catch (err) {
     next(err);
   }
