@@ -18,4 +18,4 @@ RUN mkdir -p uploads
 
 EXPOSE 3000
 
-CMD ["node", "--env-file=.env", "src/index.js"]
+CMD ["node", "--env-file-if-exists=.env", "src/index.js"]

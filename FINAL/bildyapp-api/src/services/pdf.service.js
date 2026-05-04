@@ -1,10 +1,28 @@
 import PDFDocument from 'pdfkit';
+import path from 'node:path';
+import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
-/**
- * Renderiza el contenido del albarán dentro de un PDFDocument abierto.
- * Recibe el doc para que la misma lógica sirva tanto para streaming HTTP
- * como para generar un Buffer en memoria.
- */
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const UPLOADS_DIR = path.resolve(__dirname, '../../uploads');
+
+const renderSignature = (doc, signatureUrl) => {
+  if (!signatureUrl) return;
+
+  doc.text('Firma:');
+
+  if (signatureUrl.startsWith('/uploads/')) {
+    const localPath = path.join(UPLOADS_DIR, path.basename(signatureUrl));
+    if (fs.existsSync(localPath)) {
+      doc.image(localPath, { width: 200 });
+      return;
+    }
+  }
+
+  // Cloudinary URL u otro remoto — muestra el enlace
+  doc.text(signatureUrl);
+};
+
 const renderDeliveryNote = (doc, deliveryNote) => {
   doc.fontSize(20).text('Albarán', { align: 'center' });
   doc.moveDown();
@@ -37,15 +55,10 @@ const renderDeliveryNote = (doc, deliveryNote) => {
   if (deliveryNote.signed) {
     doc.moveDown();
     doc.text(`Firmado el: ${deliveryNote.signedAt?.toLocaleDateString('es-ES') ?? '-'}`);
-    if (deliveryNote.signatureUrl) {
-      doc.text(`URL firma: ${deliveryNote.signatureUrl}`);
-    }
+    renderSignature(doc, deliveryNote.signatureUrl);
   }
 };
 
-/**
- * Hace stream del PDF directamente a la respuesta HTTP.
- */
 export const streamDeliveryNotePdf = (deliveryNote, res) => {
   const doc = new PDFDocument({ margin: 50 });
   res.setHeader('Content-Type', 'application/pdf');
@@ -55,9 +68,6 @@ export const streamDeliveryNotePdf = (deliveryNote, res) => {
   doc.end();
 };
 
-/**
- * Genera el PDF en memoria y devuelve un Buffer (para subir a la nube).
- */
 export const buildDeliveryNotePdfBuffer = (deliveryNote) =>
   new Promise((resolve, reject) => {
     const doc = new PDFDocument({ margin: 50 });
