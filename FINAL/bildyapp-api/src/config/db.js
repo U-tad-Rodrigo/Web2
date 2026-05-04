@@ -21,10 +21,4 @@ mongoose.connection.on('disconnected', () => {
   console.warn('[DB] Desconectado de MongoDB');
 });
 
-process.on('SIGINT', async () => {
-  await mongoose.connection.close();
-  console.log('[DB] Conexion a MongoDB cerrada');
-  process.exit(0);
-});
-
 export default dbConnect;

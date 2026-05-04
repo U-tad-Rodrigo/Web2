@@ -100,7 +100,7 @@ export const downloadPdf = async (req, res, next) => {
       return res.redirect(deliveryNote.pdfUrl);
     }
 
-    streamDeliveryNotePdf(deliveryNote, res);
+    await streamDeliveryNotePdf(deliveryNote, res);
   } catch (err) {
     next(err);
   }
