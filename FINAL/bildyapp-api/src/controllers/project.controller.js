@@ -3,6 +3,8 @@ import Client from '../models/Client.js';
 import { AppError } from '../utils/AppError.js';
 import { emitToCompany } from '../services/socket.service.js';
 
+const escapeRegex = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 // POST /api/project
 export const createProject = async (req, res, next) => {
   try {
@@ -66,7 +68,7 @@ export const listProjects = async (req, res, next) => {
 
     const filter = { company: user.company, deleted: false };
     if (client) filter.client = client;
-    if (name) filter.name = { $regex: name, $options: 'i' };
+    if (name) filter.name = { $regex: escapeRegex(name), $options: 'i' };
     if (active !== undefined) filter.active = active === 'true';
 
     const skip = (Number(page) - 1) * Number(limit);

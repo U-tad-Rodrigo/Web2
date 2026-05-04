@@ -2,6 +2,8 @@ import Client from '../models/Client.js';
 import { AppError } from '../utils/AppError.js';
 import { emitToCompany } from '../services/socket.service.js';
 
+const escapeRegex = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 // POST /api/client
 export const createClient = async (req, res, next) => {
   try {
@@ -52,7 +54,7 @@ export const listClients = async (req, res, next) => {
     const { page = 1, limit = 10, name, sort = '-createdAt' } = req.query;
 
     const filter = { company: user.company, deleted: false };
-    if (name) filter.name = { $regex: name, $options: 'i' };
+    if (name) filter.name = { $regex: escapeRegex(name), $options: 'i' };
 
     const skip = (Number(page) - 1) * Number(limit);
     const [clients, totalItems] = await Promise.all([

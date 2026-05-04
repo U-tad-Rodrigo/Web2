@@ -6,7 +6,17 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const UPLOADS_DIR = path.resolve(__dirname, '../../uploads');
 
-const renderSignature = (doc, signatureUrl) => {
+const fetchRemoteImage = async (url) => {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    return Buffer.from(await res.arrayBuffer());
+  } catch {
+    return null;
+  }
+};
+
+const renderSignature = async (doc, signatureUrl) => {
   if (!signatureUrl) return;
 
   doc.text('Firma:');
@@ -17,13 +27,24 @@ const renderSignature = (doc, signatureUrl) => {
       doc.image(localPath, { width: 200 });
       return;
     }
+    doc.text(signatureUrl);
+    return;
   }
 
-  // Cloudinary URL u otro remoto — muestra el enlace
+  // URL remota (Cloudinary, R2, S3) — descargar y embeber como imagen
+  const buffer = await fetchRemoteImage(signatureUrl);
+  if (buffer) {
+    try {
+      doc.image(buffer, { width: 200 });
+      return;
+    } catch {
+      // Si pdfkit no reconoce el formato (raro tras Sharp→WebP) caemos al enlace
+    }
+  }
   doc.text(signatureUrl);
 };
 
-const renderDeliveryNote = (doc, deliveryNote) => {
+const renderDeliveryNote = async (doc, deliveryNote) => {
   doc.fontSize(20).text('Albarán', { align: 'center' });
   doc.moveDown();
 
@@ -55,16 +76,16 @@ const renderDeliveryNote = (doc, deliveryNote) => {
   if (deliveryNote.signed) {
     doc.moveDown();
     doc.text(`Firmado el: ${deliveryNote.signedAt?.toLocaleDateString('es-ES') ?? '-'}`);
-    renderSignature(doc, deliveryNote.signatureUrl);
+    await renderSignature(doc, deliveryNote.signatureUrl);
   }
 };
 
-export const streamDeliveryNotePdf = (deliveryNote, res) => {
+export const streamDeliveryNotePdf = async (deliveryNote, res) => {
   const doc = new PDFDocument({ margin: 50 });
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', `inline; filename="albaran-${deliveryNote._id}.pdf"`);
   doc.pipe(res);
-  renderDeliveryNote(doc, deliveryNote);
+  await renderDeliveryNote(doc, deliveryNote);
   doc.end();
 };
 
@@ -77,6 +98,7 @@ export const buildDeliveryNotePdfBuffer = (deliveryNote) =>
     doc.on('end', () => resolve(Buffer.concat(chunks)));
     doc.on('error', reject);
 
-    renderDeliveryNote(doc, deliveryNote);
-    doc.end();
+    renderDeliveryNote(doc, deliveryNote)
+      .then(() => doc.end())
+      .catch(reject);
   });
