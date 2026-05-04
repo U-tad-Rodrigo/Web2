@@ -107,6 +107,31 @@ describe('Error handler branches', () => {
     expect(capturedBody).toMatchObject({ error: true, code: 'INTERNAL_ERROR' });
   });
 
+  test('AppError factories cover default messages and codes', async () => {
+    const { AppError } = await import('../src/utils/AppError.js');
+
+    const u = AppError.unauthorized();
+    expect(u.statusCode).toBe(401);
+    expect(u.code).toBe('NOT_AUTHORIZED');
+    expect(u.message).toBe('No autorizado');
+
+    const f = AppError.forbidden();
+    expect(f.statusCode).toBe(403);
+    expect(f.code).toBe('NOT_ALLOWED');
+
+    const n = AppError.notFound();
+    expect(n.statusCode).toBe(404);
+    expect(n.code).toBe('NOT_FOUND');
+
+    const v = AppError.validation();
+    expect(v.code).toBe('VALIDATION_ERROR');
+    expect(v.details).toEqual([]);
+
+    const i = AppError.internal();
+    expect(i.statusCode).toBe(500);
+    expect(i.code).toBe('INTERNAL_ERROR');
+  });
+
   test('11000 duplicate key throws MongoDB error at model level', async () => {
     // Verifica que el índice único dispara código 11000 directamente en Mongoose
     await Client.create({ name: 'A', cif: 'B00000001', user: '507f1f77bcf86cd799439011', company: '507f1f77bcf86cd799439012' });
