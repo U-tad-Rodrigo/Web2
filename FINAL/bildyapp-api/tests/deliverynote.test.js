@@ -371,6 +371,22 @@ describe('BildyApp API - /api/deliverynote', () => {
       expect(res.statusCode).toBe(400);
       expect(res.body.code).toBe('ALREADY_SIGNED');
     });
+
+    test('415 rejects signing with a non-image mime type', async () => {
+      const { accessToken, clientId, projectId } = await setupFullContext();
+      const created = await createDeliveryNote(accessToken, clientId, projectId);
+
+      const res = await request(app)
+        .patch(`${DELIVERYNOTE_BASE}/${created.body.data.deliveryNote._id}/sign`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .attach('signature', Buffer.from('hola mundo'), {
+          filename: 'firma.txt',
+          contentType: 'text/plain',
+        });
+
+      expect(res.statusCode).toBe(415);
+      expect(res.body.code).toBe('INVALID_FILE_TYPE');
+    });
   });
 
   describe('DELETE /api/deliverynote/:id', () => {
@@ -527,6 +543,38 @@ describe('BildyApp API - /api/deliverynote', () => {
 
       expect(res.statusCode).toBe(200);
       expect(res.headers['content-type']).toContain('application/pdf');
+    });
+
+    test('200 streams PDF embedding remote signature (mock fetch returns PNG buffer)', async () => {
+      const { accessToken, clientId, projectId } = await setupFullContext();
+      const created = await createDeliveryNote(accessToken, clientId, projectId);
+      const id = created.body.data.deliveryNote._id;
+
+      const localPng = (await import('node:fs/promises')).readFile(SIGNATURE_FIXTURE);
+      const pngBuffer = await localPng;
+
+      const originalFetch = globalThis.fetch;
+      globalThis.fetch = async () => ({
+        ok: true,
+        arrayBuffer: async () => pngBuffer.buffer.slice(pngBuffer.byteOffset, pngBuffer.byteOffset + pngBuffer.byteLength),
+      });
+
+      try {
+        await DeliveryNote.findByIdAndUpdate(id, {
+          signed: true,
+          signedAt: new Date(),
+          signatureUrl: 'https://res.cloudinary.com/test/image/upload/v1/signatures/ok.png',
+        });
+
+        const res = await request(app)
+          .get(`${DELIVERYNOTE_BASE}/pdf/${id}`)
+          .set('Authorization', `Bearer ${accessToken}`);
+
+        expect(res.statusCode).toBe(200);
+        expect(res.headers['content-type']).toContain('application/pdf');
+      } finally {
+        globalThis.fetch = originalFetch;
+      }
     });
 
     test('200 streams PDF for signed hours note with cloudinary URL signature (remote URL branch)', async () => {
