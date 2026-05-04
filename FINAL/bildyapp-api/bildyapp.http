@@ -308,3 +308,13 @@ Content-Type: application/json
 {
   "email": "alguien@bildyapp.com"
 }
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# DASHBOARD — GET /api/dashboard  [BONUS +0.5 aggregation pipeline]
+#   Estadísticas agregadas de la compañía con $group, $lookup, $unwind.
+# ─────────────────────────────────────────────────────────────────────────────
+
+### Dashboard — estadísticas agregadas de la compañía
+GET {{host}}/api/dashboard
+Authorization: Bearer {{accessToken}}

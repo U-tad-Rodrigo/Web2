@@ -14,6 +14,7 @@ import userRoutes         from './routes/user.routes.js';
 import clientRoutes       from './routes/client.routes.js';
 import projectRoutes      from './routes/project.routes.js';
 import deliverynoteRoutes from './routes/deliverynote.routes.js';
+import dashboardRoutes    from './routes/dashboard.routes.js';
 import { initSocket } from './services/socket.service.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -61,7 +62,12 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
 app.get('/health', (_req, res) => {
   const dbState = mongoose.connection.readyState;
   const db = dbState === 1 ? 'connected' : 'disconnected';
-  res.json({ status: 'ok', db, timestamp: new Date().toISOString() });
+  res.json({
+    status: 'ok',
+    db,
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // ── Rutas API ─────────────────────────────────────────────────────────────────
@@ -69,6 +75,7 @@ app.use('/api/user',         userRoutes);
 app.use('/api/client',       clientRoutes);
 app.use('/api/project',      projectRoutes);
 app.use('/api/deliverynote', deliverynoteRoutes);
+app.use('/api/dashboard',    dashboardRoutes);
 
 // ── Manejo de errores ─────────────────────────────────────────────────────────
 app.use(notFound);
