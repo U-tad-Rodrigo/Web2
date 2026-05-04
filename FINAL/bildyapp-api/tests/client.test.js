@@ -261,5 +261,69 @@ describe('BildyApp API - /api/client', () => {
       expect(res.body.message).toContain('hard');
       await expect(Client.findById(id)).resolves.toBeNull();
     });
+
+    test('404 rejects restoring a non-archived client', async () => {
+      const { accessToken } = await setupUserWithCompany();
+      const created = await createClient(accessToken);
+
+      const res = await request(app)
+        .patch(`${CLIENT_BASE}/${created.body.data.client._id}/restore`)
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      expect(res.statusCode).toBe(404);
+    });
+
+    test('404 rejects deleting a client from another company', async () => {
+      const first = await setupUserWithCompany('admin1@test.com', 'password123', 'B11111111');
+      const second = await setupUserWithCompany('admin2@test.com', 'password123', 'B22222222');
+      const created = await createClient(first.accessToken);
+
+      const res = await request(app)
+        .delete(`${CLIENT_BASE}/${created.body.data.client._id}`)
+        .set('Authorization', `Bearer ${second.accessToken}`);
+
+      expect(res.statusCode).toBe(404);
+    });
+  });
+
+  describe('GET /api/client — filter branches', () => {
+    test('200 filters clients by name (regex)', async () => {
+      const { accessToken } = await setupUserWithCompany();
+      await createClient(accessToken, { name: 'Acme SL', cif: 'B10000001' });
+      await createClient(accessToken, { name: 'Rivas SA', cif: 'B10000002' });
+
+      const res = await request(app)
+        .get(`${CLIENT_BASE}?name=acme`)
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data.clients).toHaveLength(1);
+      expect(res.body.data.clients[0].name).toBe('Acme SL');
+    });
+
+    test('200 returns empty archived list when no archived clients', async () => {
+      const { accessToken } = await setupUserWithCompany();
+      await createClient(accessToken);
+
+      const res = await request(app)
+        .get(`${CLIENT_BASE}/archived`)
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data.clients).toHaveLength(0);
+    });
+
+    test('200 updates client keeping same CIF (no duplicate check)', async () => {
+      const { accessToken } = await setupUserWithCompany();
+      const created = await createClient(accessToken);
+
+      const res = await request(app)
+        .put(`${CLIENT_BASE}/${created.body.data.client._id}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ name: 'Nombre Nuevo' });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data.client.name).toBe('Nombre Nuevo');
+    });
   });
 });
