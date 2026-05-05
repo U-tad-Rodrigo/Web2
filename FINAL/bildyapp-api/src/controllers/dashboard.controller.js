@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import DeliveryNote from '../models/DeliveryNote.js';
 import Client from '../models/Client.js';
 import Project from '../models/Project.js';
+import { AppError } from '../utils/AppError.js';
 
 const monthsAgo = (n) => {
   const d = new Date();
@@ -14,6 +15,7 @@ const monthsAgo = (n) => {
 // GET /api/dashboard
 export const getDashboard = async (req, res, next) => {
   try {
+    if (!req.user.company) return next(AppError.badRequest('Debes tener una empresa asignada', 'NO_COMPANY'));
     const companyId = new mongoose.Types.ObjectId(req.user.company);
 
     const [
