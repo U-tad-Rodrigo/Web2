@@ -1,8 +1,7 @@
-import mongoose from 'mongoose';
+import { Schema, model } from 'mongoose';
+import type { IAddress, IClient } from '../types/index.js';
 
-const { Schema, model } = mongoose;
-
-const addressSchema = new Schema(
+const addressSchema = new Schema<IAddress>(
   {
     street:   { type: String, trim: true },
     number:   { type: String, trim: true },
@@ -13,7 +12,7 @@ const addressSchema = new Schema(
   { _id: false }
 );
 
-const clientSchema = new Schema(
+const clientSchema = new Schema<IClient>(
   {
     user:    { type: Schema.Types.ObjectId, ref: 'User',    required: true, index: true },
     company: { type: Schema.Types.ObjectId, ref: 'Company', required: true, index: true },
@@ -27,8 +26,7 @@ const clientSchema = new Schema(
   { timestamps: true, versionKey: false }
 );
 
-// CIF único dentro de la misma compañía
 clientSchema.index({ company: 1, cif: 1 }, { unique: true });
 
-const Client = model('Client', clientSchema);
+const Client = model<IClient>('Client', clientSchema);
 export default Client;

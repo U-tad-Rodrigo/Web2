@@ -1,8 +1,7 @@
-import mongoose from 'mongoose';
+import { Schema, model } from 'mongoose';
+import type { IDeliveryNote, IWorker } from '../types/index.js';
 
-const { Schema, model } = mongoose;
-
-const workerSchema = new Schema(
+const workerSchema = new Schema<IWorker>(
   {
     name:  { type: String, trim: true },
     hours: { type: Number, min: 0 }
@@ -10,7 +9,7 @@ const workerSchema = new Schema(
   { _id: false }
 );
 
-const deliveryNoteSchema = new Schema(
+const deliveryNoteSchema = new Schema<IDeliveryNote>(
   {
     user:    { type: Schema.Types.ObjectId, ref: 'User',    required: true, index: true },
     company: { type: Schema.Types.ObjectId, ref: 'Company', required: true, index: true },
@@ -19,14 +18,11 @@ const deliveryNoteSchema = new Schema(
     format:  { type: String, enum: ['material', 'hours'], required: true },
     description: { type: String, trim: true },
     workDate:    { type: Date, required: true },
-    // Campos para format: 'material'
     material: { type: String, trim: true },
     quantity: { type: Number, min: 0 },
     unit:     { type: String, trim: true },
-    // Campos para format: 'hours'
-    hours:   { type: Number, min: 0 },
-    workers: { type: [workerSchema], default: [] },
-    // Firma y PDF
+    hours:    { type: Number, min: 0 },
+    workers:  { type: [workerSchema], default: [] },
     signed:       { type: Boolean, default: false, index: true },
     signedAt:     { type: Date,   default: null },
     signatureUrl: { type: String, default: null },
@@ -36,5 +32,5 @@ const deliveryNoteSchema = new Schema(
   { timestamps: true, versionKey: false }
 );
 
-const DeliveryNote = model('DeliveryNote', deliveryNoteSchema);
+const DeliveryNote = model<IDeliveryNote>('DeliveryNote', deliveryNoteSchema);
 export default DeliveryNote;
