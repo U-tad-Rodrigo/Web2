@@ -125,8 +125,8 @@ const options = {
         Pagination: {
           type: 'object',
           properties: {
-            total:      { type: 'integer', example: 42 },
-            page:       { type: 'integer', example: 1 },
+            totalItems: { type: 'integer', example: 42 },
+            currentPage:{ type: 'integer', example: 1 },
             totalPages: { type: 'integer', example: 5 },
           },
         },
@@ -321,7 +321,7 @@ const options = {
             content: { 'multipart/form-data': { schema: { type: 'object', properties: { logo: { type: 'string', format: 'binary' } } } } },
           },
           responses: {
-            200: { description: 'Logo actualizado', content: { 'application/json': { schema: { type: 'object', properties: { logoUrl: { type: 'string' } } } } } },
+            200: { description: 'Logo actualizado', content: { 'application/json': { schema: { type: 'object', properties: { error: { type: 'boolean', example: false }, data: { type: 'object', properties: { company: { $ref: '#/components/schemas/Company' } } } } } } } },
           },
         },
       },

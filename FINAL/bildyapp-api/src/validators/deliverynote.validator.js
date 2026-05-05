@@ -10,7 +10,7 @@ export const createDeliveryNoteSchema = z.object({
   project:     z.string().min(1, 'El proyecto es obligatorio'),
   format:      z.enum(['material', 'hours']),
   description: z.string().trim().optional(),
-  workDate:    z.string().min(1, 'La fecha de trabajo es obligatoria'),
+  workDate:    z.coerce.date({ required_error: 'La fecha de trabajo es obligatoria' }),
   // Material
   material: z.string().trim().optional(),
   quantity: z.number().min(0).optional(),
