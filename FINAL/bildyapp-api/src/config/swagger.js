@@ -522,7 +522,7 @@ const options = {
         get: {
           tags: ['Projects'],
           summary: 'Listar proyectos archivados',
-          responses: { 200: { description: 'Proyectos archivados' } },
+          responses: { 200: { description: 'Proyectos archivados', content: { 'application/json': { schema: { type: 'object', properties: { projects: { type: 'array', items: { $ref: '#/components/schemas/Project' } } } } } } } },
         },
       },
       '/api/project/{id}': {
@@ -742,7 +742,7 @@ const options = {
       // ── HEALTH ───────────────────────────────────────────────────────────────
       '/health': {
         get: {
-          tags: ['Auth'],
+          tags: ['System'],
           summary: 'Health check — estado del servidor y BD',
           security: [],
           responses: {

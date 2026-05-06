@@ -15,7 +15,7 @@ export const createClient = async (req, res, next) => {
     const existing = await Client.findOne({ company: user.company, cif: cif.toUpperCase(), deleted: false });
     if (existing) return next(AppError.conflict('Ya existe un cliente con ese CIF en tu empresa', 'CIF_TAKEN'));
 
-    const client = await Client.create({ user: user._id, company: user.company, name, cif, email, phone, address });
+    const client = await Client.create({ user: user._id, company: user.company, name, cif: cif.toUpperCase(), email, phone, address });
     emitToCompany(user.company, 'client:new', { client });
 
     return res.status(201).json({ error: false, data: { client } });
@@ -38,6 +38,7 @@ export const updateClient = async (req, res, next) => {
       if (dup) return next(AppError.conflict('Ya existe un cliente con ese CIF', 'CIF_TAKEN'));
     }
 
+    if (req.body.cif) req.body.cif = req.body.cif.toUpperCase();
     Object.assign(client, req.body);
     await client.save();
 
