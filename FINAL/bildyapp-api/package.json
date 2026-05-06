@@ -8,8 +8,8 @@
     "node": ">=22.0.0"
   },
   "scripts": {
-    "dev": "tsx --env-file=.env watch src/index.js",
-    "start": "node --env-file-if-exists=.env src/index.js",
+    "dev": "tsx watch --env-file=.env src/index.js",
+    "start": "tsx --env-file-if-exists=.env src/index.js",
     "build": "tsc",
     "type-check": "tsc --noEmit",
     "test": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --forceExit --detectOpenHandles",
@@ -35,6 +35,7 @@
     "socket.io": "^4.8.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
+    "tsx": "^4.21.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {
@@ -50,7 +51,6 @@
     "mongodb-memory-server": "^10.4.3",
     "supertest": "^7.2.2",
     "ts-jest": "^29.4.9",
-    "tsx": "^4.21.0",
     "typescript": "^6.0.3"
   }
 }

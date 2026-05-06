@@ -18,4 +18,5 @@ RUN mkdir -p uploads
 
 EXPOSE 3000
 
-CMD ["node", "--env-file-if-exists=.env", "src/index.js"]
+# tsx resuelve los imports a archivos .ts (modelos y middleware migrados a TS)
+CMD ["node", "node_modules/tsx/dist/cli.mjs", "src/index.js"]
