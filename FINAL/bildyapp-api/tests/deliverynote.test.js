@@ -400,8 +400,30 @@ describe('BildyApp API - /api/deliverynote', () => {
         .set('Authorization', `Bearer ${accessToken}`);
 
       expect(res.statusCode).toBe(200);
-      expect(res.body.message).toBe('Albarán eliminado');
+      expect(res.body.message).toBe('Albarán eliminado (hard)');
       await expect(DeliveryNote.findById(id)).resolves.toBeNull();
+    });
+
+    test('200 soft-deletes (?soft=true) marks deleted=true without removing the document', async () => {
+      const { accessToken, clientId, projectId } = await setupFullContext();
+      const created = await createDeliveryNote(accessToken, clientId, projectId);
+      const id = created.body.data.deliveryNote._id;
+
+      const res = await request(app)
+        .delete(`${DELIVERYNOTE_BASE}/${id}?soft=true`)
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.message).toBe('Albarán eliminado (soft)');
+      const stored = await DeliveryNote.findById(id);
+      expect(stored).not.toBeNull();
+      expect(stored.deleted).toBe(true);
+
+      // Y no debe aparecer en el listado normal
+      const list = await request(app)
+        .get(DELIVERYNOTE_BASE)
+        .set('Authorization', `Bearer ${accessToken}`);
+      expect(list.body.data.deliveryNotes).toHaveLength(0);
     });
 
     test('400 rejects deleting a signed delivery note', async () => {
@@ -621,5 +643,45 @@ describe('BildyApp API - /api/deliverynote', () => {
       expect(res.headers['content-type']).toContain('application/pdf');
     });
 
+  });
+
+  describe('GET /api/deliverynote/pdf/:id — owner-or-guest rule', () => {
+    // Helper: añade un segundo usuario admin a la misma compañía para los casos
+    // multi-usuario. El endpoint /api/user/company asigna role='guest' si el
+    // CIF ya existe; aquí necesitamos un segundo ADMIN así que lo escribimos
+    // directamente en BD para no depender del flujo de invitaciones.
+    const setupSecondMember = async (companyCif, email, role) => {
+      const verified = await setupVerifiedUser(email);
+      const company = await (await import('../src/models/Company.js')).default.findOne({ cif: companyCif });
+      await User.findOneAndUpdate({ email }, { company: company._id, role });
+      const log = await loginUser(email);
+      return log.body.data.accessToken;
+    };
+
+    test('403 NOT_OWNER when an admin who did not create the note tries to download', async () => {
+      const owner = await setupFullContext('owner@bildyapp.com', 'B11111111', 'B10000001');
+      const otherAdminToken = await setupSecondMember('B11111111', 'other-admin@bildyapp.com', 'admin');
+      const created = await createDeliveryNote(owner.accessToken, owner.clientId, owner.projectId);
+
+      const res = await request(app)
+        .get(`${DELIVERYNOTE_BASE}/pdf/${created.body.data.deliveryNote._id}`)
+        .set('Authorization', `Bearer ${otherAdminToken}`);
+
+      expect(res.statusCode).toBe(403);
+      expect(res.body.code).toBe('NOT_OWNER');
+    });
+
+    test('200 a guest of the same company can download a note created by another user', async () => {
+      const owner = await setupFullContext('owner2@bildyapp.com', 'B22222222', 'B20000001');
+      const guestToken = await setupSecondMember('B22222222', 'guest@bildyapp.com', 'guest');
+      const created = await createDeliveryNote(owner.accessToken, owner.clientId, owner.projectId);
+
+      const res = await request(app)
+        .get(`${DELIVERYNOTE_BASE}/pdf/${created.body.data.deliveryNote._id}`)
+        .set('Authorization', `Bearer ${guestToken}`);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.headers['content-type']).toContain('application/pdf');
+    });
   });
 });

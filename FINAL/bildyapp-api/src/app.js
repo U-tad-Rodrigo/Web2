@@ -50,9 +50,25 @@ app.use(cors());
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// ── Sanitización NoSQL (solo body — req.query es getter read-only en Express 5)
+// ── Sanitización NoSQL ────────────────────────────────────────────────────────
+// req.body es asignable → reemplazo limpio con mongoSanitize.
+// req.query en Express 5 es getter read-only, pero el OBJETO devuelto sí es
+// mutable: borramos in-place las claves con $ o . (lo mismo que hace
+// mongo-sanitize por debajo) para neutralizar inyección NoSQL desde la URL.
+const stripDangerousKeys = (obj) => {
+  if (!obj || typeof obj !== 'object') return;
+  for (const key of Object.keys(obj)) {
+    if (key.startsWith('$') || key.includes('.')) {
+      delete obj[key];
+    } else if (obj[key] && typeof obj[key] === 'object') {
+      stripDangerousKeys(obj[key]);
+    }
+  }
+};
+
 app.use((req, _res, next) => {
-  if (req.body) req.body = mongoSanitize(req.body);
+  if (req.body)  req.body = mongoSanitize(req.body);
+  if (req.query) stripDangerousKeys(req.query);
   next();
 });
 

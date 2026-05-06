@@ -629,10 +629,13 @@ const options = {
         },
         delete: {
           tags: ['DeliveryNotes'],
-          summary: 'Eliminar albarán (solo si no está firmado)',
-          parameters: [{ in: 'path', name: 'id', required: true, schema: { type: 'string' } }],
+          summary: 'Eliminar albarán (?soft=true para archivar) — solo si no está firmado',
+          parameters: [
+            { in: 'path',  name: 'id',   required: true, schema: { type: 'string' } },
+            { in: 'query', name: 'soft', schema: { type: 'boolean' }, description: 'true = soft delete, sin parámetro = hard delete' },
+          ],
           responses: {
-            200: { description: 'Albarán eliminado' },
+            200: { description: 'Albarán eliminado o archivado' },
             400: { description: 'No se puede eliminar un albarán firmado' },
             404: { description: 'No encontrado' },
           },
@@ -641,11 +644,12 @@ const options = {
       '/api/deliverynote/pdf/{id}': {
         get: {
           tags: ['DeliveryNotes'],
-          summary: 'Descargar PDF del albarán',
+          summary: 'Descargar PDF del albarán (solo creador o guest de la compañía)',
           parameters: [{ in: 'path', name: 'id', required: true, schema: { type: 'string' } }],
           responses: {
             200: { description: 'PDF generado con pdfkit', content: { 'application/pdf': {} } },
             302: { description: 'Redirección a pdfUrl si ya existe' },
+            403: { description: 'NOT_OWNER — un admin que no creó el albarán intenta descargarlo' },
             404: { description: 'Albarán no encontrado' },
           },
         },
