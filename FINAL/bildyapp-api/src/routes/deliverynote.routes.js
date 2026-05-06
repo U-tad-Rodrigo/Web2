@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { authenticate } from '../middleware/auth.middleware.js';
 import { validate }     from '../middleware/validate.js';
+import { validateId }   from '../middleware/validate-id.js';
 import { upload }       from '../middleware/upload.js';
 import { createDeliveryNoteSchema } from '../validators/deliverynote.validator.js';
 import {
@@ -13,12 +14,12 @@ const router = Router();
 router.use(authenticate);
 
 // Rutas estáticas antes de /:id — pdf/:id debe ir antes de /:id
-router.get('/pdf/:id', downloadPdf);
+router.get('/pdf/:id', validateId(), downloadPdf);
 
-router.post('/',           validate(createDeliveryNoteSchema), createDeliveryNote);
+router.post('/',           validate(createDeliveryNoteSchema),               createDeliveryNote);
 router.get('/',            listDeliveryNotes);
-router.get('/:id',         getDeliveryNote);
-router.patch('/:id/sign',  upload.single('signature'), signDeliveryNote);
-router.delete('/:id',      deleteDeliveryNote);
+router.get('/:id',         validateId(),                                     getDeliveryNote);
+router.patch('/:id/sign',  validateId(), upload.single('signature'),         signDeliveryNote);
+router.delete('/:id',      validateId(),                                     deleteDeliveryNote);
 
 export default router;

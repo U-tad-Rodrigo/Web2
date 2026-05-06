@@ -1,8 +1,18 @@
 # BildyApp API
 
+[![CI](https://github.com/U-tad-Rodrigo/Web2/actions/workflows/bildyapp-test.yml/badge.svg)](https://github.com/U-tad-Rodrigo/Web2/actions/workflows/bildyapp-test.yml)
+
 API REST para digitalizar albaranes de obra. La idea es que un constructor o un autónomo pueda llevar sus clientes, proyectos y partes de trabajo (horas o materiales) desde el móvil, firmar el albarán con el dedo y guardar el PDF en la nube.
 
 Práctica final de PW2 — temas T8 a T13.
+
+## En producción
+
+- **API:** https://bildyapp-api-production.up.railway.app
+- **Swagger:** https://bildyapp-api-production.up.railway.app/api-docs
+- **Health:** https://bildyapp-api-production.up.railway.app/health
+
+Desplegada en Railway con MongoDB privado conectado por red interna.
 
 ## Cómo arrancarlo
 
@@ -31,7 +41,9 @@ npm test
 npm run test:coverage
 ```
 
-Los tests usan `mongodb-memory-server`. CI los corre solo en cada push a `main` (`.github/workflows/bildyapp-test.yml`).
+Los tests usan `mongodb-memory-server`. CI los corre en cada push a `main` (`.github/workflows/bildyapp-test.yml`).
+
+**Cobertura actual:** 87.6 % statements · 75.5 % branches · 89.6 % functions · 89.7 % lines (134 tests, incluida una suite de integración de Socket.IO con cliente real).
 
 ## Qué hace la API
 
