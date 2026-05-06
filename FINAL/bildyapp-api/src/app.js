@@ -21,6 +21,12 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 
+// ── Trust proxy ───────────────────────────────────────────────────────────────
+// Railway/Heroku/cualquier PaaS pone un proxy delante; sin esto el rate-limit
+// no sabe la IP real del cliente y Express loguea ERR_ERL_UNEXPECTED_X_FORWARDED_FOR.
+// '1' = confiamos en un solo hop (el load balancer del PaaS).
+app.set('trust proxy', 1);
+
 // ── Seguridad ─────────────────────────────────────────────────────────────────
 app.use(helmet());
 
