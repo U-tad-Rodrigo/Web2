@@ -58,6 +58,23 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
   customSiteTitle: 'BildyApp API Docs',
 }));
 
+// ── Index — pequeña landing JSON con punteros a la doc ────────────────────────
+app.get('/', (_req, res) => {
+  res.json({
+    name: 'BildyApp API',
+    version: '2.0.0',
+    docs: '/api-docs',
+    health: '/health',
+    endpoints: {
+      auth:          ['POST /api/user/register', 'POST /api/user/login', 'POST /api/user/refresh'],
+      clients:       'GET|POST|PUT|DELETE /api/client',
+      projects:      'GET|POST|PUT|DELETE /api/project',
+      deliveryNotes: 'GET|POST|PATCH|DELETE /api/deliverynote',
+      dashboard:     'GET /api/dashboard',
+    },
+  });
+});
+
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get('/health', (_req, res) => {
   const dbState = mongoose.connection.readyState;
