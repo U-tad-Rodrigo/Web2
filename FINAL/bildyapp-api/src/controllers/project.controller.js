@@ -41,9 +41,13 @@ export const updateProject = async (req, res, next) => {
     const project = await Project.findOne({ _id: id, company: user.company, deleted: false });
     if (!project) return next(AppError.notFound('Proyecto no encontrado'));
 
-    if (req.body.projectCode && req.body.projectCode !== project.projectCode) {
-      const dup = await Project.findOne({ company: user.company, projectCode: req.body.projectCode });
-      if (dup) return next(AppError.conflict('Ya existe un proyecto con ese código', 'CODE_TAKEN'));
+    if (req.body.projectCode) {
+      const incoming = req.body.projectCode.toUpperCase();
+      if (incoming !== project.projectCode) {
+        const dup = await Project.findOne({ company: user.company, projectCode: incoming });
+        if (dup) return next(AppError.conflict('Ya existe un proyecto con ese código', 'CODE_TAKEN'));
+      }
+      req.body.projectCode = incoming;
     }
 
     if (req.body.client) {

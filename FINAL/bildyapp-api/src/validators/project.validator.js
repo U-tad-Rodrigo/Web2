@@ -11,7 +11,7 @@ const addressSchema = z.object({
 export const createProjectSchema = z.object({
   client:      z.string().min(1, 'El cliente es obligatorio'),
   name:        z.string().trim().min(1, 'El nombre es obligatorio'),
-  projectCode: z.string().trim().min(1, 'El código de proyecto es obligatorio'),
+  projectCode: z.string().trim().min(1, 'El código de proyecto es obligatorio').transform((v) => v.toUpperCase()),
   address:     addressSchema,
   email:       z.string().email('Email inválido').optional().or(z.literal('')),
   notes:       z.string().trim().optional(),

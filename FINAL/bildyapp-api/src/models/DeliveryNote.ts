@@ -1,5 +1,6 @@
 import { Schema, model } from 'mongoose';
 import type { IDeliveryNote, IWorker } from '../types/index.js';
+import { softDeletePlugin } from '../plugins/soft-delete.plugin.js';
 
 const workerSchema = new Schema<IWorker>(
   {
@@ -26,11 +27,12 @@ const deliveryNoteSchema = new Schema<IDeliveryNote>(
     signed:       { type: Boolean, default: false, index: true },
     signedAt:     { type: Date,   default: null },
     signatureUrl: { type: String, default: null },
-    pdfUrl:       { type: String, default: null },
-    deleted:      { type: Boolean, default: false, index: true }
+    pdfUrl:       { type: String, default: null }
   },
   { timestamps: true, versionKey: false }
 );
+
+deliveryNoteSchema.plugin(softDeletePlugin);
 
 const DeliveryNote = model<IDeliveryNote>('DeliveryNote', deliveryNoteSchema);
 export default DeliveryNote;
