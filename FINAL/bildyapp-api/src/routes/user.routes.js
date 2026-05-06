@@ -4,6 +4,7 @@ import { authenticate }    from '../middleware/auth.middleware.js';
 import { authorize }       from '../middleware/role.middleware.js';
 import { validate }        from '../middleware/validate.js';
 import { upload }          from '../middleware/upload.js';
+import { verifyImageMime } from '../middleware/verify-mime.js';
 
 import {
   registerSchema,
@@ -42,7 +43,7 @@ router.post('/refresh',   validate(refreshSchema),   refreshToken);
 router.put('/validation', authenticate, validate(verificationSchema), validateEmail);
 router.put('/register',   authenticate, validate(personalDataSchema), updatePersonalData);
 router.patch('/company',  authenticate, validate(companySchema),      updateCompany);
-router.patch('/logo',     authenticate, upload.single('logo'),        uploadLogo);
+router.patch('/logo',     authenticate, upload.single('logo'),        verifyImageMime, uploadLogo);
 router.get('/',           authenticate,                               getUser);
 router.post('/logout',    authenticate,                               logout);
 router.delete('/',        authenticate,                               deleteUser);

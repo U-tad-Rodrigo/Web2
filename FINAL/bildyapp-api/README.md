@@ -43,7 +43,7 @@ npm run test:coverage
 
 Los tests usan `mongodb-memory-server`. CI los corre en cada push a `main` (`.github/workflows/bildyapp-test.yml`).
 
-**Cobertura actual:** 87.6 % statements · 75.5 % branches · 89.6 % functions · 89.7 % lines (134 tests, incluida una suite de integración de Socket.IO con cliente real).
+**Cobertura actual:** 87.5 % statements · 75 % branches · 89 % functions · 89.5 % lines (140 tests, incluyen integración de Socket.IO con cliente real, plugin de soft delete y validación de mime real con `file-type`).
 
 ## Qué hace la API
 

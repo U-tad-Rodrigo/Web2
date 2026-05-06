@@ -64,20 +64,26 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
   customSiteTitle: 'BildyApp API Docs',
 }));
 
-// ── Index — pequeña landing JSON con punteros a la doc ────────────────────────
-app.get('/', (_req, res) => {
-  res.json({
-    name: 'BildyApp API',
-    version: '2.0.0',
-    docs: '/api-docs',
-    health: '/health',
-    endpoints: {
-      auth:          ['POST /api/user/register', 'POST /api/user/login', 'POST /api/user/refresh'],
-      clients:       'GET|POST|PUT|DELETE /api/client',
-      projects:      'GET|POST|PUT|DELETE /api/project',
-      deliveryNotes: 'GET|POST|PATCH|DELETE /api/deliverynote',
-      dashboard:     'GET /api/dashboard',
-    },
+// ── Index — html→swagger UI, json→landing con punteros ─────────────────────
+// Navegador (Accept: text/html) entra directo a Swagger; curl/Postman recibe JSON.
+const indexJson = {
+  name: 'BildyApp API',
+  version: '2.0.0',
+  docs: '/api-docs',
+  health: '/health',
+  endpoints: {
+    auth:          ['POST /api/user/register', 'POST /api/user/login', 'POST /api/user/refresh'],
+    clients:       'GET|POST|PUT|DELETE /api/client',
+    projects:      'GET|POST|PUT|DELETE /api/project',
+    deliveryNotes: 'GET|POST|PATCH|DELETE /api/deliverynote',
+    dashboard:     'GET /api/dashboard',
+  },
+};
+app.get('/', (req, res) => {
+  res.format({
+    html: () => res.redirect('/api-docs'),
+    json: () => res.json(indexJson),
+    default: () => res.json(indexJson),
   });
 });
 

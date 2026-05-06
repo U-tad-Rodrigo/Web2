@@ -1,5 +1,6 @@
 import { Schema, model } from 'mongoose';
 import type { IAddress, IClient } from '../types/index.js';
+import { softDeletePlugin } from '../plugins/soft-delete.plugin.js';
 
 const addressSchema = new Schema<IAddress>(
   {
@@ -20,12 +21,12 @@ const clientSchema = new Schema<IClient>(
     cif:     { type: String, required: [true, 'El CIF es obligatorio'],    trim: true, uppercase: true },
     email:   { type: String, trim: true, lowercase: true },
     phone:   { type: String, trim: true },
-    address: { type: addressSchema, default: {} },
-    deleted: { type: Boolean, default: false, index: true }
+    address: { type: addressSchema, default: {} }
   },
   { timestamps: true, versionKey: false }
 );
 
+clientSchema.plugin(softDeletePlugin);
 clientSchema.index({ company: 1, cif: 1 }, { unique: true });
 
 const Client = model<IClient>('Client', clientSchema);
