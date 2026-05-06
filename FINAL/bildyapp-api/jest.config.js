@@ -11,6 +11,7 @@ export default {
   testTimeout: 30000,
   collectCoverageFrom: [
     'src/**/*.{js,ts}',
+    '!src/**/*.d.ts',
     '!src/index.js',
     '!src/config/db.js',
   ],

@@ -43,7 +43,7 @@ npm run test:coverage
 
 Los tests usan `mongodb-memory-server`. CI los corre en cada push a `main` (`.github/workflows/bildyapp-test.yml`).
 
-**Cobertura actual:** 90 % statements · 79 % branches · 94 % functions · 92 % lines (150 tests, 9 suites — incluyen integración de Socket.IO con cliente real, plugin de soft delete, validación de mime real con `file-type`, y mocks ESM de Cloudinary/Sharp para cubrir la rama configurada del servicio de subida).
+**Cobertura actual:** 90.5 % statements · 81.6 % branches · 93.7 % functions · 92.5 % lines (159 tests, 12 suites — incluyen integración de Socket.IO con cliente real, plugin de soft delete, validación de mime real con `file-type`, mocks ESM de Cloudinary/Sharp/Nodemailer para cubrir las ramas configuradas, y tests del servicio Slack con `fetch` espiado).
 
 ## Qué hace la API
 
@@ -67,4 +67,4 @@ Mira `.env.example` para la lista completa.
 
 ## Stack
 
-Express 5, Mongoose, Zod, JWT, Socket.IO, Multer + Sharp + Cloudinary, pdfkit, Nodemailer, Jest + Supertest, Helmet, rate-limit, Swagger 3.0, Docker, GitHub Actions. Modelos, middleware y `AppError` migrados a TypeScript (bonus T12).
+Express 5, Mongoose, Zod, JWT, Socket.IO, Multer + Sharp + Cloudinary, pdfkit, Nodemailer, Jest + Supertest, Helmet, rate-limit, Swagger 3.0, Docker, GitHub Actions. Modelos, middleware, `AppError`, plugin de soft delete y servicios de mail/slack/notification migrados a TypeScript (bonus T12).
