@@ -3,10 +3,18 @@ services:
     build: .
     ports:
       - "3000:3000"
-    env_file: .env
+    # .env opcional: si existe se lee para Cloudinary/Mail/Slack reales,
+    # si no, los servicios degradan sin romper (URL local, console.log, no-op)
+    env_file:
+      - path: .env
+        required: false
     environment:
       - DB_URI=mongodb://mongo:27017/bildyapp
       - NODE_ENV=production
+      - JWT_SECRET=${JWT_SECRET:-dev_secret_change_in_production_at_least_32_chars}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-15m}
+      - REFRESH_TOKEN_DAYS=${REFRESH_TOKEN_DAYS:-7}
+      - SOCKET_CORS_ORIGIN=${SOCKET_CORS_ORIGIN:-*}
     depends_on:
       mongo:
         condition: service_healthy
