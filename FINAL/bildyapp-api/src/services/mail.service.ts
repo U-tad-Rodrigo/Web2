@@ -1,22 +1,29 @@
 import nodemailer from 'nodemailer';
+import type { Transporter, SendMailOptions } from 'nodemailer';
 
-const createTransport = () => {
+interface InvitePayload {
+  invitedBy:        string;
+  tempPassword:     string;
+  verificationCode: string;
+}
+
+const createTransport = (): Transporter | null => {
   const { MAIL_HOST, MAIL_PORT, MAIL_USER, MAIL_PASS, MAIL_FROM } = process.env;
 
   if (!MAIL_HOST || !MAIL_USER || !MAIL_PASS) return null;
 
   return nodemailer.createTransport({
-    host: MAIL_HOST,
-    port: parseInt(MAIL_PORT || '587', 10),
+    host:   MAIL_HOST,
+    port:   parseInt(MAIL_PORT || '587', 10),
     secure: MAIL_PORT === '465',
-    auth: { user: MAIL_USER, pass: MAIL_PASS },
-    from: MAIL_FROM || MAIL_USER,
-  });
+    auth:   { user: MAIL_USER, pass: MAIL_PASS },
+    from:   MAIL_FROM || MAIL_USER,
+  } as SendMailOptions);
 };
 
 const transporter = createTransport();
 
-const send = async (options) => {
+const send = async (options: SendMailOptions): Promise<void> => {
   if (!transporter) {
     console.warn('[mail] MAIL_* vars not configured — skipping email send');
     return;
@@ -27,7 +34,7 @@ const send = async (options) => {
   });
 };
 
-export const sendVerificationEmail = async (to, code) => {
+export const sendVerificationEmail = async (to: string, code: string): Promise<void> => {
   await send({
     to,
     subject: 'BildyApp — Verifica tu email',
@@ -48,7 +55,7 @@ export const sendVerificationEmail = async (to, code) => {
   });
 };
 
-export const sendInviteEmail = async (to, { invitedBy, tempPassword, verificationCode }) => {
+export const sendInviteEmail = async (to: string, { invitedBy, tempPassword, verificationCode }: InvitePayload): Promise<void> => {
   await send({
     to,
     subject: 'BildyApp — Has sido invitado a una empresa',
