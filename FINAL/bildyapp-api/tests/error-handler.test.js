@@ -1,9 +1,23 @@
 import request from 'supertest';
+import mongoose from 'mongoose';
 import app from '../src/app.js';
 import User from '../src/models/User.js';
 import Client from '../src/models/Client.js';
 import { errorHandler } from '../src/middleware/error-handler.js';
 import { clearTestDb, closeTestDb, connectTestDb } from './helpers/test-db.js';
+
+// Helper unit-test del errorHandler — reutilizado por varios casos
+const runErrorHandler = (err) => {
+  let capturedStatus;
+  let capturedBody;
+  const mockReq = { method: 'POST', originalUrl: '/api/test' };
+  const mockRes = {
+    status(code) { capturedStatus = code; return this; },
+    json(body)   { capturedBody = body; },
+  };
+  errorHandler(err, mockReq, mockRes, () => {});
+  return { status: capturedStatus, body: capturedBody };
+};
 
 const USER_BASE = '/api/user';
 const CLIENT_BASE = '/api/client';
@@ -143,5 +157,61 @@ describe('Error handler branches', () => {
       caughtError = err;
     }
     expect(caughtError?.code).toBe(11000);
+  });
+
+  test('400 VALIDATION_ERROR maps Mongoose ValidationError with details (unit)', () => {
+    const err = new mongoose.Error.ValidationError();
+    err.errors = {
+      name: { message: 'El nombre es obligatorio' },
+      cif:  { message: 'El CIF es obligatorio' },
+    };
+
+    const res = runErrorHandler(err);
+
+    expect(res.status).toBe(400);
+    expect(res.body).toMatchObject({
+      error: true,
+      code: 'VALIDATION_ERROR',
+      message: 'Error de validación',
+    });
+    expect(res.body.details).toEqual(['El nombre es obligatorio', 'El CIF es obligatorio']);
+  });
+
+  test('409 DUPLICATE_KEY maps MongoDB 11000 error with field name (unit)', () => {
+    const err = Object.assign(new Error('E11000 duplicate key error'), {
+      code: 11000,
+      keyValue: { cif: 'B12345678' },
+    });
+
+    const res = runErrorHandler(err);
+
+    expect(res.status).toBe(409);
+    expect(res.body).toMatchObject({
+      error: true,
+      code: 'DUPLICATE_KEY',
+    });
+    expect(res.body.message).toContain("'cif'");
+  });
+
+  test('409 DUPLICATE_KEY falls back to "campo" when keyValue missing', () => {
+    const err = Object.assign(new Error('dup'), { code: 11000 });
+    const res = runErrorHandler(err);
+    expect(res.status).toBe(409);
+    expect(res.body.message).toContain("'campo'");
+  });
+
+  test('AppError with details serialises details in body', async () => {
+    const { AppError } = await import('../src/utils/AppError.js');
+    const err = AppError.validation('Faltan campos', [{ field: 'cif', message: 'requerido' }]);
+    const res = runErrorHandler(err);
+    expect(res.status).toBe(400);
+    expect(res.body.code).toBe('VALIDATION_ERROR');
+    expect(res.body.details).toEqual([{ field: 'cif', message: 'requerido' }]);
+  });
+
+  test('uses err.status when statusCode is missing', () => {
+    const err = Object.assign(new Error('Boom'), { status: 503 });
+    const res = runErrorHandler(err);
+    expect(res.status).toBe(503);
   });
 });

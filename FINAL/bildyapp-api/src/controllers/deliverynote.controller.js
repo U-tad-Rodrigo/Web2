@@ -95,6 +95,14 @@ export const downloadPdf = async (req, res, next) => {
 
     if (!deliveryNote) return next(AppError.notFound('Albarán no encontrado'));
 
+    // Solo el creador del albarán o un guest de la compañía pueden descargarlo
+    const ownerId = deliveryNote.user?._id ?? deliveryNote.user;
+    const isOwner = ownerId.equals(req.user._id);
+    const isGuest = req.user.role === 'guest';
+    if (!isOwner && !isGuest) {
+      return next(AppError.forbidden('Solo el creador del albarán o un invitado pueden descargarlo', 'NOT_OWNER'));
+    }
+
     // Si ya está firmado y hay PDF en la nube, redirigir
     if (deliveryNote.signed && deliveryNote.pdfUrl) {
       return res.redirect(deliveryNote.pdfUrl);
@@ -155,9 +163,11 @@ export const signDeliveryNote = async (req, res, next) => {
   }
 };
 
-// DELETE /api/deliverynote/:id
+// DELETE /api/deliverynote/:id?soft=true
 export const deleteDeliveryNote = async (req, res, next) => {
   try {
+    const soft = req.query.soft === 'true';
+
     const deliveryNote = await DeliveryNote.findOne({ _id: req.params.id, company: req.user.company, deleted: false });
     if (!deliveryNote) return next(AppError.notFound('Albarán no encontrado'));
 
@@ -165,9 +175,14 @@ export const deleteDeliveryNote = async (req, res, next) => {
       return next(AppError.badRequest('No se puede eliminar un albarán firmado', 'SIGNED_NOTE'));
     }
 
-    await DeliveryNote.findByIdAndDelete(req.params.id);
+    if (soft) {
+      deliveryNote.deleted = true;
+      await deliveryNote.save();
+    } else {
+      await DeliveryNote.findByIdAndDelete(req.params.id);
+    }
 
-    return res.json({ error: false, message: 'Albarán eliminado' });
+    return res.json({ error: false, message: `Albarán eliminado (${soft ? 'soft' : 'hard'})` });
   } catch (err) {
     next(err);
   }
