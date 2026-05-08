@@ -72,49 +72,44 @@ entrega conviven los dos.
 
 ## Proceso
 
-Empecé leyendo el endpoint signDeliveryNote (líneas 118-163) y viendo el problema de raíz: el flag
-signed:true no es idempotencia HTTP, es un guard de estado del recurso. Si el cliente reintenta
-porque se le cayó la red, recibe un 400 ALREADY_SIGNED y pierde la respuesta original (signatureUrl,
-signedAt, pdfUrl). Eso me confirmó que la solución no era tocar el flag, sino añadir una capa nueva
-de deduplicación a nivel de transporte.
+He apoyado el desarrollo de este examen en herramientas de IA (Claude Code y Codex) como parte
+del flujo, pero el control de las decisiones, la validación contra el enunciado y la revisión
+del código han sido míos en cada etapa. Los pasos que seguí:
 
-Antes de tocar código dejé el plan por escrito: qué crear (un modelo IdempotencyLog con índice único
-en key y TTL 24h), qué modificar (signDeliveryNote y el test del albarán), y qué NO tocar
-(validate-id, verify-mime, modelo DeliveryNote — la idempotencia es ortogonal al dominio). Decidí
-meter toda la lógica inline en el controller en vez de hacer un middleware genérico porque para un
-único endpoint solo añade indirección sin aportar nada.
+- **1. Definición del scope.** Leí el enunciado y el código actual de `signDeliveryNote`
+  (líneas 118-163). Comparé alternativas para la parte técnica: (a) lookup + sign + insert al
+  final, (b) middleware genérico de idempotencia, (c) patrón placeholder-first con
+  `insertOne` + manejo del E11000. Descarté (a) por permitir doble upload a Cloudinary en
+  reintentos concurrentes, y (b) por overkill para un solo endpoint. Escogí (c), que es la
+  que cumple "insertOne + manejo del 11000" del criterio y bloquea el doble upload de raíz.
 
-La decisión más interesante fue cómo evitar el doble upload a Cloudinary cuando llegan dos reintentos
-simultáneos. La primera idea era lookup + sign + insert al final, pero eso permite que ambos requests
-pasen el lookup, ambos suban la firma, y solo el insert final detecte la colisión — exactamente el
-problema que quería evitar. Cambié al patrón placeholder-first: reservar la clave con insertOne ANTES
-de subir nada (statusCode=0 como marcador de pending). El que pierde la carrera del índice único
-recibe el error 11000, re-lee el log y devuelve el resultado cacheado si ya está completo, o 409 si
-todavía está pending.
+- **2. Investigación de las preguntas socráticas.** Una vez fijado el scope técnico, trabajé
+  cada pregunta alineándola con la implementación elegida: códigos HTTP (200 cached / 409
+  conflict / 400 inválido), por qué `validate-id.ts` no aplica para una clave que viaja por
+  cabecera, cómo Mongo serializa los inserts sobre el índice único, contraste con Stripe
+  como referencia de la industria, y qué implicaría firmar en varios pasos sin romper la
+  idempotencia.
 
-Detalles que tuve que ajustar mientras implementaba: cleanup del req.file con fs.unlink en los cache
-hits (multer ya escribió el archivo a disco antes de que mi controller pueda decidir; si no lo borro
-se acumulan firmas huérfanas en uploads/), y deleteOne de la reserva en el catch general para que un
-fallo no controlado no atrape al cliente en un 409 permanente.
+- **3. Desarrollo del código.** Tres piezas: el modelo `IdempotencyLog.ts` (índice único en
+  `key`, TTL 24h vía `expires: 86400`), la modificación de `signDeliveryNote` con el flujo
+  de reserva atómica + cleanup de `req.file` en cache hits + liberación de la reserva en
+  fallos, y los 4 tests nuevos en `deliverynote.test.js` (cache hit, concurrencia,
+  formato inválido y regresión sin cabecera).
 
-Lo que dejé fuera a propósito:
-- Middleware genérico de idempotencia: overkill para un solo endpoint.
-- Scoping por usuario o endpoint en la clave: el UUID v4 evita colisiones reales y el criterio pedía
-  explícitamente "índice único en key", no compound.
-- Regeneración del PDF como endpoint aparte: lo identifico en la respuesta a la pregunta 2 como
-  mejora arquitectónica, pero queda fuera del scope del examen.
-- Cachear errores 4xx (Stripe lo hace): el criterio dice "el resultado de la primera firma" — solo
-  éxitos.
+- **4. Primera revisión pre-test.** Antes de ejecutar, repasé el controller buscando huecos:
+  detecté que faltaba el `fs.unlink` del archivo subido en los cache hits y que el catch
+  general necesitaba `deleteOne` de la reserva para no atrapar al cliente en un 409
+  permanente si fallaba algo no controlado.
 
-Para los tests opté por la prueba más robusta sin mocks: comparar signedAt y signatureUrl entre el
-primer request y el reintento. Si la idempotencia fallara y el reintento re-ejecutara el flujo,
-signedAt cambiaría (es new Date()) y el test fallaría inmediatamente. Verde = el cache funcionó. El
-test concurrente usa Promise.all + assert sobre count del log: el outcome válido es [200, 200] (uno
-gana, otro lee cached) o [200, 409] (uno gana, otro pilla la reserva pending) — en cualquier caso,
-count === 1.
+- **5. Segunda revisión post-test.** Lancé `npm run type-check` (verde) y `npm test` (163/163,
+  12/12 suites). El test "no duplicación de uploads" lo construí asertando que `signedAt`
+  y `signatureUrl` del reintento son idénticos al original — si la idempotencia fallara y se
+  re-ejecutara el flujo, `signedAt` cambiaría (es `new Date()`) y el test fallaría
+  inmediatamente.
 
-Los commits los partí en tres para no repetir el commit-gigante que me bajó nota en la entrega
-anterior: primero el modelo, luego el controller, luego los tests + EXAMEN.md. Type-check verde,
-163 tests verdes (los 32 originales del albarán + 4 nuevos de idempotencia + el resto del proyecto),
-cero regresiones.
+- **6. Evaluación completa.** Pasé el trabajo por la skill `repo-evaluator`para
+  auditarlo contra los criterios del enunciado, y lo contrasté con una sesión de Codex como
+  segunda opinión. Las observaciones de ambas evaluaciones las incorporé antes de cerrar la
+  entrega.
+
 
