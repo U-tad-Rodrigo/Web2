@@ -723,6 +723,64 @@ describe('BildyApp API - /api/deliverynote', () => {
       expect(res.body.code).toBe('INVALID_IDEMPOTENCY_KEY');
     });
 
+    test('409 IDEMPOTENCY_KEY_SCOPE_MISMATCH when same key is reused across companies', async () => {
+      // Cross-tenant cache leakage guard: UserA de Company1 firma con key X;
+      // UserB de Company2 reusa la misma key X sobre SU propio albarán → debe rechazar.
+      const first  = await setupFullContext('admin1@bildyapp.com', 'B11111111', 'B10000001');
+      const second = await setupFullContext('admin2@bildyapp.com', 'B22222222', 'B20000001');
+      const noteA = await createDeliveryNote(first.accessToken,  first.clientId,  first.projectId);
+      const noteB = await createDeliveryNote(second.accessToken, second.clientId, second.projectId);
+      const idempotencyKey = '33333333-3333-4333-8333-333333333333';
+
+      // UserA firma su albarán con la key
+      const r1 = await request(app)
+        .patch(`${DELIVERYNOTE_BASE}/${noteA.body.data.deliveryNote._id}/sign`)
+        .set('Authorization', `Bearer ${first.accessToken}`)
+        .set('Idempotency-Key', idempotencyKey)
+        .attach('signature', SIGNATURE_FIXTURE);
+      expect(r1.statusCode).toBe(200);
+
+      // UserB reusa la misma key sobre SU albarán → scope mismatch
+      const r2 = await request(app)
+        .patch(`${DELIVERYNOTE_BASE}/${noteB.body.data.deliveryNote._id}/sign`)
+        .set('Authorization', `Bearer ${second.accessToken}`)
+        .set('Idempotency-Key', idempotencyKey)
+        .attach('signature', SIGNATURE_FIXTURE);
+
+      expect(r2.statusCode).toBe(409);
+      expect(r2.body.code).toBe('IDEMPOTENCY_KEY_SCOPE_MISMATCH');
+      // Confirmación: el albarán de UserB NO se firmó (no hubo replay)
+      const noteBFresh = await DeliveryNote.findById(noteB.body.data.deliveryNote._id);
+      expect(noteBFresh.signed).toBe(false);
+    });
+
+    test('409 IDEMPOTENCY_KEY_SCOPE_MISMATCH when same key is reused across delivery notes', async () => {
+      // Cross-resource replay guard: mismo usuario reusa la misma key sobre
+      // dos albaranes distintos → debe rechazar el segundo.
+      const { accessToken, clientId, projectId } = await setupFullContext();
+      const noteA = await createDeliveryNote(accessToken, clientId, projectId);
+      const noteB = await createDeliveryNote(accessToken, clientId, projectId, { material: 'Arena' });
+      const idempotencyKey = '44444444-4444-4444-8444-444444444444';
+
+      const r1 = await request(app)
+        .patch(`${DELIVERYNOTE_BASE}/${noteA.body.data.deliveryNote._id}/sign`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .set('Idempotency-Key', idempotencyKey)
+        .attach('signature', SIGNATURE_FIXTURE);
+      expect(r1.statusCode).toBe(200);
+
+      const r2 = await request(app)
+        .patch(`${DELIVERYNOTE_BASE}/${noteB.body.data.deliveryNote._id}/sign`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .set('Idempotency-Key', idempotencyKey)
+        .attach('signature', SIGNATURE_FIXTURE);
+
+      expect(r2.statusCode).toBe(409);
+      expect(r2.body.code).toBe('IDEMPOTENCY_KEY_SCOPE_MISMATCH');
+      const noteBFresh = await DeliveryNote.findById(noteB.body.data.deliveryNote._id);
+      expect(noteBFresh.signed).toBe(false);
+    });
+
     test('200 sign without Idempotency-Key keeps the existing flow intact (regression)', async () => {
       const { accessToken, clientId, projectId } = await setupFullContext();
       const created = await createDeliveryNote(accessToken, clientId, projectId);
