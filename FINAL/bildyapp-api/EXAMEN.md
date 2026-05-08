@@ -111,5 +111,6 @@ del código han sido míos en cada etapa. Los pasos que seguí:
   auditarlo contra los criterios del enunciado, y lo contrasté con una sesión de Codex como
   segunda opinión. Las observaciones de ambas evaluaciones las incorporé antes de cerrar la
   entrega.
+- **7. Correciones finales tras el audit de Codex.**: Codex detectó unos errores y los corregimos rápido.
 
 
