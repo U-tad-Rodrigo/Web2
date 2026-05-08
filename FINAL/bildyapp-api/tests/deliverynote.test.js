@@ -3,6 +3,7 @@ import { fileURLToPath } from 'url';
 import request from 'supertest';
 import app from '../src/app.js';
 import DeliveryNote from '../src/models/DeliveryNote.js';
+import IdempotencyLog from '../src/models/IdempotencyLog.js';
 import User from '../src/models/User.js';
 import { clearTestDb, closeTestDb, connectTestDb } from './helpers/test-db.js';
 
@@ -643,6 +644,102 @@ describe('BildyApp API - /api/deliverynote', () => {
       expect(res.headers['content-type']).toContain('application/pdf');
     });
 
+  });
+
+  describe('PATCH /api/deliverynote/:id/sign — Idempotency-Key', () => {
+    test('200 returns cached result on retry with same Idempotency-Key without duplicating uploads', async () => {
+      const { accessToken, clientId, projectId } = await setupFullContext();
+      const created = await createDeliveryNote(accessToken, clientId, projectId);
+      const id = created.body.data.deliveryNote._id;
+      const idempotencyKey = '11111111-1111-4111-8111-111111111111';
+
+      // Primer request: firma real
+      const first = await request(app)
+        .patch(`${DELIVERYNOTE_BASE}/${id}/sign`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .set('Idempotency-Key', idempotencyKey)
+        .attach('signature', SIGNATURE_FIXTURE);
+
+      expect(first.statusCode).toBe(200);
+      expect(first.body.data.deliveryNote.signed).toBe(true);
+      const firstSignedAt     = first.body.data.deliveryNote.signedAt;
+      const firstSignatureUrl = first.body.data.deliveryNote.signatureUrl;
+
+      // Reintento con la MISMA clave: debe devolver el resultado cacheado
+      // (mismo signedAt y signatureUrl prueban que NO se re-ejecutó la firma)
+      const second = await request(app)
+        .patch(`${DELIVERYNOTE_BASE}/${id}/sign`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .set('Idempotency-Key', idempotencyKey)
+        .attach('signature', SIGNATURE_FIXTURE);
+
+      expect(second.statusCode).toBe(200);
+      expect(second.body.data.deliveryNote.signedAt).toBe(firstSignedAt);
+      expect(second.body.data.deliveryNote.signatureUrl).toBe(firstSignatureUrl);
+
+      // Solo debe existir UN registro en IdempotencyLog
+      const count = await IdempotencyLog.countDocuments({ key: idempotencyKey });
+      expect(count).toBe(1);
+    });
+
+    test('two concurrent retries with same key produce only one IdempotencyLog record', async () => {
+      const { accessToken, clientId, projectId } = await setupFullContext();
+      const created = await createDeliveryNote(accessToken, clientId, projectId);
+      const id = created.body.data.deliveryNote._id;
+      const idempotencyKey = '22222222-2222-4222-8222-222222222222';
+
+      const fire = () =>
+        request(app)
+          .patch(`${DELIVERYNOTE_BASE}/${id}/sign`)
+          .set('Authorization', `Bearer ${accessToken}`)
+          .set('Idempotency-Key', idempotencyKey)
+          .attach('signature', SIGNATURE_FIXTURE);
+
+      const [r1, r2] = await Promise.all([fire(), fire()]);
+
+      const codes = [r1.statusCode, r2.statusCode].sort((a, b) => a - b);
+      // Outcomes válidos: [200, 200] (uno gana, otro lee cached)
+      //                   [200, 409] (uno gana, otro pilla la reserva pending)
+      expect(codes[0]).toBe(200);
+      expect([200, 409]).toContain(codes[1]);
+
+      // Sea cual sea el outcome, el índice único garantiza un solo registro
+      const count = await IdempotencyLog.countDocuments({ key: idempotencyKey });
+      expect(count).toBe(1);
+    });
+
+    test('400 rejects invalid Idempotency-Key format', async () => {
+      const { accessToken, clientId, projectId } = await setupFullContext();
+      const created = await createDeliveryNote(accessToken, clientId, projectId);
+      const id = created.body.data.deliveryNote._id;
+
+      const res = await request(app)
+        .patch(`${DELIVERYNOTE_BASE}/${id}/sign`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .set('Idempotency-Key', 'not-a-uuid')
+        .attach('signature', SIGNATURE_FIXTURE);
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.code).toBe('INVALID_IDEMPOTENCY_KEY');
+    });
+
+    test('200 sign without Idempotency-Key keeps the existing flow intact (regression)', async () => {
+      const { accessToken, clientId, projectId } = await setupFullContext();
+      const created = await createDeliveryNote(accessToken, clientId, projectId);
+      const id = created.body.data.deliveryNote._id;
+
+      const res = await request(app)
+        .patch(`${DELIVERYNOTE_BASE}/${id}/sign`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .attach('signature', SIGNATURE_FIXTURE);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data.deliveryNote.signed).toBe(true);
+
+      // Sin cabecera no debe crearse ningún log
+      const count = await IdempotencyLog.countDocuments({});
+      expect(count).toBe(0);
+    });
   });
 
   describe('GET /api/deliverynote/pdf/:id — owner-or-guest rule', () => {

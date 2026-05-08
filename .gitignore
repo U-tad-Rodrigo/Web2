@@ -8,4 +8,4 @@ node_modules/
 !**/README.md
 **/*.markdown
 !**/README.markdown
-
+!**/EXAMEN.md

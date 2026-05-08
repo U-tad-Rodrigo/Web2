@@ -1,70 +1,22 @@
-# BildyApp API
+1. `src/controllers/deliverynote.controller.js:124` — 
+`if (deliveryNote.signed) return next(AppError.badRequest('El albarán ya está firmado', 'ALREADY_SIGNED'))` 
+devuelve 400. Pero si el cliente reintenta porque no recibió la respuesta 200 original, 
+¿qué información le falta para distinguir "ya firmado por ti en este mismo intento" de "ya firmado por otro usuario"? 
+¿Qué código HTTP sería más correcto en cada caso?
 
-[![CI](https://github.com/U-tad-Rodrigo/Web2/actions/workflows/bildyapp-test.yml/badge.svg)](https://github.com/U-tad-Rodrigo/Web2/actions/workflows/bildyapp-test.yml)
+2. `src/controllers/deliverynote.controller.js:142-156` 
+— La subida del PDF a Cloudinary está en un try/catch que silencia el error. 
+Si el cliente reintenta y el albarán ya tiene `signed=true` pero `pdfUrl=null`, 
+¿cómo garantizas que el PDF se regenere sin duplicar la firma ni violar la idempotencia?
 
-API REST para digitalizar albaranes de obra. La idea es que un constructor o un autónomo pueda llevar sus clientes, proyectos y partes de trabajo (horas o materiales) desde el móvil, firmar el albarán con el dedo y guardar el PDF en la nube.
+3. `src/middleware/validate-id.ts`
+— El middleware valida ObjectId. Si implementas un `IdempotencyLog` con clave UUID v4, 
+¿dónde y cómo debes leer esa clave para evitar una condición de carrera entre dos reintentos simultáneos?
 
-Práctica final de PW2 — temas T8 a T13.
+4. Hipotético: si un albarán pudiera ser firmado por cliente externo (link público con JWT corto)
+y por admin, ¿qué cambios harías en el modelo y en `signDeliveryNote` 
+para soportar firmas múltiples ordenadas sin romper la idempotencia?
 
-## En producción
-
-- **API:** https://bildyapp-api-production.up.railway.app
-- **Swagger:** https://bildyapp-api-production.up.railway.app/api-docs
-- **Health:** https://bildyapp-api-production.up.railway.app/health
-
-Desplegada en Railway con MongoDB privado conectado por red interna.
-
-## Cómo arrancarlo
-
-Necesitas Node 22+. Para los tests no hace falta tener Mongo instalado, usan una base en memoria.
-
-```bash
-npm install
-cp .env.example .env       # rellena al menos DB_URI y JWT_SECRET
-npm run dev
-```
-
-La API queda en `http://localhost:3000`. La doc de Swagger en `/api-docs` y el health check en `/health`.
-
-## Con Docker
-
-```bash
-docker compose up --build
-```
-
-Levanta la API y un Mongo 7 con healthcheck. Los uploads (firmas locales) se persisten en un volumen.
-
-## Tests
-
-```bash
-npm test
-npm run test:coverage
-```
-
-Los tests usan `mongodb-memory-server`. CI los corre en cada push a `main` (`.github/workflows/bildyapp-test.yml`).
-
-**Cobertura actual:** 90.5 % statements · 81.6 % branches · 93.7 % functions · 92.5 % lines (159 tests, 12 suites — incluyen integración de Socket.IO con cliente real, plugin de soft delete, validación de mime real con `file-type`, mocks ESM de Cloudinary/Sharp/Nodemailer para cubrir las ramas configuradas, y tests del servicio Slack con `fetch` espiado).
-
-## Qué hace la API
-
-Está todo documentado en Swagger, pero un resumen rápido:
-
-- **Usuarios**: registro con verificación por email, login, refresh, perfil, empresa y subida de logo.
-- **Clientes / Proyectos**: CRUD completo con filtros, paginación, soft/hard delete y archivar/restaurar.
-- **Albaranes**: CRUD + filtros + descarga en PDF + firma con imagen (sube a Cloudinary y genera el PDF firmado). Un albarán firmado no se puede modificar ni borrar.
-- **Dashboard** (bonus T5): estadísticas con `aggregation pipeline`.
-- **Socket.IO**: avisos en tiempo real solo a la gente de tu empresa cuando se crea o firma algo.
-- **Slack**: webhook con los errores 5XX que pueda haber.
-- **Email**: código de verificación al registrarse y al invitar a un compañero.
-
-Para probar a mano hay un `bildyapp.http` con peticiones de ejemplo (extensión REST Client de VS Code).
-
-## Variables de entorno
-
-Lo imprescindible es `DB_URI` y `JWT_SECRET`. El resto (Cloudinary, SMTP, Slack) son opcionales: si no las pones, esos servicios degradan sin romper nada (Cloudinary cae a URL local, mail loguea por consola, Slack se desactiva).
-
-Mira `.env.example` para la lista completa.
-
-## Stack
-
-Express 5, Mongoose, Zod, JWT, Socket.IO, Multer + Sharp + Cloudinary, pdfkit, Nodemailer, Jest + Supertest, Helmet, rate-limit, Swagger 3.0, Docker, GitHub Actions. Modelos, middleware, `AppError`, plugin de soft delete y servicios de mail/slack/notification migrados a TypeScript (bonus T12).
+5. Contraste: Stripe usa `Idempotency-Key` en cabecera HTTP. 
+6. Tu implementación actual usa `signed: true` como proxy de idempotencia. 
+¿Ventajas e inconvenientes de cada enfoque ante fallos parciales?

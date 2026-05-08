@@ -1,10 +1,15 @@
+import fs from 'node:fs/promises';
 import DeliveryNote from '../models/DeliveryNote.js';
 import Project from '../models/Project.js';
 import Client from '../models/Client.js';
+import IdempotencyLog from '../models/IdempotencyLog.js';
 import { AppError } from '../utils/AppError.js';
 import { emitToCompany } from '../services/socket.service.js';
 import { uploadImage, uploadBuffer } from '../services/cloudinary.service.js';
 import { streamDeliveryNotePdf, buildDeliveryNotePdfBuffer } from '../services/pdf.service.js';
+
+// UUID v4 (RFC 4122): xxxxxxxx-xxxx-4xxx-[89ab]xxx-xxxxxxxxxxxx
+const UUID_V4_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 // POST /api/deliverynote
 export const createDeliveryNote = async (req, res, next) => {
@@ -115,13 +120,74 @@ export const downloadPdf = async (req, res, next) => {
 };
 
 // PATCH /api/deliverynote/:id/sign
+//
+// Idempotencia HTTP estilo Stripe (opcional):
+//   - El cliente envía la cabecera `Idempotency-Key` con un UUID v4.
+//   - El primer request reserva la clave en `IdempotencyLog` y ejecuta la firma.
+//     Al terminar, persiste el resultado y lo devuelve.
+//   - Reintentos posteriores con la MISMA clave devuelven el resultado cacheado
+//     sin volver a subir firma ni PDF a Cloudinary.
+//   - Reintentos concurrentes pierden la carrera del índice único (E11000) y
+//     reciben 409 IDEMPOTENT_REQUEST_IN_PROGRESS hasta que el ganador termine.
 export const signDeliveryNote = async (req, res, next) => {
+  const idempotencyKey = req.headers['idempotency-key'];
+
+  // Helper: limpia el archivo subido por multer cuando no vamos a usarlo
+  const cleanupUpload = async () => {
+    if (req.file) await fs.unlink(req.file.path).catch(() => {});
+  };
+
+  // Validación de formato si la cabecera viene
+  if (idempotencyKey !== undefined) {
+    if (typeof idempotencyKey !== 'string' || !UUID_V4_REGEX.test(idempotencyKey)) {
+      await cleanupUpload();
+      return next(AppError.badRequest('La cabecera Idempotency-Key debe ser un UUID v4 válido', 'INVALID_IDEMPOTENCY_KEY'));
+    }
+  }
+
+  let keyReserved = false;
+
   try {
-    if (!req.file) return next(AppError.badRequest('No se ha subido ningún archivo de firma', 'NO_FILE'));
+    // Reserva atómica: insertOne + handler de E11000 resuelve la race condition
+    if (idempotencyKey) {
+      try {
+        await IdempotencyLog.create({
+          key:        idempotencyKey,
+          statusCode: 0,                  // 0 = placeholder (pending)
+          response:   { pending: true }
+        });
+        keyReserved = true;
+      } catch (err) {
+        if (err && err.code === 11000) {
+          // Otro request ya reservó la clave: completed → cached, pending → 409
+          const existing = await IdempotencyLog.findOne({ key: idempotencyKey });
+          await cleanupUpload();
+          if (existing && existing.statusCode > 0) {
+            return res.status(existing.statusCode).json(existing.response);
+          }
+          return next(AppError.conflict('Reintento idempotente todavía en curso', 'IDEMPOTENT_REQUEST_IN_PROGRESS'));
+        }
+        throw err;
+      }
+    }
+
+    // Validaciones de negocio (errores → liberar la reserva para permitir reintentos limpios)
+    if (!req.file) {
+      if (keyReserved) await IdempotencyLog.deleteOne({ key: idempotencyKey });
+      return next(AppError.badRequest('No se ha subido ningún archivo de firma', 'NO_FILE'));
+    }
 
     const deliveryNote = await DeliveryNote.findOne({ _id: req.params.id, company: req.user.company, deleted: false });
-    if (!deliveryNote) return next(AppError.notFound('Albarán no encontrado'));
-    if (deliveryNote.signed) return next(AppError.badRequest('El albarán ya está firmado', 'ALREADY_SIGNED'));
+    if (!deliveryNote) {
+      if (keyReserved) await IdempotencyLog.deleteOne({ key: idempotencyKey });
+      await cleanupUpload();
+      return next(AppError.notFound('Albarán no encontrado'));
+    }
+    if (deliveryNote.signed) {
+      if (keyReserved) await IdempotencyLog.deleteOne({ key: idempotencyKey });
+      await cleanupUpload();
+      return next(AppError.badRequest('El albarán ya está firmado', 'ALREADY_SIGNED'));
+    }
 
     // 1) Sube la imagen de la firma (Sharp + Cloudinary)
     const cloudSignatureUrl = await uploadImage(req.file.path, 'signatures');
@@ -157,8 +223,22 @@ export const signDeliveryNote = async (req, res, next) => {
 
     emitToCompany(req.user.company, 'deliverynote:signed', { deliveryNote: populated });
 
-    return res.json({ error: false, data: { deliveryNote: populated } });
+    const responseBody = { error: false, data: { deliveryNote: populated } };
+
+    // Persiste el resultado en el log para que los reintentos lo devuelvan tal cual
+    if (keyReserved) {
+      await IdempotencyLog.updateOne(
+        { key: idempotencyKey },
+        { statusCode: 200, response: responseBody }
+      );
+    }
+
+    return res.json(responseBody);
   } catch (err) {
+    // Excepción no controlada: liberar la reserva para no atrapar al cliente con un 409 permanente
+    if (keyReserved) {
+      await IdempotencyLog.deleteOne({ key: idempotencyKey }).catch(() => {});
+    }
     next(err);
   }
 };
