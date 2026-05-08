@@ -148,21 +148,36 @@ export const signDeliveryNote = async (req, res, next) => {
   let keyReserved = false;
 
   try {
-    // Reserva atómica: insertOne + handler de E11000 resuelve la race condition
+    // Reserva atómica: insertOne + handler de E11000 resuelve la race condition.
+    // Usamos collection.insertOne() (driver nativo) en vez de Model.create() para
+    // cumplir literalmente el criterio del enunciado.
     if (idempotencyKey) {
       try {
-        await IdempotencyLog.create({
-          key:        idempotencyKey,
-          statusCode: 0,                  // 0 = placeholder (pending)
-          response:   { pending: true }
+        await IdempotencyLog.collection.insertOne({
+          key:          idempotencyKey,
+          company:      req.user.company,
+          deliveryNote: req.params.id,
+          user:         req.user._id,
+          statusCode:   0,                  // 0 = placeholder (pending)
+          response:     { pending: true },
+          createdAt:    new Date()         // collection.insertOne bypassea defaults de Mongoose
         });
         keyReserved = true;
       } catch (err) {
         if (err && err.code === 11000) {
-          // Otro request ya reservó la clave: completed → cached, pending → 409
           const existing = await IdempotencyLog.findOne({ key: idempotencyKey });
           await cleanupUpload();
-          if (existing && existing.statusCode > 0) {
+
+          // Validación de scope: la misma key NO puede replayar resultados de otra
+          // empresa o de otro albarán. Bloquea cross-tenant + cross-resource leakage.
+          const sameCompany = existing && String(existing.company)      === String(req.user.company);
+          const sameNote    = existing && String(existing.deliveryNote) === String(req.params.id);
+          if (!existing || !sameCompany || !sameNote) {
+            return next(AppError.conflict('Idempotency-Key reusada en otro recurso o empresa', 'IDEMPOTENCY_KEY_SCOPE_MISMATCH'));
+          }
+
+          // Misma scope: completed → cached, pending → 409
+          if (existing.statusCode > 0) {
             return res.status(existing.statusCode).json(existing.response);
           }
           return next(AppError.conflict('Reintento idempotente todavía en curso', 'IDEMPOTENT_REQUEST_IN_PROGRESS'));
